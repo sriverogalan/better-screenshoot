@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useRoute, useRouter } from "vue-router";
 import EditorCanvas from "../components/editor/EditorCanvas.vue";
 import EditorStyleBar from "../components/editor/EditorStyleBar.vue";
 import EditorToolbar from "../components/editor/EditorToolbar.vue";
@@ -10,6 +11,7 @@ import { useEditorHistory } from "../composables/useEditorHistory";
 import { useEditorLayout } from "../composables/useEditorLayout";
 import { useEditorShortcuts } from "../composables/useEditorShortcuts";
 import { createBlurredRegionDataUrl } from "../lib/editor/blur";
+import { isCaptureSessionReady } from "../lib/editor/capture-session";
 import type { KonvaNode } from "../lib/editor/konva";
 import type {
   DraftAnnotation,
@@ -39,7 +41,11 @@ import {
   loadCaptureImage,
 } from "../lib/load-capture-image";
 import type { SavedCapture } from "../lib/tauri";
-import { hideEditorWindow } from "../lib/editor-window";
+import {
+  exitCaptureEditor,
+  isCaptureSurfaceLabel,
+} from "../lib/editor-window";
+import { setMainWindowGuardPaused } from "../lib/main-window-guard";
 import {
   clearPendingCapture,
   copyImageToClipboard,
@@ -49,6 +55,8 @@ import {
 } from "../lib/tauri";
 
 const captureStore = useCaptureStore();
+const route = useRoute();
+const router = useRouter();
 const canvasHost = ref<HTMLElement | null>(null);
 const canvasRef = ref<InstanceType<typeof EditorCanvas> | null>(null);
 
@@ -92,6 +100,7 @@ function scheduleMeasureHost() {
 
 const {
   annotations,
+  history,
   pushHistory,
   undo,
   redo,
@@ -560,24 +569,34 @@ async function exportPngBase64(): Promise<string> {
   );
 }
 
-async function applyIncomingCapture(capture: SavedCapture) {
-  const isSameId = captureStore.current?.id === capture.id;
+function resetInteractionState() {
+  textEditor.value = null;
+  selectedId.value = null;
+  drawing.value = false;
+  draft.value = null;
+  actionError.value = null;
+}
 
-  if (isSameId) {
+async function applyIncomingCapture(capture: SavedCapture) {
+  const sessionReady = isCaptureSessionReady({
+    currentCaptureId: captureStore.current?.id ?? null,
+    incomingCaptureId: capture.id,
+    imagePreviewReady: !!imagePreviewSrc.value,
+    historyEntries: history.value.length,
+  });
+
+  if (sessionReady) {
     await clearPendingCapture();
-    if (imagePreviewSrc.value) {
-      scheduleMeasureHost();
-      return;
-    }
-    void loadCapture(capture);
     scheduleMeasureHost();
     return;
   }
 
-  textEditor.value = null;
-  selectedId.value = null;
+  resetInteractionState();
   resetHistory();
   captureStore.setCapture(capture);
+  // Cargamos la imagen de forma explícita en lugar de depender del watcher:
+  // así garantizamos que la captura entrante siempre se renderice.
+  await loadCapture(capture);
   initHistory();
   await clearPendingCapture();
   await nextTick();
@@ -591,10 +610,23 @@ async function hydratePendingCapture() {
   }
 }
 
+function isCaptureSurfaceWindow(label: string): boolean {
+  return (
+    isCaptureSurfaceLabel(label) &&
+    (label === "editor" || route.path === "/editor")
+  );
+}
+
 async function closeEditor() {
-  await hideEditorWindow();
-  textEditor.value = null;
-  selectedId.value = null;
+  const win = getCurrentWindow();
+  if (win.label === "main") {
+    await router.push("/history");
+  }
+  await exitCaptureEditor(win);
+  await emit("editor-closed");
+  setMainWindowGuardPaused(false);
+  resetInteractionState();
+  resetHistory();
   captureStore.clear();
   await clearPendingCapture();
 }
@@ -670,7 +702,11 @@ let resizeObserver: ResizeObserver | undefined;
 
 onMounted(async () => {
   const win = getCurrentWindow();
-  if (win.label === "editor") {
+  if (isCaptureSurfaceWindow(win.label)) {
+    if (win.label === "main") {
+      setMainWindowGuardPaused(true);
+    }
+
     await win.onCloseRequested(async (event) => {
       event.preventDefault();
       await closeEditor();
@@ -699,7 +735,11 @@ onMounted(async () => {
     void applyIncomingCapture(event.payload);
   });
 
-  if (captureStore.current) {
+  await listen("editor-presented", () => {
+    scheduleMeasureHost();
+  });
+
+  if (captureStore.current && history.value.length === 0) {
     initHistory();
   }
 });

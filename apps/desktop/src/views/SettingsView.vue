@@ -1,9 +1,24 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { TIERS } from "@better-screenshoot/licensing";
+import {
+  DEFAULT_HOTKEYS,
+  SYSTEM_REPLACEMENT_HOTKEYS,
+  type HotkeyConfig,
+  type LicenseTier,
+  type SystemCaptureMode,
+} from "@better-screenshoot/shared-types";
 import { useSettingsStore } from "../stores/settings";
-import type { HotkeyConfig, LicenseTier } from "@better-screenshoot/shared-types";
-import { validateLicenseKey } from "../lib/tauri";
+import SystemScreenshotPermissionDialog from "../components/settings/SystemScreenshotPermissionDialog.vue";
+import {
+  getSystemCaptureStatus,
+  setSystemCaptureMode,
+  type SystemCaptureStatus,
+  validateLicenseKey,
+} from "../lib/tauri";
+import { formatHotkey } from "../lib/format-hotkey";
+import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
 
 const settingsStore = useSettingsStore();
 
@@ -14,9 +29,45 @@ const hotkeyFields: Array<{ key: keyof HotkeyConfig; label: string; hint?: strin
   { key: "open_history", label: "Abrir historial" },
 ];
 
+const captureHotkeyKeys: Array<keyof HotkeyConfig> = [
+  "capture_area",
+  "capture_screen",
+  "capture_window",
+];
+
 const settings = computed(() => settingsStore.settings);
 const licenseKey = ref("");
 const licenseMessage = ref("");
+const systemMessage = ref<string | null>(null);
+const systemSuccess = ref<string | null>(null);
+const systemBusy = ref(false);
+const showReplaceDialog = ref(false);
+const captureStatus = ref<SystemCaptureStatus | null>(null);
+
+const independentHotkeyPreview = computed(() =>
+  [
+    `${formatHotkey(DEFAULT_HOTKEYS.capture_area)} región`,
+    `${formatHotkey(DEFAULT_HOTKEYS.capture_screen)} pantalla`,
+    `${formatHotkey(DEFAULT_HOTKEYS.capture_window)} ventana`,
+  ].join(" · "),
+);
+
+const replacementHotkeyPreview = computed(() =>
+  [
+    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen)} pantalla`,
+    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area)} región`,
+    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window)} ventana`,
+  ].join(" · "),
+);
+
+const currentMode = computed(() => settings.value.system_capture_mode);
+const isReplaceMode = computed(() => currentMode.value === "replace_system");
+const driftDetected = computed(() => captureStatus.value?.drift_detected ?? false);
+const driftMessage = computed(() => captureStatus.value?.message ?? null);
+
+function isCaptureHotkeyLocked(key: keyof HotkeyConfig) {
+  return isReplaceMode.value && captureHotkeyKeys.includes(key);
+}
 
 async function applyLicense() {
   const result = await validateLicenseKey(licenseKey.value);
@@ -52,6 +103,74 @@ async function updateHotkey(
     hotkeys: { ...settings.value.hotkeys, [key]: value },
   });
 }
+
+async function loadCaptureStatus() {
+  try {
+    captureStatus.value = await getSystemCaptureStatus();
+  } catch (err) {
+    systemMessage.value =
+      err instanceof Error ? err.message : "No se pudo comprobar el modo de captura";
+  }
+}
+
+async function applyCaptureMode(mode: SystemCaptureMode) {
+  systemBusy.value = true;
+  systemMessage.value = null;
+  systemSuccess.value = null;
+  try {
+    const result = await setSystemCaptureMode(mode);
+    settingsStore.settings = result.settings;
+    captureStatus.value = result.status;
+    systemSuccess.value = result.message;
+  } catch (err) {
+    systemMessage.value =
+      err instanceof Error ? err.message : "No se pudo cambiar el modo de captura";
+    await loadCaptureStatus();
+  } finally {
+    systemBusy.value = false;
+  }
+}
+
+async function onModeChange(mode: SystemCaptureMode) {
+  if (mode === currentMode.value || systemBusy.value) return;
+
+  if (mode === "replace_system") {
+    await loadCaptureStatus();
+    showReplaceDialog.value = true;
+    return;
+  }
+
+  await applyCaptureMode("independent");
+}
+
+async function confirmReplaceMode() {
+  await applyCaptureMode("replace_system");
+  showReplaceDialog.value = false;
+}
+
+async function restoreSystemCaptures() {
+  await applyCaptureMode("independent");
+}
+
+async function repairDrift() {
+  await applyCaptureMode("independent");
+}
+
+let unlisteners: UnlistenFn[] = [];
+
+onMounted(async () => {
+  await loadCaptureStatus();
+  unlisteners = await Promise.all([
+    listen<string>("system-capture-drift", (event) => {
+      systemMessage.value = event.payload;
+      void loadCaptureStatus();
+    }),
+  ]);
+});
+
+onUnmounted(() => {
+  unlisteners.forEach((unlisten) => unlisten());
+});
 </script>
 
 <template>
@@ -61,6 +180,8 @@ async function updateHotkey(
     </header>
 
     <main class="mx-auto w-full max-w-2xl flex-1 space-y-8 p-6">
+      <PendingCaptureBanner />
+
       <section>
         <h2 class="mb-4 text-sm font-medium text-text-muted">Captura</h2>
         <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
@@ -118,31 +239,130 @@ async function updateHotkey(
       </section>
 
       <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">Sustituir capturas del sistema</h2>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">Modo de captura (macOS)</h2>
         <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
-          <label class="flex items-start gap-3">
-            <input
-              :checked="settings.replace_system_screenshots"
-              type="checkbox"
-              class="mt-0.5 size-4 rounded border-border"
-              @change="
-                updateField(
-                  'replace_system_screenshots',
-                  ($event.target as HTMLInputElement).checked,
-                )
+          <div
+            v-if="driftDetected"
+            class="rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
+            role="alert"
+          >
+            <p>{{ driftMessage }}</p>
+            <button
+              type="button"
+              class="mt-2 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+              :disabled="systemBusy"
+              @click="repairDrift"
+            >
+              Reparar estado
+            </button>
+          </div>
+
+          <fieldset
+            class="space-y-3"
+            :disabled="systemBusy || captureStatus?.platform_supported === false"
+          >
+            <legend class="sr-only">Modo de captura del sistema</legend>
+
+            <label
+              class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
+              :class="
+                currentMode === 'independent'
+                  ? 'border-accent bg-accent/5'
+                  : 'border-border bg-surface hover:bg-border/40'
               "
-            />
-            <span class="text-sm">
-              Usar Better Screenshoot como herramienta principal de captura
-            </span>
-          </label>
-          <p class="text-xs leading-relaxed text-text-muted">
-            macOS no permite desactivar los atajos del sistema desde una app. Si activas esta
-            opción, asigna aquí atajos que no choquen con
-            <code class="text-accent">⌘⇧3</code>,
+            >
+              <input
+                type="radio"
+                name="system-capture-mode"
+                value="independent"
+                class="mt-0.5"
+                :checked="currentMode === 'independent'"
+                @change="onModeChange('independent')"
+              />
+              <span class="space-y-1">
+                <span class="block text-sm font-medium">Atajos propios de Better Screenshoot</span>
+                <span class="block text-xs text-text-muted">
+                  {{ independentHotkeyPreview }}
+                </span>
+                <span class="block text-xs text-text-muted">
+                  macOS conserva <code class="text-accent">⌘⇧3</code>,
+                  <code class="text-accent">⌘⇧4</code> y
+                  <code class="text-accent">⌘⇧5</code>.
+                </span>
+              </span>
+            </label>
+
+            <label
+              class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
+              :class="
+                currentMode === 'replace_system'
+                  ? 'border-accent bg-accent/5'
+                  : 'border-border bg-surface hover:bg-border/40'
+              "
+            >
+              <input
+                type="radio"
+                name="system-capture-mode"
+                value="replace_system"
+                class="mt-0.5"
+                :checked="currentMode === 'replace_system'"
+                @change="onModeChange('replace_system')"
+              />
+              <span class="space-y-1">
+                <span class="block text-sm font-medium">Sustituir capturas del sistema</span>
+                <span class="block text-xs text-text-muted">
+                  {{ replacementHotkeyPreview }}
+                </span>
+                <span class="block text-xs text-text-muted">
+                  Desactiva los atajos nativos y los reasigna a Better Screenshoot.
+                </span>
+              </span>
+            </label>
+          </fieldset>
+
+          <ul
+            v-if="captureStatus?.platform_supported && captureStatus.system_shortcuts.length > 0"
+            class="space-y-2 rounded-lg border border-border bg-surface px-3 py-3 text-sm"
+          >
+            <li
+              v-for="shortcut in captureStatus.system_shortcuts"
+              :key="shortcut.id"
+              class="flex items-center justify-between gap-3"
+            >
+              <span class="text-text-muted">{{ shortcut.label }}</span>
+              <span
+                class="rounded-md px-2 py-0.5 text-xs"
+                :class="
+                  shortcut.enabled
+                    ? 'bg-amber-950/50 text-amber-100'
+                    : 'bg-emerald-950/50 text-emerald-100'
+                "
+              >
+                {{ shortcut.enabled ? "Activo en macOS" : "Desactivado" }}
+              </span>
+            </li>
+          </ul>
+
+          <button
+            v-if="isReplaceMode"
+            type="button"
+            class="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-border disabled:opacity-50"
+            :disabled="systemBusy"
+            @click="restoreSystemCaptures"
+          >
+            Restaurar capturas del sistema
+          </button>
+          <p v-if="isReplaceMode" class="text-xs text-text-muted">
+            Reactiva <code class="text-accent">⌘⇧3</code>,
             <code class="text-accent">⌘⇧4</code> y
-            <code class="text-accent">⌘⇧5</code>, y desactívalos en
-            Ajustes del Sistema → Teclado → Capturas de pantalla.
+            <code class="text-accent">⌘⇧5</code> de macOS y vuelve a los atajos propios de la app.
+          </p>
+
+          <p v-if="systemSuccess" class="text-xs text-emerald-400" role="status">
+            {{ systemSuccess }}
+          </p>
+          <p v-if="systemMessage" class="text-xs text-red-400" role="alert">
+            {{ systemMessage }}
           </p>
         </div>
       </section>
@@ -158,9 +378,22 @@ async function updateHotkey(
             <input
               :value="settings.hotkeys[field.key]"
               type="text"
-              class="w-full rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm"
+              class="w-full rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="isCaptureHotkeyLocked(field.key)"
               @change="updateHotkey(field.key, ($event.target as HTMLInputElement).value)"
             />
+            <p
+              v-if="isCaptureHotkeyLocked(field.key)"
+              class="mt-1 text-xs text-text-muted"
+            >
+              Gestionado por «Sustituir capturas del sistema» ({{
+                field.key === "capture_screen"
+                  ? "⌘⇧3"
+                  : field.key === "capture_area"
+                    ? "⌘⇧4"
+                    : "⌘⇧5"
+              }}).
+            </p>
           </label>
         </div>
       </section>
@@ -198,5 +431,13 @@ async function updateHotkey(
         </div>
       </section>
     </main>
+
+    <SystemScreenshotPermissionDialog
+      :open="showReplaceDialog"
+      :busy="systemBusy"
+      :shortcuts="captureStatus?.system_shortcuts ?? []"
+      @close="showReplaceDialog = false"
+      @confirm="confirmReplaceMode"
+    />
   </div>
 </template>

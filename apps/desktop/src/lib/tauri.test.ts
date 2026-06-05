@@ -28,6 +28,24 @@ describe("tauri integration contracts", () => {
     });
   });
 
+  it("peekPendingCapture invokes backend command", async () => {
+    invokeMock.mockResolvedValue(null);
+    const { peekPendingCapture } = await import("./tauri");
+
+    await peekPendingCapture();
+
+    expect(invokeMock).toHaveBeenCalledWith("peek_pending_capture");
+  });
+
+  it("openPendingCaptureInEditor invokes backend command", async () => {
+    invokeMock.mockResolvedValue(undefined);
+    const { openPendingCaptureInEditor } = await import("./tauri");
+
+    await openPendingCaptureInEditor();
+
+    expect(invokeMock).toHaveBeenCalledWith("open_pending_capture_in_editor");
+  });
+
   it("discardCapture invokes backend command", async () => {
     invokeMock.mockResolvedValue(undefined);
     const { discardCapture } = await import("./tauri");
@@ -37,6 +55,30 @@ describe("tauri integration contracts", () => {
     expect(invokeMock).toHaveBeenCalledWith("discard_capture", {
       captureId: "capture-123",
       filePath: "/tmp/capture.png",
+    });
+  });
+
+  it("getSystemCaptureStatus invokes backend command", async () => {
+    invokeMock.mockResolvedValue({ mode: "independent" });
+    const { getSystemCaptureStatus } = await import("./tauri");
+
+    await getSystemCaptureStatus();
+
+    expect(invokeMock).toHaveBeenCalledWith("get_system_capture_status");
+  });
+
+  it("setSystemCaptureMode invokes backend command", async () => {
+    invokeMock.mockResolvedValue({
+      message: "ok",
+      status: { mode: "replace_system" },
+      settings: {},
+    });
+    const { setSystemCaptureMode } = await import("./tauri");
+
+    await setSystemCaptureMode("replace_system");
+
+    expect(invokeMock).toHaveBeenCalledWith("set_system_capture_mode", {
+      mode: "replace_system",
     });
   });
 });

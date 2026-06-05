@@ -9,6 +9,7 @@ import { deleteHistoryItem, getHistory, openCaptureInEditor } from "../lib/tauri
 import { useCapturePermissions } from "../composables/useCapturePermissions";
 import { useSettingsStore } from "../stores/settings";
 import { formatHotkey } from "../lib/format-hotkey";
+import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
 
 const items = ref<CaptureRecord[]>([]);
 const loading = ref(true);
@@ -88,6 +89,8 @@ onUnmounted(() => {
       <p class="mt-1 text-sm text-text-muted">Todas tus capturas guardadas</p>
     </header>
 
+    <PendingCaptureBanner />
+
     <div
       v-if="permissionMessage"
       class="mb-4 rounded-xl border border-amber-500/40 bg-amber-950/40 px-4 py-3 text-sm text-amber-100"
@@ -143,8 +146,8 @@ onUnmounted(() => {
     <div v-else-if="items.length === 0" class="space-y-3 text-sm text-text-muted">
       <p>Aún no hay capturas.</p>
       <p class="text-xs">
-        Pulsa uno de los atajos de arriba para capturar. Al terminar, la captura aparecerá aquí
-        y podrás abrirla en el editor.
+        Pulsa uno de los atajos de arriba para capturar. Solo las capturas que guardes desde el
+        editor aparecerán aquí.
       </p>
     </div>
     <ul v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

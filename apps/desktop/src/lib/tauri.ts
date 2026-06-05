@@ -3,7 +3,9 @@ import type {
   AppSettings,
   CaptureRecord,
   DisplayInfo,
+  HotkeyConfig,
   Region,
+  SystemCaptureMode,
   WindowInfo,
 } from "@better-screenshoot/shared-types";
 
@@ -15,6 +17,8 @@ export interface SavedCapture {
   created_at: string;
   data_url: string;
 }
+
+export function frontendLog(_scope: string, _message: string): void {}
 
 export async function listDisplays(): Promise<DisplayInfo[]> {
   return invoke("list_displays");
@@ -37,6 +41,43 @@ export async function getCaptureStatus(): Promise<CaptureStatus> {
 
 export async function requestScreenCapturePermission(): Promise<boolean> {
   return invoke("request_screen_capture_permission");
+}
+
+export interface SystemScreenshotShortcut {
+  id: number;
+  label: string;
+  enabled: boolean;
+}
+
+export interface SystemCaptureStatus {
+  platform_supported: boolean;
+  mode: SystemCaptureMode;
+  effective_mode: SystemCaptureMode;
+  drift_detected: boolean;
+  can_restore: boolean;
+  system_shortcuts: SystemScreenshotShortcut[];
+  app_hotkeys: HotkeyConfig;
+  message?: string | null;
+}
+
+export interface SystemCaptureModeResult {
+  message: string;
+  status: SystemCaptureStatus;
+  settings: AppSettings;
+}
+
+export async function openSystemScreenshotShortcutsSettings(): Promise<void> {
+  return invoke("open_system_screenshot_shortcuts_settings");
+}
+
+export async function getSystemCaptureStatus(): Promise<SystemCaptureStatus> {
+  return invoke("get_system_capture_status");
+}
+
+export async function setSystemCaptureMode(
+  mode: SystemCaptureMode,
+): Promise<SystemCaptureModeResult> {
+  return invoke("set_system_capture_mode", { mode });
 }
 
 export async function captureScreen(displayId?: number): Promise<SavedCapture> {
@@ -79,12 +120,20 @@ export async function captureAreaInteractive(): Promise<SavedCapture> {
   return invoke("capture_area_interactive");
 }
 
+export async function peekPendingCapture(): Promise<SavedCapture | null> {
+  return invoke("peek_pending_capture");
+}
+
 export async function takePendingCapture(): Promise<SavedCapture | null> {
   return invoke("take_pending_capture");
 }
 
 export async function clearPendingCapture(): Promise<void> {
   return invoke("clear_pending_capture");
+}
+
+export async function openPendingCaptureInEditor(): Promise<void> {
+  return invoke("open_pending_capture_in_editor");
 }
 
 export async function openCaptureInEditor(captureId: string): Promise<void> {
