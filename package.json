@@ -1,0 +1,17 @@
+{
+  "name": "better-screenshoot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @better-screenshoot/desktop tauri dev",
+    "build": "pnpm --filter @better-screenshoot/desktop tauri build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

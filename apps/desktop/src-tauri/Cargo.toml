@@ -1,0 +1,40 @@
+[package]
+name = "better-screenshoot"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Better Screenshoot desktop app"
+
+[lib]
+name = "better_screenshoot_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+capture-core = { workspace = true }
+tauri = { version = "2", features = ["macos-private-api", "tray-icon", "image-png", "protocol-asset"] }
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-deep-link = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+dirs = "6"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.22"
+image = { workspace = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+urlencoding = "2"
+rfd = "0.15"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ashpd = { version = "0.10", features = ["tokio"] }

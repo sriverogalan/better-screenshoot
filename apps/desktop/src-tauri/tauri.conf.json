@@ -1,0 +1,83 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Better Screenshoot",
+  "version": "0.1.0",
+  "identifier": "com.betterscreenshoot.app",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Better Screenshoot",
+        "width": 960,
+        "height": 640,
+        "visible": false,
+        "decorations": true,
+        "resizable": true,
+        "center": true,
+        "backgroundColor": "#111318"
+      },
+      {
+        "label": "overlay",
+        "title": "Capture",
+        "url": "/overlay",
+        "width": 800,
+        "height": 600,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "fullscreen": false
+      },
+      {
+        "label": "editor",
+        "title": "Editor",
+        "url": "/editor",
+        "width": 900,
+        "height": 700,
+        "visible": false,
+        "decorations": false,
+        "center": true,
+        "resizable": true,
+        "backgroundColor": "#111318"
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$PICTURE/**", "$HOME/**", "$CACHE/**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["betterscreenshoot"]
+      }
+    }
+  }
+}
