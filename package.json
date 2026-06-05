@@ -8,7 +8,7 @@
     "build": "pnpm --filter @better-screenshoot/desktop tauri build",
     "build:mac": "pnpm --filter @better-screenshoot/desktop tauri build -- --bundles dmg",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r --filter '!@better-screenshoot/cli' test",
+    "test": "pnpm -r --filter \"!@better-screenshoot/cli\" test",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
