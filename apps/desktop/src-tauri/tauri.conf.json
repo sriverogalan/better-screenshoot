@@ -20,7 +20,10 @@
         "height": 640,
         "visible": false,
         "decorations": true,
-        "resizable": true,
+        "resizable": false,
+        "maximizable": false,
+        "maxWidth": 960,
+        "maxHeight": 640,
         "center": true,
         "backgroundColor": "#111318"
       },
@@ -48,6 +51,7 @@
         "decorations": false,
         "center": true,
         "resizable": true,
+        "preventOverflow": true,
         "backgroundColor": "#111318"
       }
     ],

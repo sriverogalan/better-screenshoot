@@ -1,5 +1,9 @@
 use std::fs;
+use std::io::Cursor;
 use std::path::PathBuf;
+use std::sync::LazyLock;
+
+use tokio::sync::Mutex;
 
 use base64::{engine::general_purpose::STANDARD, Engine};
 use capture_core::encode::{downscale_for_preview, encode_jpeg_preview};
@@ -10,8 +14,12 @@ use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
 use tauri_plugin_clipboard_manager::ClipboardExt;
 use uuid::Uuid;
 
+use crate::capture_session;
 use crate::state::AppState;
-use crate::window_front::bring_window_to_front;
+use crate::window_activation::activate_app_for_window;
+use crate::window_front::{bring_editor_to_front_quiet, bring_window_to_front};
+
+static EDITOR_PRESENT_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
 #[derive(Debug, Serialize, Clone)]
 pub struct OverlayPreview {
@@ -46,17 +54,30 @@ fn copy_rgba_to_clipboard(
         .map_err(|e| e.to_string())
 }
 
-fn try_copy_to_clipboard(app: &AppHandle, image: &CaptureImage) {
-    if image.rgba_bytes.is_empty() {
-        return;
-    }
+async fn copy_png_to_clipboard_async(app: AppHandle, png_bytes: Vec<u8>) {
+    let decoded = tauri::async_runtime::spawn_blocking(
+        move || -> Result<(Vec<u8>, u32, u32), String> {
+            let img = image::load_from_memory(&png_bytes).map_err(|e| e.to_string())?;
+            let rgba = img.to_rgba8();
+            let width = rgba.width();
+            let height = rgba.height();
+            Ok((rgba.into_raw(), width, height))
+        },
+    )
+    .await;
 
-    let copy_result =
-        copy_rgba_to_clipboard(app, &image.rgba_bytes, image.width, image.height);
-
-    if let Err(error) = copy_result {
-        eprintln!("clipboard copy failed: {error}");
-        let _ = app.emit("capture-warning", error);
+    match decoded {
+        Ok(Ok((raw, width, height))) => {
+            if let Err(error) = copy_rgba_to_clipboard(&app, &raw, width, height) {
+                let _ = app.emit("capture-warning", error);
+            }
+        }
+        Ok(Err(message)) => {
+            let _ = app.emit("capture-warning", message);
+        }
+        Err(join_error) => {
+            let _ = app.emit("capture-warning", join_error.to_string());
+        }
     }
 }
 
@@ -80,14 +101,21 @@ fn save_temp_png(app: &AppHandle, image: &CaptureImage) -> Result<(String, Strin
     save_png_to_dir(&dir, image)
 }
 
+fn png_dimensions(bytes: &[u8]) -> Result<(u32, u32), String> {
+    image::ImageReader::new(Cursor::new(bytes))
+        .with_guessed_format()
+        .map_err(|e| e.to_string())?
+        .into_dimensions()
+        .map_err(|e| e.to_string())
+}
+
 fn capture_from_png_bytes(bytes: Vec<u8>) -> Result<CaptureImage, String> {
-    let img = image::load_from_memory(&bytes).map_err(|e| e.to_string())?;
-    let rgba = img.to_rgba8();
+    let (width, height) = png_dimensions(&bytes)?;
     Ok(CaptureImage {
-        width: rgba.width(),
-        height: rgba.height(),
+        width,
+        height,
         png_bytes: bytes,
-        rgba_bytes: rgba.as_raw().to_vec(),
+        rgba_bytes: Vec::new(),
     })
 }
 
@@ -100,76 +128,307 @@ fn save_overlay_preview_jpeg(app: &AppHandle, jpeg_bytes: &[u8]) -> Result<Strin
 }
 
 fn show_main_hub(app: &AppHandle) {
+    if capture_session::is_active_fresh() {
+        return;
+    }
+
     let Some(main) = app.get_webview_window("main") else {
         return;
     };
+
+    let hub_epoch = capture_session::current_hub_show_epoch();
     let main_handle = main.clone();
     tauri::async_runtime::spawn(async move {
+        if !capture_session::should_show_hub(hub_epoch) {
+            return;
+        }
         bring_window_to_front(&main_handle).await;
+        if !capture_session::should_show_hub(hub_epoch) {
+            return;
+        }
         let _ = main_handle.emit("navigate", "/history");
     });
 }
 
-fn editor_open_failed(app: &AppHandle, record: &SavedCapture) {
-    eprintln!(
+fn notify_editor_opened(app: &AppHandle, capture_id: &str) {
+    // No borramos `pending_capture` aquí: si el editor se pierde el evento `capture-complete`,
+    // debe poder recuperar la captura al ganar foco. El propio editor la limpia al cargarla.
+    let _ = app.emit("editor-opened", capture_id);
+}
+
+const EDITOR_CONFIRM_RETRIES: u32 = 4;
+const EDITOR_CONFIRM_RETRY_MS: u64 = 60;
+const EDITOR_NAVIGATE_SETTLE_MS: u64 = 120;
+const HUB_MAINTAIN_MS: u64 = 200;
+const HUB_MAINTAIN_MS_URGENT: u64 = 100;
+const HUB_MAINTAIN_MAX_TICKS: u32 = 1200;
+
+fn capture_surface_presentation_ok(surface_visible: bool, detached_editor_visible: bool) -> bool {
+    surface_visible && !detached_editor_visible
+}
+
+fn capture_surface_state(app: &AppHandle, surface: &WebviewWindow) -> (bool, bool) {
+    let surface_visible = surface.is_visible().unwrap_or(false);
+    let detached_editor_visible = app
+        .get_webview_window("editor")
+        .map(|editor| editor.is_visible().unwrap_or(false))
+        .unwrap_or(false);
+    (surface_visible, detached_editor_visible)
+}
+
+async fn hide_detached_editor_window(app: &AppHandle) {
+    if let Some(editor) = app.get_webview_window("editor") {
+        let _ = crate::window_layout::reset_editor_fullscreen_state(&editor);
+        let _ = editor.hide();
+    }
+}
+
+async fn prepare_capture_surface(app: &AppHandle) -> Result<WebviewWindow, String> {
+    let main = app
+        .get_webview_window("main")
+        .ok_or_else(|| "Ventana principal no encontrada".to_string())?;
+
+    hide_detached_editor_window(app).await;
+    crate::window_layout::set_main_editor_mode(true);
+    let _ = main.emit("navigate", "/editor");
+    tokio::time::sleep(tokio::time::Duration::from_millis(EDITOR_NAVIGATE_SETTLE_MS)).await;
+
+    Ok(main)
+}
+
+async fn confirm_editor_presented(app: &AppHandle, surface: &WebviewWindow) -> bool {
+    for attempt in 0..EDITOR_CONFIRM_RETRIES {
+        hide_detached_editor_window(app).await;
+
+        let (surface_visible, detached_editor_visible) = capture_surface_state(app, surface);
+
+        if capture_surface_presentation_ok(surface_visible, detached_editor_visible) {
+            bring_editor_to_front_quiet(surface).await;
+            crate::app_trace!("confirm_editor_presented: OK en intento {}", attempt + 1);
+            return true;
+        }
+
+        crate::app_trace!(
+            "confirm_editor_presented: intento {} surface_visible={surface_visible} detached_editor_visible={detached_editor_visible}",
+            attempt + 1
+        );
+
+        bring_editor_to_front_quiet(surface).await;
+
+        if attempt + 1 < EDITOR_CONFIRM_RETRIES {
+            tokio::time::sleep(tokio::time::Duration::from_millis(EDITOR_CONFIRM_RETRY_MS)).await;
+        }
+    }
+
+    let (surface_visible, detached_editor_visible) = capture_surface_state(app, surface);
+    let ok = capture_surface_presentation_ok(surface_visible, detached_editor_visible);
+    crate::app_trace!(
+        "confirm_editor_presented: fallo final surface_visible={surface_visible} detached_editor_visible={detached_editor_visible}"
+    );
+    ok
+}
+
+async fn maintain_capture_surface(app: &AppHandle) {
+    let _hub_guard = crate::window_layout::HubWatchSuppressGuard::new();
+    let mut tick = 0u32;
+
+    loop {
+        let Some(surface) = app.get_webview_window("main") else {
+            break;
+        };
+
+        if !surface.is_visible().unwrap_or(false) {
+            break;
+        }
+
+        hide_detached_editor_window(app).await;
+
+        let (surface_visible, detached_editor_visible) = capture_surface_state(app, &surface);
+        let needs_urgent = !surface_visible || detached_editor_visible;
+        if needs_urgent {
+            crate::app_trace!(
+                "maintain_capture_surface: tick={tick} surface_visible={surface_visible} detached_editor_visible={detached_editor_visible}"
+            );
+            bring_editor_to_front_quiet(&surface).await;
+        } else if tick.is_multiple_of(5) {
+            bring_editor_to_front_quiet(&surface).await;
+        }
+
+        tick += 1;
+        if tick >= HUB_MAINTAIN_MAX_TICKS {
+            crate::app_trace!("maintain_capture_surface: tope de seguridad alcanzado");
+            break;
+        }
+
+        let delay_ms = if needs_urgent {
+            HUB_MAINTAIN_MS_URGENT
+        } else {
+            HUB_MAINTAIN_MS
+        };
+        tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await;
+    }
+
+    crate::window_layout::set_main_editor_mode(false);
+}
+
+async fn editor_open_failed(app: &AppHandle, record: &SavedCapture, tried_fullscreen: bool) {
+    crate::app_trace!(
         "editor window failed to open for capture {}",
         &record.id[..8.min(record.id.len())]
     );
+
+    crate::window_layout::set_main_editor_mode(false);
+    hide_detached_editor_window(app).await;
+
+    if tried_fullscreen {
+        crate::app_trace!("editor_open_failed: reintentando sin pantalla completa");
+        let retry_opened = present_editor_with_capture(app, record, false).await;
+        if retry_opened {
+            return;
+        }
+    }
+
     let _ = app.emit(
         "capture-error",
-        "No se pudo abrir el editor. Abre la captura desde Historial.",
+        "No se pudo abrir el editor. Pulsa «Abrir en editor» en el banner o usa el menú de la bandeja.",
     );
+
     show_main_hub(app);
 }
 
-async fn present_editor_window(editor: &WebviewWindow, fullscreen: bool) {
-    // Resetear estado mientras la ventana sigue oculta para no mostrar la barra de título.
-    #[cfg(target_os = "macos")]
-    let _ = editor.set_simple_fullscreen(false);
-    #[cfg(not(target_os = "macos"))]
-    let _ = editor.set_fullscreen(false);
+async fn present_editor_window(surface: &WebviewWindow, fullscreen: bool) {
+    let app = surface.app_handle();
 
-    if fullscreen {
-        #[cfg(target_os = "macos")]
-        let _ = editor.set_simple_fullscreen(true);
-        #[cfg(not(target_os = "macos"))]
-        let _ = editor.set_fullscreen(true);
-        tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+    hide_detached_editor_window(&app).await;
+    crate::window_layout::reset_editor_presentation_state(surface);
+    let _ = surface.set_decorations(false);
+
+    if let Err(_error) = crate::window_layout::move_editor_to_active_monitor(surface) {
+        crate::app_trace!("move_editor_to_active_monitor failed: {error}");
     }
 
-    bring_window_to_front(editor).await;
+    if fullscreen {
+        crate::app_trace!("present_editor_window: entrando en modo captura (main)");
+    } else if let Err(_error) = crate::window_layout::restore_windowed_editor(surface) {
+        crate::app_trace!("restore_windowed_editor failed: {error}");
+    }
+
+    let _ = surface.unminimize();
+    let _ = surface.show();
+    let _ = surface.set_focus();
+
+    activate_app_for_window(&app);
+    hide_detached_editor_window(&app).await;
+
+    bring_editor_to_front_quiet(surface).await;
+
+    if fullscreen {
+        let _ = surface.set_focus();
+        tokio::time::sleep(tokio::time::Duration::from_millis(80)).await;
+        hide_detached_editor_window(&app).await;
+
+        if let Err(_error) = crate::window_layout::enter_editor_capture_fullscreen(surface) {
+            crate::app_trace!("enter_editor_capture_fullscreen failed: {_error}");
+            if let Err(_fallback) = crate::window_layout::fill_work_area(surface) {
+                crate::app_trace!("fill_work_area fallback failed: {_fallback}");
+            }
+        }
+        bring_editor_to_front_quiet(surface).await;
+        hide_detached_editor_window(&app).await;
+    }
+
+    crate::app_trace!("present_editor_window: superficie de captura mostrada ({})", surface.label());
+}
+
+async fn present_editor_with_capture(
+    app: &AppHandle,
+    record: &SavedCapture,
+    fullscreen: bool,
+) -> bool {
+    crate::app_trace!(
+        "present_editor_with_capture: capture_id={}, fullscreen={}, session_active={}",
+        &record.id[..8.min(record.id.len())],
+        fullscreen,
+        capture_session::is_active()
+    );
+
+    let surface = match prepare_capture_surface(app).await {
+        Ok(surface) => surface,
+        Err(_error) => {
+            crate::app_trace!("present_editor_with_capture: prepare_capture_surface failed");
+            crate::window_layout::set_main_editor_mode(false);
+            return false;
+        }
+    };
+
+    // Timeout defensivo: si una presentación previa se quedó colgada reteniendo el lock,
+    // no bloqueamos para siempre las capturas futuras.
+    let _guard = match tokio::time::timeout(
+        tokio::time::Duration::from_secs(8),
+        EDITOR_PRESENT_LOCK.lock(),
+    )
+    .await
+    {
+        Ok(guard) => guard,
+        Err(_) => {
+            crate::app_trace!("present_editor_with_capture: timeout esperando EDITOR_PRESENT_LOCK");
+            return false;
+        }
+    };
+
+    // Precargar la captura mientras la ventana sigue oculta: la imagen estará lista al mostrarse.
+    deliver_capture_to_editor(&surface, record).await;
+    tokio::time::sleep(tokio::time::Duration::from_millis(40)).await;
+
+    present_editor_window(&surface, fullscreen).await;
+
+    let _ = surface.emit("editor-presented", ());
+    let _ = surface.emit("capture-complete", record);
+
+    let presented = confirm_editor_presented(app, &surface).await;
+    crate::app_trace!("present_editor_with_capture: confirm_editor_presented={presented}");
+
+    if presented {
+        notify_editor_opened(app, &record.id);
+    }
+
+    presented
 }
 
 async fn deliver_capture_to_editor(editor: &WebviewWindow, record: &SavedCapture) {
-    for delay_ms in [250_u64, 400] {
-        tokio::time::sleep(tokio::time::Duration::from_millis(delay_ms)).await;
-        let _ = editor.emit("capture-complete", record);
-    }
+    let _ = editor.emit("capture-complete", record);
 }
 
 fn show_editor_with_capture(app: &AppHandle, record: &SavedCapture, fullscreen: bool) {
-    let Some(editor) = app.get_webview_window("editor") else {
-        editor_open_failed(app, record);
-        return;
-    };
-
     let app_bg = app.clone();
     let record_bg = record.clone();
     tauri::async_runtime::spawn(async move {
-        present_editor_window(&editor, fullscreen).await;
-
-        if !editor.is_visible().unwrap_or(false) {
-            bring_window_to_front(&editor).await;
-            tokio::time::sleep(tokio::time::Duration::from_millis(120)).await;
+        let _session_end = capture_session::CaptureSessionEndGuard::current(&app_bg);
+        let opened = present_editor_with_capture(&app_bg, &record_bg, fullscreen).await;
+        if opened {
+            maintain_capture_surface(&app_bg).await;
+        } else {
+            editor_open_failed(&app_bg, &record_bg, fullscreen).await;
         }
-
-        if !editor.is_visible().unwrap_or(false) {
-            editor_open_failed(&app_bg, &record_bg);
-            return;
-        }
-
-        deliver_capture_to_editor(&editor, &record_bg).await;
     });
+}
+
+async fn open_capture_in_editor_internal(
+    app: &AppHandle,
+    record: &SavedCapture,
+    fullscreen: bool,
+) -> Result<(), String> {
+    let _session = capture_session::CaptureSessionGuard::begin(app);
+
+    let opened = present_editor_with_capture(app, record, fullscreen).await;
+
+    if opened {
+        maintain_capture_surface(app).await;
+        Ok(())
+    } else {
+        editor_open_failed(app, record, fullscreen).await;
+        Err("No se pudo abrir el editor. Comprueba que Better Screenshoot tenga permiso de grabación de pantalla.".into())
+    }
 }
 
 async fn finalize_capture(
@@ -182,11 +441,18 @@ async fn finalize_capture(
         settings.auto_copy
     };
 
-    // Siempre temporal hasta que el usuario guarde; descartar borra sin historial.
-    let (id, file_path) = save_temp_png(app, &image)?;
-
     let image_width = image.width;
     let image_height = image.height;
+    let png_bytes_for_clipboard = if auto_copy {
+        Some(image.png_bytes.clone())
+    } else {
+        None
+    };
+
+    let app_save = app.clone();
+    let (id, file_path) = tauri::async_runtime::spawn_blocking(move || save_temp_png(&app_save, &image))
+        .await
+        .map_err(|e| e.to_string())??;
 
     let record = SavedCapture {
         id: id.clone(),
@@ -205,10 +471,10 @@ async fn finalize_capture(
     let _ = app.emit("capture-complete", &record);
     show_editor_with_capture(app, &record, true);
 
-    if auto_copy {
+    if let Some(png_bytes) = png_bytes_for_clipboard {
         let app_bg = app.clone();
         tauri::async_runtime::spawn(async move {
-            try_copy_to_clipboard(&app_bg, &image);
+            copy_png_to_clipboard_async(app_bg, png_bytes).await;
         });
     }
 
@@ -260,7 +526,7 @@ pub async fn capture_overlay_preview_internal(
                 .map_err(|e| e.to_string())?;
             let source_width = rgba.width();
             let source_height = rgba.height();
-            let preview = downscale_for_preview(&rgba);
+            let preview = downscale_for_preview(rgba);
             let preview_width = preview.width();
             let preview_height = preview.height();
             let jpeg_bytes = encode_jpeg_preview(&preview).map_err(|e| e.to_string())?;
@@ -321,17 +587,24 @@ pub async fn capture_screen_internal(
     app: AppHandle,
     display_id: Option<u32>,
 ) -> Result<SavedCapture, String> {
+    let app_capture = app.clone();
+    let image = tauri::async_runtime::spawn_blocking(move || {
+        let state = app_capture.state::<AppState>();
+        match display_id {
+            Some(id) => state
+                .provider
+                .capture_display(id)
+                .map_err(|e| e.to_string()),
+            None => state
+                .provider
+                .capture_primary_display()
+                .map_err(|e| e.to_string()),
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+
     let state = app.state::<AppState>();
-    let image = match display_id {
-        Some(id) => state
-            .provider
-            .capture_display(id)
-            .map_err(|e| e.to_string())?,
-        None => state
-            .provider
-            .capture_primary_display()
-            .map_err(|e| e.to_string())?,
-    };
     finalize_capture(&app, &state, image).await
 }
 
@@ -341,17 +614,8 @@ pub async fn capture_screen(
     state: State<'_, AppState>,
     display_id: Option<u32>,
 ) -> Result<SavedCapture, String> {
-    let image = match display_id {
-        Some(id) => state
-            .provider
-            .capture_display(id)
-            .map_err(|e| e.to_string())?,
-        None => state
-            .provider
-            .capture_primary_display()
-            .map_err(|e| e.to_string())?,
-    };
-    finalize_capture(&app, &state, image).await
+    let _ = state;
+    capture_screen_internal(app, display_id).await
 }
 
 #[tauri::command]
@@ -360,10 +624,27 @@ pub async fn capture_window(
     state: State<'_, AppState>,
     window_id: u64,
 ) -> Result<SavedCapture, String> {
-    let image = state
-        .provider
-        .capture_window(window_id)
-        .map_err(|e| e.to_string())?;
+    let gen = capture_session::begin(&app);
+    if gen == 0 {
+        return Err("Ya hay una captura en curso".into());
+    }
+    crate::capture_prep::hide_app_windows_before_capture(&app).await;
+
+    let app_capture = app.clone();
+    let image = tauri::async_runtime::spawn_blocking(move || {
+        let state = app_capture.state::<AppState>();
+        state
+            .provider
+            .capture_window(window_id)
+            .map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|error| {
+        capture_session::end_generation(&app, gen);
+        error
+    })?;
+
     finalize_capture(&app, &state, image).await
 }
 
@@ -374,10 +655,17 @@ pub async fn capture_region(
     display_id: u32,
     region: Region,
 ) -> Result<SavedCapture, String> {
-    let image = state
-        .provider
-        .capture_region(display_id, region)
-        .map_err(|e| e.to_string())?;
+    let app_capture = app.clone();
+    let image = tauri::async_runtime::spawn_blocking(move || {
+        let state = app_capture.state::<AppState>();
+        state
+            .provider
+            .capture_region(display_id, region)
+            .map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+
     finalize_capture(&app, &state, image).await
 }
 
@@ -404,11 +692,15 @@ pub async fn complete_area_capture(
         return Err("region coordinates must be non-negative".into());
     }
 
+    let gen = capture_session::begin(&app);
+    if gen == 0 {
+        return Err("Ya hay una captura en curso".into());
+    }
     crate::capture_prep::hide_overlay_before_capture(&app).await;
     crate::capture_prep::hide_app_windows_before_capture(&app).await;
 
     let app_capture = app.clone();
-    let image = tauri::async_runtime::spawn_blocking(move || {
+    let image = match tauri::async_runtime::spawn_blocking(move || {
         let state = app_capture.state::<AppState>();
         state
             .provider
@@ -416,7 +708,17 @@ pub async fn complete_area_capture(
             .map_err(|e| e.to_string())
     })
     .await
-    .map_err(|e| e.to_string())??;
+    {
+        Ok(Ok(image)) => image,
+        Ok(Err(error)) => {
+            capture_session::end_generation(&app, gen);
+            return Err(error);
+        }
+        Err(error) => {
+            capture_session::end_generation(&app, gen);
+            return Err(error.to_string());
+        }
+    };
 
     finalize_capture(&app, &state, image).await
 }
@@ -445,15 +747,12 @@ pub async fn capture_via_portal(app: AppHandle) -> Result<SavedCapture, String> 
         let bytes = fs::read(&path).map_err(|e| e.to_string())?;
         let _ = fs::remove_file(&path);
 
-        let image = image::load_from_memory(&bytes)
-            .map_err(|e| e.to_string())?
-            .to_rgba8();
-
+        let (width, height) = png_dimensions(&bytes)?;
         let capture = CaptureImage {
-            width: image.width(),
-            height: image.height(),
+            width,
+            height,
             png_bytes: bytes,
-            rgba_bytes: image.as_raw().to_vec(),
+            rgba_bytes: Vec::new(),
         };
 
         let state = app.state::<AppState>();
@@ -492,8 +791,28 @@ pub async fn open_capture_in_editor(
         *state.pending_capture.lock().map_err(|e| e.to_string())? = Some(json);
     }
 
-    show_editor_with_capture(&app, &record, false);
-    Ok(())
+    open_capture_in_editor_internal(&app, &record, false).await
+}
+
+fn read_pending_capture(state: &State<'_, AppState>) -> Result<Option<SavedCapture>, String> {
+    let json = state
+        .pending_capture
+        .lock()
+        .map_err(|e| e.to_string())?
+        .clone();
+    match json {
+        Some(raw) => {
+            let capture: SavedCapture =
+                serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+            Ok(Some(capture))
+        }
+        None => Ok(None),
+    }
+}
+
+#[tauri::command]
+pub fn peek_pending_capture(state: State<'_, AppState>) -> Result<Option<SavedCapture>, String> {
+    read_pending_capture(&state)
 }
 
 #[tauri::command]
@@ -511,6 +830,22 @@ pub fn take_pending_capture(state: State<'_, AppState>) -> Result<Option<SavedCa
         }
         None => Ok(None),
     }
+}
+
+#[tauri::command]
+pub async fn open_pending_capture_in_editor(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let Some(record) = read_pending_capture(&state)? else {
+        return Err("No hay ninguna captura pendiente".into());
+    };
+
+    if !PathBuf::from(&record.file_path).exists() {
+        return Err("El archivo de la captura pendiente ya no existe en disco".into());
+    }
+
+    open_capture_in_editor_internal(&app, &record, true).await
 }
 
 #[tauri::command]
@@ -569,13 +904,12 @@ pub async fn save_image_to_disk(
     png_base64: String,
 ) -> Result<SavedCapture, String> {
     let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
-    let img = image::load_from_memory(&bytes).map_err(|e| e.to_string())?;
-    let rgba = img.to_rgba8();
+    let (width, height) = png_dimensions(&bytes)?;
     let capture = CaptureImage {
-        width: rgba.width(),
-        height: rgba.height(),
+        width,
+        height,
         png_bytes: bytes,
-        rgba_bytes: rgba.as_raw().to_vec(),
+        rgba_bytes: Vec::new(),
     };
     finalize_capture(&app, &state, capture).await
 }
@@ -632,4 +966,17 @@ pub async fn save_image_with_dialog(
         created_at,
         data_url: String::new(),
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::capture_surface_presentation_ok;
+
+    #[test]
+    fn capture_surface_presentation_ok_requires_visible_main_and_hidden_detached_editor() {
+        assert!(capture_surface_presentation_ok(true, false));
+        assert!(!capture_surface_presentation_ok(false, false));
+        assert!(!capture_surface_presentation_ok(true, true));
+        assert!(!capture_surface_presentation_ok(false, true));
+    }
 }

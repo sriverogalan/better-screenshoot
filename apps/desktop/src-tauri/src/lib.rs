@@ -1,13 +1,18 @@
+mod app_log;
 mod capture_prep;
+mod capture_session;
 mod commands;
 mod deep_link;
 mod shortcuts;
 mod state;
 mod system_capture;
+mod system_shortcuts;
 mod tray;
+mod window_activation;
 mod window_front;
+mod window_layout;
 
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 use tauri_plugin_single_instance::init as single_instance;
 
 use state::{load_settings, save_settings, AppState};
@@ -34,11 +39,21 @@ pub fn run() {
         .plugin(single_instance(|app, args, _cwd| {
             if let Some(url) = args.iter().find(|a| a.starts_with("betterscreenshoot://")) {
                 deep_link::handle_deep_link(app, vec![url.clone()]);
-            } else if let Some(main) = app.get_webview_window("main") {
-                let main_handle = main.clone();
-                tauri::async_runtime::spawn(async move {
-                    crate::window_front::bring_window_to_front(&main_handle).await;
-                });
+            } else if !capture_session::is_active_fresh() {
+                if let Some(main) = app.get_webview_window("main") {
+                    let hub_epoch = capture_session::current_hub_show_epoch();
+                    let main_handle = main.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if !capture_session::should_show_hub(hub_epoch) {
+                            return;
+                        }
+                        let _ = window_layout::prepare_main_hub_window(&main_handle);
+                        if !capture_session::should_show_hub(hub_epoch) {
+                            return;
+                        }
+                        crate::window_front::bring_window_to_front(&main_handle).await;
+                    });
+                }
             }
         }))
         .setup(|app| {
@@ -46,6 +61,11 @@ pub fn run() {
             let state = app.state::<AppState>();
             load_settings(&handle, state.inner())?;
             tray::setup_tray(&handle)?;
+
+            if let Some(message) = commands::reconcile_system_capture(&handle, state.inner())? {
+                let _ = handle.emit("system-capture-drift", message);
+            }
+
             shortcuts::register_hotkeys(&handle)?;
 
             #[cfg(any(target_os = "linux", target_os = "windows"))]
@@ -54,13 +74,32 @@ pub fn run() {
                 let _ = app.deep_link().register("betterscreenshoot");
             }
 
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = window_layout::prepare_main_hub_window(&main);
+            }
+
+            // Precalienta el webview del editor (Tauri puede diferir la carga si nunca se mostró).
+            if let Some(editor) = app.get_webview_window("editor") {
+                window_activation::activate_app_for_window(&handle);
+                let _ = editor.show();
+                let _ = editor.hide();
+            }
+
             Ok(())
         })
         .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if window.label() == "main" {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
                     let _ = window.hide();
+                    return;
+                }
+
+                if matches!(
+                    event,
+                    tauri::WindowEvent::Focused(true) | tauri::WindowEvent::Resized(_)
+                ) {
+                    window_layout::watch_main_hub_window(window);
                 }
             }
         })
@@ -74,8 +113,10 @@ pub fn run() {
             commands::complete_area_capture,
             commands::capture_area_interactive,
             commands::capture_via_portal,
+            commands::peek_pending_capture,
             commands::take_pending_capture,
             commands::clear_pending_capture,
+            commands::open_pending_capture_in_editor,
             commands::open_capture_in_editor,
             commands::read_capture_data_url,
             commands::discard_capture,
@@ -91,6 +132,12 @@ pub fn run() {
             commands::upload_for_share,
             commands::get_capture_status,
             commands::request_screen_capture_permission,
+            commands::open_system_screenshot_shortcuts_settings,
+            commands::get_system_capture_status,
+            commands::set_system_capture_mode,
+            window_layout::reset_editor_window_layout,
+            window_layout::reset_main_window_layout,
+            window_layout::exit_main_editor_mode,
             shortcuts::handle_capture_action,
         ])
         .build(tauri::generate_context!())

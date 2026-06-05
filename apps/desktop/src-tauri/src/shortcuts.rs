@@ -3,8 +3,10 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri::WebviewWindow;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
+use crate::capture_session;
 use crate::state::AppState;
 use crate::window_front::bring_window_to_front;
+use crate::window_layout::prepare_main_hub_window;
 
 pub fn register_hotkeys(app: &AppHandle) -> Result<(), String> {
     let settings = {
@@ -16,27 +18,29 @@ pub fn register_hotkeys(app: &AppHandle) -> Result<(), String> {
     let gs = app.global_shortcut();
     let _ = gs.unregister_all();
 
-    register_one(app, &settings.capture_area, "capture-area")?;
-    register_one(app, &settings.capture_screen, "capture-screen")?;
-    register_one(app, &settings.capture_window, "capture-window")?;
-    register_one(app, &settings.open_history, "open-history")?;
+    // Un fallo al registrar un atajo no debe impedir registrar los demás.
+    register_one(app, &settings.capture_area, "capture-area");
+    register_one(app, &settings.capture_screen, "capture-screen");
+    register_one(app, &settings.capture_window, "capture-window");
+    register_one(app, &settings.open_history, "open-history");
 
     Ok(())
 }
 
-fn register_one(app: &AppHandle, shortcut: &str, action: &str) -> Result<(), String> {
-    let action = action.to_string();
+fn register_one(app: &AppHandle, shortcut: &str, action: &str) {
+    let action_owned = action.to_string();
     let app_handle = app.clone();
 
-    app.global_shortcut()
+    match app
+        .global_shortcut()
         .on_shortcut(shortcut, move |_app, _shortcut, event| {
             if event.state == ShortcutState::Pressed {
-                handle_hotkey_action(&app_handle, &action);
+                handle_hotkey_action(&app_handle, &action_owned);
             }
-        })
-        .map_err(|e| e.to_string())?;
-
-    Ok(())
+        }) {
+        Ok(()) => crate::app_trace!("register_hotkey: OK '{shortcut}' -> {action}"),
+        Err(_error) => crate::app_trace!("register_hotkey: ERROR '{shortcut}' -> {action}"),
+    }
 }
 
 pub fn handle_hotkey_action(app: &AppHandle, action: &str) {
@@ -45,10 +49,16 @@ pub fn handle_hotkey_action(app: &AppHandle, action: &str) {
         "capture-screen" => {
             let app = app.clone();
             tauri::async_runtime::spawn(async move {
+                let gen = capture_session::begin(&app);
+                if gen == 0 {
+                    crate::app_trace!("capture-screen: captura ya en curso, ignorando");
+                    return;
+                }
                 crate::capture_prep::hide_app_windows_before_capture(&app).await;
                 if let Err(error) =
                     crate::commands::capture::capture_screen_internal(app.clone(), None).await
                 {
+                    capture_session::end_generation(&app, gen);
                     let _ = app.emit("capture-error", error);
                 }
             });
@@ -83,13 +93,21 @@ pub fn start_area_capture(app: &AppHandle) {
 
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
+        let gen = capture_session::begin(&app);
+        if gen == 0 {
+            crate::app_trace!("start_area_capture: captura ya en curso, ignorando");
+            return;
+        }
         crate::capture_prep::hide_app_windows_before_capture(&app).await;
         match crate::commands::capture::capture_area_interactive_internal(app.clone()).await {
             Ok(_) => {}
             Err(error) if error != "Captura cancelada" => {
+                capture_session::end_generation(&app, gen);
                 let _ = app.emit("capture-error", error);
             }
-            _ => {}
+            Err(_) => {
+                capture_session::end_generation(&app, gen);
+            }
         }
     });
 }
@@ -134,13 +152,44 @@ pub fn handle_capture_action(app: AppHandle, action: String) {
 }
 
 pub fn show_main_window(app: &AppHandle, route: &str) {
+    if capture_session::is_active_fresh() || crate::window_layout::is_main_editor_mode() {
+        return;
+    }
+
     let Some(main) = app.get_webview_window("main") else {
         return;
     };
+
+    let hub_epoch = capture_session::current_hub_show_epoch();
     let route = route.to_string();
+
+    if let Some(editor) = app.get_webview_window("editor") {
+        if editor.is_visible().unwrap_or(false) {
+            return;
+        }
+        let _ = editor.hide();
+    }
+    if let Some(overlay) = app.get_webview_window("overlay") {
+        let _ = overlay.hide();
+    }
+
     let main_handle = main.clone();
     tauri::async_runtime::spawn(async move {
+        if !capture_session::should_show_hub(hub_epoch) {
+            return;
+        }
+
+        let _ = prepare_main_hub_window(&main_handle);
+        if !capture_session::should_show_hub(hub_epoch) {
+            return;
+        }
+
         bring_window_to_front(&main_handle).await;
+
+        if !capture_session::should_show_hub(hub_epoch) {
+            return;
+        }
+
         let _ = main_handle.emit("navigate", route);
     });
 }

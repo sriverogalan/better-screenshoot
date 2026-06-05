@@ -85,3 +85,24 @@ pub async fn get_capture_status(state: State<'_, AppState>) -> Result<CaptureSta
 pub fn request_screen_capture_permission() -> bool {
     macos_request_screen_capture()
 }
+
+#[cfg(target_os = "macos")]
+const SYSTEM_SCREENSHOT_SHORTCUTS_URL: &str =
+    "x-apple.systempreferences:com.apple.Keyboard-Settings.extension?Screenshots";
+
+#[tauri::command]
+pub fn open_system_screenshot_shortcuts_settings() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(SYSTEM_SCREENSHOT_SHORTCUTS_URL)
+            .spawn()
+            .map_err(|e| format!("No se pudieron abrir los ajustes del sistema: {e}"))?;
+        Ok(())
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err("Los atajos de captura del sistema solo se configuran en macOS.".into())
+    }
+}
