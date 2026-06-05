@@ -506,7 +506,7 @@ checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
 
 [[package]]
 name = "better-screenshoot"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ashpd 0.10.3",
  "base64 0.22.1",
@@ -535,7 +535,7 @@ dependencies = [
 
 [[package]]
 name = "better-screenshoot-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "capture-core",
@@ -817,7 +817,7 @@ dependencies = [
 
 [[package]]
 name = "capture-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "image",
  "serde",

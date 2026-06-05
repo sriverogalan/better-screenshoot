@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { IconPhoto, IconSettings } from "@tabler/icons-vue";
+import logoUrl from "../../assets/logo.svg";
 
 const navItems = [
   { to: "/history", label: "Historial", icon: IconPhoto },
@@ -13,7 +14,7 @@ const navItems = [
     aria-label="Navegación principal"
   >
     <div class="flex items-center gap-2 border-b border-border px-4 py-4">
-      <IconPhoto class="size-5 text-accent" aria-hidden="true" />
+      <img :src="logoUrl" alt="" class="size-5 shrink-0" aria-hidden="true" />
       <span class="text-sm font-semibold">Better Screenshoot</span>
     </div>
 

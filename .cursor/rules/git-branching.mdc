@@ -1,0 +1,31 @@
+---
+description: Reglas de ramas, PRs y releases de better-screenshoot
+alwaysApply: true
+---
+
+# Git: ramas y releases
+
+## Ramas
+
+- `main` es producción. Nunca commitear directo salvo que el usuario lo pida explícitamente.
+- Nuevas ramas desde `main`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
+- PRs hacia `main`; título `[better-screenshoot] …`.
+
+## Commits
+
+- Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `ci:`.
+- Un PR = un objetivo. No mezclar feature + bump de versión sin motivo.
+
+## Versiones
+
+Sincronizar en todos estos archivos al subir versión:
+
+- `Cargo.toml` (`[workspace.package].version`)
+- `package.json` (raíz y paquetes del monorepo)
+- `apps/desktop/src-tauri/tauri.conf.json`
+
+## Releases
+
+- Tag semver desde `main`: `v0.2.0`.
+- El workflow `.github/workflows/release.yml` crea draft release al pushear `v*`.
+- Ver `docs/branching.md` para el flujo completo.
