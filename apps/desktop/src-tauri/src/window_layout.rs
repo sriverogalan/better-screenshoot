@@ -1,16 +1,13 @@
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use tauri::{
     AppHandle, LogicalSize, Manager, Monitor, PhysicalPosition, PhysicalSize, Position, Size,
-    WebviewWindow, Window,
+    WebviewWindow,
 };
 
 static MAIN_RESTORING: AtomicBool = AtomicBool::new(false);
 static MAIN_EDITOR_MODE: AtomicBool = AtomicBool::new(false);
-static HUB_WATCH_SUPPRESS_COUNT: AtomicU32 = AtomicU32::new(0);
 
-const MAIN_WINDOW_WIDTH: f64 = 960.0;
-const MAIN_WINDOW_HEIGHT: f64 = 640.0;
 const EDITOR_WINDOW_WIDTH: f64 = 900.0;
 const EDITOR_WINDOW_HEIGHT: f64 = 700.0;
 
@@ -158,19 +155,9 @@ pub fn prepare_main_hub_window(window: &WebviewWindow) -> Result<(), String> {
 }
 
 fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
-    let _ = window.set_maximizable(false);
-    let _ = window.set_resizable(false);
     #[cfg(target_os = "macos")]
     let _ = window.set_simple_fullscreen(false);
     let _ = window.set_fullscreen(false);
-    let _ = window.unmaximize();
-    window
-        .set_size(Size::Logical(LogicalSize {
-            width: MAIN_WINDOW_WIDTH,
-            height: MAIN_WINDOW_HEIGHT,
-        }))
-        .map_err(|e| e.to_string())?;
-    window.center().map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -200,109 +187,3 @@ pub fn exit_main_editor_mode(app: AppHandle) -> Result<(), String> {
     prepare_main_hub_window(&main)
 }
 
-/// Oculta el hub si entra en fullscreen, maximizado o tamaño inválido.
-/// Ocultar (en vez de redimensionar en caliente) evita bucles de eventos Resized.
-pub fn suppress_hub_watch() {
-    HUB_WATCH_SUPPRESS_COUNT.fetch_add(1, Ordering::SeqCst);
-}
-
-pub fn release_hub_watch() {
-    HUB_WATCH_SUPPRESS_COUNT.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |count| {
-        Some(count.saturating_sub(1))
-    }).ok();
-}
-
-pub fn is_hub_watch_suppressed() -> bool {
-    HUB_WATCH_SUPPRESS_COUNT.load(Ordering::SeqCst) > 0
-}
-
-pub struct HubWatchSuppressGuard;
-
-impl HubWatchSuppressGuard {
-    pub fn new() -> Self {
-        suppress_hub_watch();
-        Self
-    }
-}
-
-impl Drop for HubWatchSuppressGuard {
-    fn drop(&mut self) {
-        release_hub_watch();
-    }
-}
-
-pub fn watch_main_hub_window(window: &Window) {
-    if MAIN_RESTORING.load(Ordering::SeqCst)
-        || is_hub_watch_suppressed()
-        || is_main_editor_mode()
-    {
-        return;
-    }
-
-    if !window.is_visible().unwrap_or(false) {
-        return;
-    }
-
-    let app = window.app_handle();
-    let Some(main) = app.get_webview_window("main") else {
-        return;
-    };
-
-    if !main_hub_is_invalid(&main) {
-        return;
-    }
-
-    let _guard = HubWatchSuppressGuard::new();
-    #[cfg(target_os = "macos")]
-    let _ = main.set_simple_fullscreen(false);
-    let _ = main.set_fullscreen(false);
-    let _ = main.unmaximize();
-    let _ = main.hide();
-}
-
-fn main_hub_is_invalid(window: &WebviewWindow) -> bool {
-    window.is_fullscreen().unwrap_or(false)
-        || window.is_maximized().unwrap_or(false)
-        || main_window_exceeds_bounds(window)
-}
-
-fn main_window_exceeds_bounds(window: &WebviewWindow) -> bool {
-    let Ok(size) = window.inner_size() else {
-        return false;
-    };
-    let scale = window.scale_factor().unwrap_or(1.0);
-    let width = size.width as f64 / scale;
-    let height = size.height as f64 / scale;
-    width > MAIN_WINDOW_WIDTH + 4.0 || height > MAIN_WINDOW_HEIGHT + 4.0
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{
-        is_hub_watch_suppressed, release_hub_watch, suppress_hub_watch, HUB_WATCH_SUPPRESS_COUNT,
-    };
-    use std::sync::atomic::Ordering;
-
-    fn reset_suppress_count() {
-        HUB_WATCH_SUPPRESS_COUNT.store(0, Ordering::SeqCst);
-    }
-
-    #[test]
-    fn hub_watch_suppress_refcount() {
-        reset_suppress_count();
-        assert!(!is_hub_watch_suppressed());
-
-        suppress_hub_watch();
-        assert!(is_hub_watch_suppressed());
-
-        suppress_hub_watch();
-        release_hub_watch();
-        assert!(is_hub_watch_suppressed());
-
-        release_hub_watch();
-        assert!(!is_hub_watch_suppressed());
-
-        release_hub_watch();
-        assert!(!is_hub_watch_suppressed());
-    }
-}

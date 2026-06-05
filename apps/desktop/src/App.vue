@@ -1,28 +1,19 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { listen } from "@tauri-apps/api/event";
 import { useRouter } from "vue-router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import {
-  setMainWindowGuardPaused,
-  startMainWindowGuard,
-} from "./lib/main-window-guard";
 import { useSettingsStore } from "./stores/settings";
 
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const isOverlay = ref(false);
 const notice = ref<string | null>(null);
-let stopMainWindowGuard: (() => void) | undefined;
 
 onMounted(async () => {
   try {
     const win = getCurrentWindow();
     isOverlay.value = win.label === "overlay";
-
-    if (win.label === "main") {
-      stopMainWindowGuard = startMainWindowGuard(win);
-    }
 
     await settingsStore.load();
   } catch (error) {
@@ -50,22 +41,9 @@ onMounted(async () => {
     }, 4000);
   });
 
-  await listen("capture-session-active", () => {
-    setMainWindowGuardPaused(true);
-  });
-
   await listen("editor-opened", () => {
-    setMainWindowGuardPaused(true);
     notice.value = null;
   });
-
-  await listen("editor-closed", () => {
-    setMainWindowGuardPaused(false);
-  });
-});
-
-onUnmounted(() => {
-  stopMainWindowGuard?.();
 });
 </script>
 

@@ -45,7 +45,6 @@ import {
   exitCaptureEditor,
   isCaptureSurfaceLabel,
 } from "../lib/editor-window";
-import { setMainWindowGuardPaused } from "../lib/main-window-guard";
 import {
   clearPendingCapture,
   copyImageToClipboard,
@@ -624,7 +623,6 @@ async function closeEditor() {
   }
   await exitCaptureEditor(win);
   await emit("editor-closed");
-  setMainWindowGuardPaused(false);
   resetInteractionState();
   resetHistory();
   captureStore.clear();
@@ -703,10 +701,6 @@ let resizeObserver: ResizeObserver | undefined;
 onMounted(async () => {
   const win = getCurrentWindow();
   if (isCaptureSurfaceWindow(win.label)) {
-    if (win.label === "main") {
-      setMainWindowGuardPaused(true);
-    }
-
     await win.onCloseRequested(async (event) => {
       event.preventDefault();
       await closeEditor();

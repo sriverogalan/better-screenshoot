@@ -92,14 +92,6 @@ pub fn run() {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
                     let _ = window.hide();
-                    return;
-                }
-
-                if matches!(
-                    event,
-                    tauri::WindowEvent::Focused(true) | tauri::WindowEvent::Resized(_)
-                ) {
-                    window_layout::watch_main_hub_window(window);
                 }
             }
         })

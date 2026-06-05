@@ -49,11 +49,9 @@ async fn hide_windows(app: &AppHandle, labels: &[&str]) {
 }
 
 fn force_hide_hub_window(window: &WebviewWindow) {
-    let _guard = window_layout::HubWatchSuppressGuard::new();
     #[cfg(target_os = "macos")]
     let _ = window.set_simple_fullscreen(false);
     let _ = window.set_fullscreen(false);
-    let _ = window.unmaximize();
     let _ = window.hide();
 }
 
