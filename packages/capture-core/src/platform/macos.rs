@@ -80,7 +80,7 @@ impl CaptureProvider for MacOSProvider {
 
     fn capture_display(&self, display_id: u32) -> CaptureResult<CaptureImage> {
         let image = self.capture_display_rgba(display_id)?;
-        encode_png(&image)
+        encode_png(image)
     }
 
     fn capture_window(&self, window_id: u64) -> CaptureResult<CaptureImage> {
@@ -88,7 +88,7 @@ impl CaptureProvider for MacOSProvider {
         let image = window
             .capture_image()
             .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
-        encode_png(&image)
+        encode_png(image)
     }
 
     fn capture_region(&self, display_id: u32, region: Region) -> CaptureResult<CaptureImage> {
@@ -102,7 +102,7 @@ impl CaptureProvider for MacOSProvider {
         let image = monitor
             .capture_region(x, y, width, height)
             .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
-        encode_png(&image)
+        encode_png(image)
     }
 }
 

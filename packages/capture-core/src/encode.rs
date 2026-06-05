@@ -11,7 +11,9 @@ use crate::types::CaptureImage;
 const PREVIEW_MAX_WIDTH: u32 = 1600;
 const PREVIEW_JPEG_QUALITY: u8 = 72;
 
-pub fn encode_png_fast(image: &image::RgbaImage) -> CaptureResult<CaptureImage> {
+pub fn encode_png_fast(image: image::RgbaImage) -> CaptureResult<CaptureImage> {
+    let width = image.width();
+    let height = image.height();
     let mut buffer = Vec::new();
     let mut writer = Cursor::new(&mut buffer);
     let encoder = PngEncoder::new_with_quality(
@@ -22,33 +24,33 @@ pub fn encode_png_fast(image: &image::RgbaImage) -> CaptureResult<CaptureImage> 
     encoder
         .write_image(
             image.as_raw(),
-            image.width(),
-            image.height(),
+            width,
+            height,
             ExtendedColorType::Rgba8,
         )
         .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
 
     Ok(CaptureImage {
-        width: image.width(),
-        height: image.height(),
+        width,
+        height,
         png_bytes: buffer,
-        rgba_bytes: image.as_raw().to_vec(),
+        rgba_bytes: Vec::new(),
     })
 }
 
-pub fn encode_png(image: &image::RgbaImage) -> CaptureResult<CaptureImage> {
+pub fn encode_png(image: image::RgbaImage) -> CaptureResult<CaptureImage> {
     encode_png_fast(image)
 }
 
-pub fn downscale_for_preview(image: &image::RgbaImage) -> image::RgbaImage {
+pub fn downscale_for_preview(image: image::RgbaImage) -> image::RgbaImage {
     if image.width() <= PREVIEW_MAX_WIDTH {
-        return image.clone();
+        return image;
     }
 
     let ratio = PREVIEW_MAX_WIDTH as f32 / image.width() as f32;
     let target_height = (image.height() as f32 * ratio).round().max(1.0) as u32;
     image::imageops::resize(
-        image,
+        &image,
         PREVIEW_MAX_WIDTH,
         target_height,
         ResizeFilter::Triangle,
@@ -70,16 +72,18 @@ pub fn encode_jpeg_preview(image: &image::RgbaImage) -> CaptureResult<Vec<u8>> {
     Ok(buffer)
 }
 
-pub fn encode_cropped_png(cropped: &image::RgbaImage) -> CaptureResult<CaptureImage> {
+pub fn encode_cropped_png(cropped: image::RgbaImage) -> CaptureResult<CaptureImage> {
+    let width = cropped.width();
+    let height = cropped.height();
     let mut buffer = Vec::new();
     cropped
         .write_to(&mut Cursor::new(&mut buffer), ImageFormat::Png)
         .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
 
     Ok(CaptureImage {
-        width: cropped.width(),
-        height: cropped.height(),
+        width,
+        height,
         png_bytes: buffer,
-        rgba_bytes: cropped.as_raw().to_vec(),
+        rgba_bytes: Vec::new(),
     })
 }

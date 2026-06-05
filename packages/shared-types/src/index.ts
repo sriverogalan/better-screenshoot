@@ -43,12 +43,14 @@ export interface CaptureRecord {
 
 export type CaptureMode = "screen" | "window" | "area";
 
+export type SystemCaptureMode = "independent" | "replace_system";
+
 export interface AppSettings {
   save_directory: string;
   auto_copy: boolean;
   auto_save: boolean;
   allow_external_control: boolean;
-  replace_system_screenshots: boolean;
+  system_capture_mode: SystemCaptureMode;
   hotkeys: HotkeyConfig;
   tier: LicenseTier;
 }
@@ -76,12 +78,19 @@ export const DEFAULT_HOTKEYS: HotkeyConfig = {
   open_history: "CommandOrControl+Shift+H",
 };
 
+/** Atajos que sustituyen a las capturas nativas de macOS. */
+export const SYSTEM_REPLACEMENT_HOTKEYS = {
+  capture_screen: "Command+Shift+3",
+  capture_area: "Command+Shift+4",
+  capture_window: "Command+Shift+5",
+} as const satisfies Pick<HotkeyConfig, "capture_screen" | "capture_area" | "capture_window">;
+
 export const DEFAULT_SETTINGS: AppSettings = {
   save_directory: "",
   auto_copy: true,
   auto_save: true,
   allow_external_control: true,
-  replace_system_screenshots: false,
+  system_capture_mode: "independent",
   hotkeys: DEFAULT_HOTKEYS,
   tier: "community",
 };
