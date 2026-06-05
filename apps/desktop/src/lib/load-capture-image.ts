@@ -14,7 +14,7 @@ export async function resolveCaptureDataUrl(
   }
 
   if (!capture.file_path) {
-    throw new Error("La captura no tiene imagen");
+    throw new Error("Capture has no image");
   }
 
   return convertFileSrc(capture.file_path);
@@ -27,11 +27,11 @@ async function readCaptureDataUrlFromDisk(filePath: string): Promise<string> {
 export function loadHtmlImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    // WKWebView/Safari marca el canvas como "tainted" sin esto y
-    // canvas.toDataURL() lanza "The operation is insecure".
+    // WKWebView/Safari marks the canvas as "tainted" without this and
+    // canvas.toDataURL() throws "The operation is insecure".
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Error al decodificar la imagen"));
+    img.onerror = () => reject(new Error("Error decoding image"));
     img.src = src;
   });
 }
@@ -40,7 +40,7 @@ export async function loadCaptureImage(
   capture: SavedCapture,
 ): Promise<LoadedCaptureImage> {
   if (!capture.data_url && !capture.file_path) {
-    throw new Error("La captura no tiene imagen");
+    throw new Error("Capture has no image");
   }
 
   const primarySrc = await resolveCaptureDataUrl(capture);
@@ -60,5 +60,5 @@ export async function loadCaptureImage(
 }
 
 export function disposeCaptureImage() {
-  // Sin blob URLs que revocar; se mantiene por compatibilidad con el editor.
+  // No blob URLs to revoke; kept for editor compatibility.
 }

@@ -151,8 +151,8 @@ fn show_main_hub(app: &AppHandle) {
 }
 
 fn notify_editor_opened(app: &AppHandle, capture_id: &str) {
-    // No borramos `pending_capture` aquí: si el editor se pierde el evento `capture-complete`,
-    // debe poder recuperar la captura al ganar foco. El propio editor la limpia al cargarla.
+    // Do not clear `pending_capture` here: if the editor misses the `capture-complete` event,
+    // it must be able to recover the capture on focus. The editor clears it when loaded.
     let _ = app.emit("editor-opened", capture_id);
 }
 
@@ -186,7 +186,7 @@ async fn hide_detached_editor_window(app: &AppHandle) {
 async fn prepare_capture_surface(app: &AppHandle) -> Result<WebviewWindow, String> {
     let main = app
         .get_webview_window("main")
-        .ok_or_else(|| "Ventana principal no encontrada".to_string())?;
+        .ok_or_else(|| "Main window not found".to_string())?;
 
     hide_detached_editor_window(app).await;
     crate::window_layout::set_main_editor_mode(true);
@@ -281,7 +281,7 @@ async fn editor_open_failed(app: &AppHandle, record: &SavedCapture, tried_fullsc
     hide_detached_editor_window(app).await;
 
     if tried_fullscreen {
-        crate::app_trace!("editor_open_failed: reintentando sin pantalla completa");
+        crate::app_trace!("editor_open_failed: retrying without fullscreen");
         let retry_opened = present_editor_with_capture(app, record, false).await;
         if retry_opened {
             return;
@@ -290,7 +290,7 @@ async fn editor_open_failed(app: &AppHandle, record: &SavedCapture, tried_fullsc
 
     let _ = app.emit(
         "capture-error",
-        "No se pudo abrir el editor. Pulsa «Abrir en editor» en el banner o usa el menú de la bandeja.",
+        "Could not open the editor. Click «Open in editor» in the banner or use the tray menu.",
     );
 
     show_main_hub(app);
@@ -361,8 +361,8 @@ async fn present_editor_with_capture(
         }
     };
 
-    // Timeout defensivo: si una presentación previa se quedó colgada reteniendo el lock,
-    // no bloqueamos para siempre las capturas futuras.
+    // Defensive timeout: if a previous presentation hung while holding the lock,
+    // do not block future captures forever.
     let _guard = match tokio::time::timeout(
         tokio::time::Duration::from_secs(8),
         EDITOR_PRESENT_LOCK.lock(),
@@ -371,12 +371,12 @@ async fn present_editor_with_capture(
     {
         Ok(guard) => guard,
         Err(_) => {
-            crate::app_trace!("present_editor_with_capture: timeout esperando EDITOR_PRESENT_LOCK");
+            crate::app_trace!("present_editor_with_capture: timeout waiting for EDITOR_PRESENT_LOCK");
             return false;
         }
     };
 
-    // Precargar la captura mientras la ventana sigue oculta: la imagen estará lista al mostrarse.
+    // Preload the capture while the window stays hidden: the image will be ready when shown.
     deliver_capture_to_editor(&surface, record).await;
     tokio::time::sleep(tokio::time::Duration::from_millis(40)).await;
 
@@ -427,7 +427,7 @@ async fn open_capture_in_editor_internal(
         Ok(())
     } else {
         editor_open_failed(app, record, fullscreen).await;
-        Err("No se pudo abrir el editor. Comprueba que Better Screenshoot tenga permiso de grabación de pantalla.".into())
+        Err("Could not open the editor. Check that Better Screenshoot has Screen Recording permission.".into())
     }
 }
 
@@ -572,7 +572,7 @@ pub async fn capture_area_interactive_internal(app: AppHandle) -> Result<SavedCa
 
     #[cfg(target_os = "windows")]
     {
-        Err("usa el selector de región integrado en Windows".into())
+        Err("use the built-in region selector on Windows".into())
     }
 }
 
@@ -774,7 +774,7 @@ pub async fn open_capture_in_editor(
     let history_record = crate::commands::history::get_record_by_id(&app, &capture_id)?;
 
     if !PathBuf::from(&history_record.file_path).exists() {
-        return Err("El archivo de captura ya no existe en disco".into());
+        return Err("Capture file no longer exists on disk".into());
     }
 
     let record = SavedCapture {
@@ -842,7 +842,7 @@ pub async fn open_pending_capture_in_editor(
     };
 
     if !PathBuf::from(&record.file_path).exists() {
-        return Err("El archivo de la captura pendiente ya no existe en disco".into());
+        return Err("Pending capture file no longer exists on disk".into());
     }
 
     open_capture_in_editor_internal(&app, &record, true).await
@@ -860,9 +860,9 @@ pub fn clear_pending_capture(state: State<'_, AppState>) -> Result<(), String> {
 #[tauri::command]
 pub async fn read_capture_data_url(file_path: String) -> Result<String, String> {
     let bytes = fs::read(&file_path)
-        .map_err(|e| format!("No se pudo leer la imagen: {e}"))?;
+        .map_err(|e| format!("Could not read image: {e}"))?;
     if bytes.is_empty() {
-        return Err("El archivo de captura está vacío".into());
+        return Err("Capture file is empty".into());
     }
     Ok(format!(
         "data:image/png;base64,{}",
@@ -924,8 +924,8 @@ pub async fn save_image_with_dialog(
 
     let picked_path = tauri::async_runtime::spawn_blocking(move || {
         rfd::FileDialog::new()
-            .set_title("Guardar captura")
-            .add_filter("Imagen PNG", &["png"])
+            .set_title("Save capture")
+            .add_filter("PNG image", &["png"])
             .set_file_name(&default_name)
             .save_file()
     })

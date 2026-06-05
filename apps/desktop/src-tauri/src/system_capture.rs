@@ -28,17 +28,17 @@ pub async fn capture_interactive_area(app: &AppHandle) -> Result<PathBuf, String
     })
     .await
     .map_err(|e| e.to_string())?
-    .map_err(|e| format!("no se pudo ejecutar la captura del sistema: {e}"))?;
+    .map_err(|e| format!("could not run system capture: {e}"))?;
 
     if !status.success() {
         let _ = std::fs::remove_file(&path);
-        return Err("Captura cancelada".into());
+        return Err("Capture cancelled".into());
     }
 
     let file_size = path.metadata().map(|meta| meta.len()).unwrap_or(0);
     if file_size == 0 {
         let _ = std::fs::remove_file(&path);
-        return Err("Captura cancelada".into());
+        return Err("Capture cancelled".into());
     }
 
     Ok(path)
@@ -46,5 +46,5 @@ pub async fn capture_interactive_area(app: &AppHandle) -> Result<PathBuf, String
 
 #[cfg(not(target_os = "macos"))]
 pub async fn capture_interactive_area(_app: &AppHandle) -> Result<PathBuf, String> {
-    Err("la captura interactiva del sistema solo está disponible en macOS".into())
+    Err("interactive system capture is only available on macOS".into())
 }

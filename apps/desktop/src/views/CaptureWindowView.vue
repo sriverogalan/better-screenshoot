@@ -34,14 +34,14 @@ onMounted(load);
 <template>
   <div class="flex min-h-full flex-col p-6">
     <header class="mb-6">
-      <h1 class="text-lg font-semibold">Capturar ventana</h1>
-      <p class="mt-1 text-sm text-text-muted">Selecciona la ventana a capturar</p>
+      <h1 class="text-lg font-semibold">Capture window</h1>
+      <p class="mt-1 text-sm text-text-muted">Select the window to capture</p>
     </header>
 
     <main class="flex-1">
-      <p v-if="loading" class="text-sm text-text-muted">Buscando ventanas…</p>
+      <p v-if="loading" class="text-sm text-text-muted">Searching for windows…</p>
       <p v-else-if="windows.length === 0" class="text-sm text-text-muted">
-        No se encontraron ventanas. En Linux Wayland usa la captura por portal.
+        No windows found.
       </p>
       <ul v-else class="space-y-2">
         <li v-for="win in windows" :key="win.id">
@@ -52,7 +52,7 @@ onMounted(load);
             @click="capture(win.id)"
           >
             <span>
-              <span class="block text-sm font-medium">{{ win.title || "Sin título" }}</span>
+              <span class="block text-sm font-medium">{{ win.title || "Untitled" }}</span>
               <span class="text-xs text-text-muted">{{ win.app_name }}</span>
             </span>
             <span class="text-xs text-text-muted">{{ win.width }}×{{ win.height }}</span>

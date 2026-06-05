@@ -94,7 +94,7 @@ function onPreviewImageLoad() {
 }
 
 function onPreviewImageError() {
-  error.value = "No se pudo cargar la vista previa";
+  error.value = "Could not load preview";
   loading.value = false;
 }
 
@@ -129,7 +129,7 @@ async function onPointerUp() {
     await completeAreaCapture(preview.value.display_id, region);
   } catch (err) {
     error.value =
-      err instanceof Error ? err.message : "No se pudo completar la captura";
+      err instanceof Error ? err.message : "Could not complete capture";
   } finally {
     if (!error.value) {
       await closeOverlay();
@@ -194,7 +194,7 @@ onUnmounted(() => {
   <div
     class="fixed inset-0 cursor-crosshair select-none overflow-hidden bg-transparent"
     role="application"
-    aria-label="Selector de región de captura"
+    aria-label="Capture region selector"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
@@ -241,7 +241,7 @@ onUnmounted(() => {
       class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40"
     >
       <p class="rounded-full bg-black/70 px-5 py-2.5 text-sm text-white">
-        Preparando captura…
+        Preparing capture…
       </p>
     </div>
 
@@ -256,7 +256,7 @@ onUnmounted(() => {
       v-if="!loading && preview && !error"
       class="pointer-events-none fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-5 py-2.5 text-sm text-white/90 shadow-lg"
     >
-      Arrastra para seleccionar · Esc para cancelar
+      Drag to select · Esc to cancel
     </p>
   </div>
 </template>

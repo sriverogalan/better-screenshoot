@@ -22,7 +22,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "community".into(),
             expires_at: None,
-            message: "Sin clave — modo Community".into(),
+            message: "No key — Community mode".into(),
         });
     }
 
@@ -31,7 +31,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "pro".into(),
             expires_at: None,
-            message: "Licencia Pro válida".into(),
+            message: "Valid Pro license".into(),
         });
     }
 
@@ -40,7 +40,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "cloud".into(),
             expires_at: None,
-            message: "Licencia Cloud válida".into(),
+            message: "Valid Cloud license".into(),
         });
     }
 
@@ -49,7 +49,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "team".into(),
             expires_at: None,
-            message: "Licencia Team válida".into(),
+            message: "Valid Team license".into(),
         });
     }
 
@@ -57,7 +57,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
         valid: false,
         tier: "community".into(),
         expires_at: None,
-        message: "Clave de licencia no válida".into(),
+        message: "Invalid license key".into(),
     })
 }
 

@@ -138,7 +138,7 @@ async function loadCapture(capture: SavedCapture | null) {
     if (generation !== loadGeneration) return;
     if (!imagePreviewSrc.value && !imageLoadError.value) {
       imageLoadError.value =
-        "No se pudo mostrar la imagen. Comprueba permisos de grabación de pantalla.";
+        "Could not display the image. Check Screen Recording permissions.";
     }
   }, IMAGE_LOAD_TIMEOUT_MS);
 
@@ -159,7 +159,7 @@ async function loadCapture(capture: SavedCapture | null) {
     if (generation !== loadGeneration) return;
     clearLoadTimeout();
     imageLoadError.value =
-      error instanceof Error ? error.message : "Error al cargar la imagen";
+      error instanceof Error ? error.message : "Error loading image";
   }
 }
 
@@ -557,7 +557,7 @@ async function exportPngBase64(): Promise<string> {
   const baseImage = konvaImage.value;
   const annotationLayer = canvasRef.value?.getAnnotationLayer() ?? null;
   if (!baseImage || !annotationLayer) {
-    throw new Error("La imagen aún no está lista para exportar");
+    throw new Error("Image is not ready to export yet");
   }
 
   return compositeCaptureExport(
@@ -594,8 +594,8 @@ async function applyIncomingCapture(capture: SavedCapture) {
   resetInteractionState();
   resetHistory();
   captureStore.setCapture(capture);
-  // Cargamos la imagen de forma explícita en lugar de depender del watcher:
-  // así garantizamos que la captura entrante siempre se renderice.
+  // Load the image explicitly instead of relying on the watcher:
+  // this ensures incoming captures always render.
   await loadCapture(capture);
   initHistory();
   await clearPendingCapture();
@@ -657,7 +657,7 @@ async function runEditorAction(action: "discard" | "save") {
     await closeEditor();
   } catch (err) {
     actionError.value =
-      err instanceof Error ? err.message : "No se pudo completar la acción";
+      err instanceof Error ? err.message : "Could not complete action";
   } finally {
     actionBusy.value = false;
   }

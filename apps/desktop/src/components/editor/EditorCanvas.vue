@@ -472,13 +472,13 @@ defineExpose({
       v-else-if="!imagePreviewSrc && hasCapture"
       class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
     >
-      Cargando imagen…
+      Loading image…
     </p>
     <p
       v-else-if="!hasCapture"
       class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
     >
-      Realiza una captura para empezar a editar.
+      Take a capture to start editing.
     </p>
   </div>
 </template>

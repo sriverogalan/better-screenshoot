@@ -16,10 +16,10 @@ const {
     role="status"
   >
     <p class="font-medium text-text">
-      Captura lista pero el editor no se abrió
+      Capture ready but editor did not open
     </p>
     <p class="mt-1 text-xs text-text-muted">
-      {{ pendingCapture.width }}×{{ pendingCapture.height }} — guardada temporalmente hasta que la edites o descartes.
+      {{ pendingCapture.width }}×{{ pendingCapture.height }} — temporarily saved until you edit or discard it.
     </p>
     <p v-if="recoveryError" class="mt-2 text-xs text-red-400">
       {{ recoveryError }}
@@ -30,7 +30,7 @@ const {
       :disabled="recoveryBusy"
       @click="openPendingInEditor"
     >
-      {{ recoveryBusy ? "Abriendo…" : "Abrir en editor" }}
+      {{ recoveryBusy ? "Opening…" : "Open in editor" }}
     </button>
   </div>
 </template>

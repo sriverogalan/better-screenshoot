@@ -21,15 +21,15 @@ const closeButtonRef = ref<HTMLButtonElement | null>(null);
 const replacements = [
   {
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen),
-    action: "Capturar pantalla",
+    action: "Capture screen",
   },
   {
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area),
-    action: "Capturar región",
+    action: "Capture region",
   },
   {
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window),
-    action: "Capturar ventana",
+    action: "Capture window",
   },
 ];
 
@@ -84,22 +84,22 @@ onUnmounted(() => {
               id="system-screenshot-permission-title"
               class="text-base font-semibold text-text"
             >
-              ¿Sustituir capturas del sistema?
+              Replace system captures?
             </h2>
             <p
               id="system-screenshot-permission-description"
               class="mt-1 text-sm text-text-muted"
             >
-              Better Screenshoot desactivará los atajos nativos de macOS y los
-              reasignará a sus propias capturas. Guardaremos una copia para
-              restaurarlos si cambias de opinión.
+              Better Screenshoot will disable macOS native shortcuts and
+              reassign them to its own captures. We'll keep a backup to
+              restore them if you change your mind.
             </p>
           </div>
           <button
             ref="closeButtonRef"
             type="button"
             class="rounded-lg p-1 text-text-muted hover:bg-border hover:text-text disabled:opacity-50"
-            aria-label="Cerrar"
+            aria-label="Close"
             :disabled="busy"
             @click="emit('close')"
           >
@@ -138,7 +138,7 @@ onUnmounted(() => {
                   : 'bg-emerald-950/50 text-emerald-100'
               "
             >
-              {{ shortcut.enabled ? "Activo en macOS" : "Se desactivará" }}
+              {{ shortcut.enabled ? "Active on macOS" : "Will be disabled" }}
             </span>
           </li>
         </ul>
@@ -150,7 +150,7 @@ onUnmounted(() => {
             :disabled="busy"
             @click="emit('close')"
           >
-            Cancelar
+            Cancel
           </button>
           <button
             type="button"
@@ -158,7 +158,7 @@ onUnmounted(() => {
             :disabled="busy"
             @click="emit('confirm')"
           >
-            {{ busy ? "Sustituyendo…" : "Sustituir atajos del sistema" }}
+            {{ busy ? "Replacing…" : "Replace system shortcuts" }}
           </button>
         </div>
       </div>

@@ -35,7 +35,7 @@ impl CaptureProvider for MacOSProvider {
         let monitors = Monitor::all().map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
         if monitors.is_empty() {
             return Err(CaptureError::PermissionDenied(
-                "macOS no devolvió pantallas. Activa Grabación de pantalla para Better Screenshoot en Ajustes del Sistema → Privacidad y seguridad.".into(),
+                "macOS returned no displays. Enable Screen Recording for Better Screenshoot in System Settings → Privacy & Security.".into(),
             ));
         }
 

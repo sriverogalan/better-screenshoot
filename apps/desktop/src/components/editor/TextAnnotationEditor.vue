@@ -107,8 +107,8 @@ function onKeydown(event: KeyboardEvent) {
     rows="1"
     class="pointer-events-auto absolute z-20 resize-none overflow-hidden rounded-md border-2 border-accent bg-black/85 px-2 py-1 shadow-lg outline-none ring-2 ring-accent/30 placeholder:text-white/50"
     :style="editorStyle"
-    placeholder="Escribe aquí…"
-    aria-label="Editar texto de la anotación"
+    placeholder="Type here…"
+    aria-label="Edit annotation text"
     @input="onInput"
     @blur="onBlur"
     @mousedown.stop

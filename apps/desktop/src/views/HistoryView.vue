@@ -21,9 +21,9 @@ const { permissionMessage, devBinaryPath, checkPermissions, requestPermission } 
   useCapturePermissions();
 
 const captureShortcuts = computed(() => [
-  { label: "Capturar región", hotkey: settingsStore.settings.hotkeys.capture_area },
-  { label: "Capturar pantalla", hotkey: settingsStore.settings.hotkeys.capture_screen },
-  { label: "Capturar ventana", hotkey: settingsStore.settings.hotkeys.capture_window },
+  { label: "Capture region", hotkey: settingsStore.settings.hotkeys.capture_area },
+  { label: "Capture screen", hotkey: settingsStore.settings.hotkeys.capture_screen },
+  { label: "Capture window", hotkey: settingsStore.settings.hotkeys.capture_window },
 ]);
 
 async function load() {
@@ -33,7 +33,7 @@ async function load() {
     items.value = await getHistory();
   } catch (err) {
     error.value =
-      err instanceof Error ? err.message : "No se pudo cargar el historial";
+      err instanceof Error ? err.message : "Could not load history";
   } finally {
     loading.value = false;
   }
@@ -54,7 +54,7 @@ async function openInEditor(id: string) {
     await openCaptureInEditor(id);
   } catch (err) {
     error.value =
-      err instanceof Error ? err.message : "No se pudo abrir el editor";
+      err instanceof Error ? err.message : "Could not open editor";
   } finally {
     openingId.value = null;
   }
@@ -85,8 +85,8 @@ onUnmounted(() => {
 <template>
   <div class="flex min-h-full flex-col p-6">
     <header class="mb-6">
-      <h1 class="text-lg font-semibold">Historial</h1>
-      <p class="mt-1 text-sm text-text-muted">Todas tus capturas guardadas</p>
+      <h1 class="text-lg font-semibold">History</h1>
+      <p class="mt-1 text-sm text-text-muted">All your saved captures</p>
     </header>
 
     <PendingCaptureBanner />
@@ -98,14 +98,14 @@ onUnmounted(() => {
     >
       <p>{{ permissionMessage }}</p>
       <p v-if="devBinaryPath" class="mt-2 font-mono text-xs text-amber-200/80">
-        Binario en desarrollo: {{ devBinaryPath }}
+        Dev binary: {{ devBinaryPath }}
       </p>
       <button
         type="button"
         class="mt-3 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
         @click="requestPermission"
       >
-        Abrir permisos de macOS
+        Open macOS permissions
       </button>
     </div>
 
@@ -114,10 +114,10 @@ onUnmounted(() => {
       aria-labelledby="capture-shortcuts-heading"
     >
       <h2 id="capture-shortcuts-heading" class="text-sm font-medium">
-        Atajos de captura
+        Capture shortcuts
       </h2>
       <p class="mt-1 text-xs text-text-muted">
-        Usa los atajos globales para capturar. También puedes usar el menú del icono en la barra.
+        Use global shortcuts to capture. You can also use the tray icon menu.
       </p>
       <ul class="mt-3 space-y-2">
         <li
@@ -137,17 +137,17 @@ onUnmounted(() => {
         to="/settings"
         class="mt-3 inline-block text-xs text-accent hover:text-accent-hover"
       >
-        Personalizar atajos en Ajustes
+        Customize shortcuts in Settings
       </RouterLink>
     </section>
 
-    <p v-if="loading" class="text-sm text-text-muted">Cargando capturas…</p>
+    <p v-if="loading" class="text-sm text-text-muted">Loading captures…</p>
     <p v-else-if="error" class="text-sm text-red-400">{{ error }}</p>
     <div v-else-if="items.length === 0" class="space-y-3 text-sm text-text-muted">
-      <p>Aún no hay capturas.</p>
+      <p>No captures yet.</p>
       <p class="text-xs">
-        Pulsa uno de los atajos de arriba para capturar. Solo las capturas que guardes desde el
-        editor aparecerán aquí.
+        Press one of the shortcuts above to capture. Only captures you save from the
+        editor will appear here.
       </p>
     </div>
     <ul v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -160,12 +160,12 @@ onUnmounted(() => {
           type="button"
           class="block w-full text-left disabled:opacity-50"
           :disabled="openingId === item.id"
-          :aria-label="`Abrir captura ${item.width} por ${item.height} en el editor`"
+          :aria-label="`Open ${item.width} by ${item.height} capture in editor`"
           @click="openInEditor(item.id)"
         >
           <img
             :src="previewSrc(item.file_path)"
-            :alt="`Captura ${item.id}`"
+            :alt="`Capture ${item.id}`"
             class="aspect-video w-full object-cover"
           />
         </button>
@@ -176,7 +176,7 @@ onUnmounted(() => {
           <button
             type="button"
             class="rounded p-1 opacity-0 transition group-hover:opacity-100 hover:bg-border hover:text-red-400"
-            aria-label="Eliminar captura"
+            aria-label="Delete capture"
             @click.stop="remove(item.id)"
           >
             <IconTrash class="size-4" />

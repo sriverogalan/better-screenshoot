@@ -27,7 +27,7 @@ onMounted(async () => {
     await settingsStore.load();
   } catch (error) {
     notice.value =
-      error instanceof Error ? error.message : "Error al iniciar la aplicación";
+      error instanceof Error ? error.message : "Error starting application";
   }
 
   await listen<string>("navigate", (event) => {

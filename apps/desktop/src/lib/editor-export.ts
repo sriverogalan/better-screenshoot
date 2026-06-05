@@ -63,7 +63,7 @@ export async function compositeCaptureExport(
   canvas.height = nativeHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) {
-    throw new Error("No se pudo preparar la exportación");
+    throw new Error("Could not prepare export");
   }
 
   ctx.drawImage(baseImage, 0, 0, nativeWidth, nativeHeight);

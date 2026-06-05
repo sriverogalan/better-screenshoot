@@ -17,7 +17,7 @@ export function useCapturePermissions() {
       }
     } catch (err) {
       permissionMessage.value =
-        err instanceof Error ? err.message : "No se pudo comprobar permisos";
+        err instanceof Error ? err.message : "Could not check permissions";
     }
   }
 

@@ -1,6 +1,6 @@
 use tauri::AppHandle;
 
-/// En macOS, una app en bandeja debe activarse antes de que una ventana nueva sea visible.
+/// On macOS, a tray app must activate before a new window becomes visible.
 pub fn activate_app_for_window(app: &AppHandle) {
     #[cfg(target_os = "macos")]
     {
@@ -15,7 +15,7 @@ pub fn activate_app_for_window(app: &AppHandle) {
     }
 }
 
-/// Vuelve a modo accesorio cuando no queda ninguna ventana visible (bandeja).
+/// Returns to accessory mode when no windows remain visible (tray).
 #[allow(dead_code)]
 pub fn deactivate_app_to_accessory(app: &AppHandle) {
     #[cfg(target_os = "macos")]

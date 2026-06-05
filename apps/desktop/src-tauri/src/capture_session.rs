@@ -8,12 +8,12 @@ use crate::window_layout;
 static ACTIVE: AtomicBool = AtomicBool::new(false);
 static HUB_SHOW_EPOCH: AtomicU64 = AtomicU64::new(0);
 static SESSION_STARTED_AT_MS: AtomicU64 = AtomicU64::new(0);
-/// Contador monotónico para asignar un token único a cada sesión real.
+/// Monotonic counter to assign a unique token to each real session.
 static GEN_COUNTER: AtomicU64 = AtomicU64::new(0);
-/// Token de la sesión activa (0 = sin sesión).
+/// Active session token (0 = no session).
 static CURRENT_GEN: AtomicU64 = AtomicU64::new(0);
 
-/// Sesiones activas más allá de este umbral se consideran obsoletas (zombie).
+/// Active sessions beyond this threshold are considered stale (zombie).
 const STALE_SESSION_MS: u64 = 8_000;
 
 pub(crate) fn now_ms() -> u64 {
@@ -27,7 +27,7 @@ pub fn is_active() -> bool {
     ACTIVE.load(Ordering::SeqCst)
 }
 
-/// `true` solo si hay sesión activa y no ha superado el umbral de obsolescencia.
+/// `true` only if a session is active and has not exceeded the stale threshold.
 pub fn is_active_fresh() -> bool {
     if !is_active() {
         return false;
@@ -57,7 +57,7 @@ fn force_clear_session() {
     window_layout::release_hub_watch();
 }
 
-/// Token de la sesión activa (0 si no hay ninguna).
+/// Active session token (0 if none).
 pub fn current_generation() -> u64 {
     CURRENT_GEN.load(Ordering::SeqCst)
 }
@@ -66,12 +66,12 @@ pub fn current_hub_show_epoch() -> u64 {
     HUB_SHOW_EPOCH.load(Ordering::SeqCst)
 }
 
-/// Devuelve `false` si una captura está activa o si `epoch` quedó invalidado por un `begin` posterior.
+/// Returns `false` if a capture is active or if `epoch` was invalidated by a later `begin`.
 pub fn should_show_hub(epoch: u64) -> bool {
     !is_active_fresh() && epoch == current_hub_show_epoch()
 }
 
-/// Inicia una sesión y devuelve su token. Si ya hay una activa, devuelve `0` (coalescida).
+/// Starts a session and returns its token. If one is already active, returns `0` (coalesced).
 pub fn begin(app: &AppHandle) -> u64 {
     if ACTIVE.swap(true, Ordering::SeqCst) {
         crate::app_trace!("capture_session: begin skipped (already active)");
@@ -88,17 +88,17 @@ pub fn begin(app: &AppHandle) -> u64 {
     gen
 }
 
-/// `true` si una tarea con token `gen` puede cerrar la sesión `current` vigente.
+/// `true` if a task with token `gen` can close the current active session.
 fn can_end_generation(gen: u64, current: u64) -> bool {
     gen != 0 && gen == current
 }
 
-/// Termina la sesión solo si `gen` sigue siendo la sesión activa.
-/// Evita que una tarea obsoleta cierre una sesión de captura más reciente.
+/// Ends the session only if `gen` is still the active session.
+/// Prevents a stale task from closing a more recent capture session.
 pub fn end_generation(app: &AppHandle, gen: u64) {
     if !can_end_generation(gen, CURRENT_GEN.load(Ordering::SeqCst)) {
         if gen != 0 {
-            crate::app_trace!("capture_session: end_generation(gen={gen}) ignorado (sesion no vigente)");
+            crate::app_trace!("capture_session: end_generation(gen={gen}) ignored (session not current)");
         }
         return;
     }
@@ -114,7 +114,7 @@ pub fn end_generation(app: &AppHandle, gen: u64) {
     let _ = app.emit("capture-session-ended", ());
 }
 
-/// Inicia sesión si no hay una activa; al soltar el guard se llama a `end_generation`.
+/// Starts a session if none is active; dropping the guard calls `end_generation`.
 pub struct CaptureSessionGuard {
     app: AppHandle,
     gen: u64,
@@ -136,14 +136,14 @@ impl Drop for CaptureSessionGuard {
     }
 }
 
-/// Termina la sesión `gen` al soltar el guard (para tareas async que heredan una sesión ya iniciada).
+/// Ends session `gen` when the guard is dropped (for async tasks that inherit an already-started session).
 pub struct CaptureSessionEndGuard {
     app: AppHandle,
     gen: u64,
 }
 
 impl CaptureSessionEndGuard {
-    /// Captura el token de la sesión vigente para cerrarla de forma segura más tarde.
+    /// Captures the current session token to close it safely later.
     pub fn current(app: &AppHandle) -> Self {
         Self {
             app: app.clone(),
@@ -228,13 +228,13 @@ mod tests {
 
     #[test]
     fn can_end_generation_only_for_vigent_token() {
-        // El dueño de la sesión vigente sí puede cerrarla.
+        // The owner of the current session can close it.
         assert!(can_end_generation(2, 2));
-        // Un token obsoleto (de una captura anterior ya relevada) no puede.
+        // A stale token (from a superseded capture) cannot.
         assert!(!can_end_generation(1, 2));
-        // Una sesión coalescida (token 0) nunca cierra la sesión vigente.
+        // A coalesced session (token 0) never closes the current session.
         assert!(!can_end_generation(0, 2));
-        // Sin sesión vigente tampoco se cierra nada.
+        // With no current session, nothing is closed either.
         assert!(!can_end_generation(0, 0));
     }
 }

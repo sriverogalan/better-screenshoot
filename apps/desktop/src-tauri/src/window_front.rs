@@ -2,7 +2,7 @@ use tauri::{Manager, WebviewWindow};
 
 use crate::window_activation::activate_app_for_window;
 
-/// Muestra la ventana por encima del resto de apps (tray/background en macOS).
+/// Shows the window above other apps (tray/background on macOS).
 pub async fn bring_window_to_front(window: &WebviewWindow) {
     activate_app_for_window(&window.app_handle());
 
@@ -25,13 +25,13 @@ pub async fn bring_window_to_front(window: &WebviewWindow) {
     }
 }
 
-/// Presentación del editor: activa la app y trae la ventana al frente.
+/// Editor presentation: activates the app and brings the window to the front.
 #[allow(dead_code)]
 pub async fn bring_editor_to_front(window: &WebviewWindow) {
     bring_editor_to_front_inner(window, true).await;
 }
 
-/// Enfoca el editor sin reactivar la app (evita que macOS restaure el hub en Ajustes).
+/// Focuses the editor without reactivating the app (avoids macOS restoring the Settings hub).
 pub async fn bring_editor_to_front_quiet(window: &WebviewWindow) {
     bring_editor_to_front_inner(window, false).await;
 }

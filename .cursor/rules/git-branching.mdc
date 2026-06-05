@@ -1,31 +1,31 @@
 ---
-description: Reglas de ramas, PRs y releases de better-screenshoot
+description: Better Screenshoot branch, PR, and release rules
 alwaysApply: true
 ---
 
-# Git: ramas y releases
+# Git: branches and releases
 
-## Ramas
+## Branches
 
-- `main` es producción. Nunca commitear directo salvo que el usuario lo pida explícitamente.
-- Nuevas ramas desde `main`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
-- PRs hacia `main`; título `[better-screenshoot] …`.
+- `main` is production. Never commit directly unless the user explicitly asks.
+- New branches from `main`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
+- PRs to `main`; title `[better-screenshoot] …`.
 
 ## Commits
 
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `ci:`.
-- Un PR = un objetivo. No mezclar feature + bump de versión sin motivo.
+- One PR = one goal. Don't mix feature + version bump without reason.
 
-## Versiones
+## Versions
 
-Sincronizar en todos estos archivos al subir versión:
+Sync across all these files when bumping version:
 
 - `Cargo.toml` (`[workspace.package].version`)
-- `package.json` (raíz y paquetes del monorepo)
+- `package.json` (root and monorepo packages)
 - `apps/desktop/src-tauri/tauri.conf.json`
 
 ## Releases
 
-- Tag semver desde `main`: `v0.2.0`.
-- El workflow `.github/workflows/release.yml` crea draft release al pushear `v*`.
-- Ver `docs/branching.md` para el flujo completo.
+- Semver tag from `main`: `v0.2.0`.
+- The `.github/workflows/release.yml` workflow creates a draft release when pushing `v*`.
+- See `docs/branching.md` for the full flow.

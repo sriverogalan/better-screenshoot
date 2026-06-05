@@ -12,14 +12,14 @@ export const TIERS: Record<LicenseTier, TierDefinition> = {
   community: {
     id: "community",
     name: "Community",
-    price: "Gratis",
+    price: "Free",
     billing: "free",
     features: [
-      "Captura pantalla, ventana y región",
-      "Anotación básica",
-      "Historial local",
-      "CLI y URL scheme",
-      "Atajos globales",
+      "Screen, window, and region capture",
+      "Basic annotation",
+      "Local history",
+      "CLI and URL scheme",
+      "Global shortcuts",
     ],
   },
   pro: {
@@ -28,38 +28,38 @@ export const TIERS: Record<LicenseTier, TierDefinition> = {
     price: "$24",
     billing: "one-time",
     features: [
-      "Todo Community",
-      "OCR local",
+      "Everything in Community",
+      "Local OCR",
       "Scrolling capture",
       "GIF recording",
       "Pin to screen",
-      "Temas personalizados",
+      "Custom themes",
     ],
   },
   cloud: {
     id: "cloud",
     name: "Cloud",
-    price: "$6/mes",
+    price: "$6/mo",
     billing: "monthly",
     features: [
-      "Todo Pro",
-      "Links compartibles",
-      "50 GB almacenamiento",
-      "Dominio propio",
-      "Expiración de links",
+      "Everything in Pro",
+      "Shareable links",
+      "50 GB storage",
+      "Custom domain",
+      "Link expiration",
     ],
   },
   team: {
     id: "team",
     name: "Team",
-    price: "$8/usuario/mes",
+    price: "$8/user/mo",
     billing: "monthly",
     features: [
-      "Todo Cloud",
+      "Everything in Cloud",
       "SSO",
-      "Branding de equipo",
-      "Panel de administración",
-      "Políticas de retención",
+      "Team branding",
+      "Admin panel",
+      "Retention policies",
     ],
   },
 };
@@ -71,7 +71,7 @@ export interface LicenseValidationResult {
   message: string;
 }
 
-/** Placeholder — integrar Lemon Squeezy o Polar en producción */
+/** Placeholder — integrate Lemon Squeezy or Polar in production */
 export async function validateLicenseKey(
   key: string,
   provider: "lemonsqueezy" | "polar" = "lemonsqueezy",
@@ -81,7 +81,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "community",
       expiresAt: null,
-      message: "Sin clave — modo Community",
+      message: "No key — Community mode",
     };
   }
 
@@ -90,7 +90,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "pro",
       expiresAt: null,
-      message: `Licencia Pro válida (${provider})`,
+      message: `Valid Pro license (${provider})`,
     };
   }
 
@@ -99,7 +99,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "cloud",
       expiresAt: null,
-      message: `Licencia Cloud válida (${provider})`,
+      message: `Valid Cloud license (${provider})`,
     };
   }
 
@@ -108,7 +108,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "team",
       expiresAt: null,
-      message: `Licencia Team válida (${provider})`,
+      message: `Valid Team license (${provider})`,
     };
   }
 
@@ -116,7 +116,7 @@ export async function validateLicenseKey(
     valid: false,
     tier: "community",
     expiresAt: null,
-    message: "Clave de licencia no válida",
+    message: "Invalid license key",
   };
 }
 
@@ -130,7 +130,7 @@ export interface CloudShareResponse {
   expiresAt: string;
 }
 
-/** Beta stub — reemplazar con API real de cloud */
+/** Beta stub — replace with real cloud API */
 export async function uploadForShare(
   request: CloudShareRequest,
 ): Promise<CloudShareResponse> {

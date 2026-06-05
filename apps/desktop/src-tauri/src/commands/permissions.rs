@@ -48,23 +48,23 @@ fn dev_binary_hint() -> Option<String> {
 
 fn permission_message(displays_found: usize, granted: bool) -> String {
     if displays_found > 0 {
-        return format!("{displays_found} pantalla(s) detectada(s).");
+        return format!("{displays_found} display(s) detected.");
     }
 
     #[cfg(target_os = "macos")]
     {
         let mut message = String::from(
-            "macOS no permite capturar la pantalla. Ve a Ajustes del Sistema → Privacidad y seguridad → Grabación de pantalla y activa Better Screenshoot.",
+            "macOS does not allow screen capture. Go to System Settings → Privacy & Security → Screen Recording and enable Better Screenshoot.",
         );
         if !granted {
-            message.push_str(" Si usas `pnpm dev`, autoriza también el binario en target/debug/better-screenshoot.");
+            message.push_str(" If you use `pnpm dev`, also authorize the binary at target/debug/better-screenshoot.");
         }
         return message;
     }
 
     #[cfg(not(target_os = "macos"))]
     {
-        "No se detectaron pantallas.".into()
+        "No displays detected.".into()
     }
 }
 
@@ -97,12 +97,12 @@ pub fn open_system_screenshot_shortcuts_settings() -> Result<(), String> {
         std::process::Command::new("open")
             .arg(SYSTEM_SCREENSHOT_SHORTCUTS_URL)
             .spawn()
-            .map_err(|e| format!("No se pudieron abrir los ajustes del sistema: {e}"))?;
+            .map_err(|e| format!("Could not open system settings: {e}"))?;
         Ok(())
     }
 
     #[cfg(not(target_os = "macos"))]
     {
-        Err("Los atajos de captura del sistema solo se configuran en macOS.".into())
+        Err("System capture shortcuts can only be configured on macOS.".into())
     }
 }

@@ -78,7 +78,7 @@ export const DEFAULT_HOTKEYS: HotkeyConfig = {
   open_history: "CommandOrControl+Shift+H",
 };
 
-/** Atajos que sustituyen a las capturas nativas de macOS. */
+/** Shortcuts that replace native macOS captures. */
 export const SYSTEM_REPLACEMENT_HOTKEYS = {
   capture_screen: "Command+Shift+3",
   capture_area: "Command+Shift+4",

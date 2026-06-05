@@ -34,7 +34,7 @@ export function usePendingCaptureRecovery() {
       }
     } catch (err) {
       recoveryError.value =
-        err instanceof Error ? err.message : "No se pudo abrir el editor";
+        err instanceof Error ? err.message : "Could not open editor";
       await refreshPendingCapture();
     } finally {
       recoveryBusy.value = false;

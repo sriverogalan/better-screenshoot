@@ -78,7 +78,7 @@ pub fn run() {
                 let _ = window_layout::prepare_main_hub_window(&main);
             }
 
-            // Precalienta el webview del editor (Tauri puede diferir la carga si nunca se mostró).
+            // Warm up the editor webview (Tauri may defer loading if it was never shown).
             if let Some(editor) = app.get_webview_window("editor") {
                 window_activation::activate_app_for_window(&handle);
                 let _ = editor.show();

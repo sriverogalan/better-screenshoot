@@ -17,10 +17,6 @@ jobs:
             target: aarch64-apple-darwin
           - platform: macos-latest
             target: x86_64-apple-darwin
-          - platform: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-          - platform: windows-latest
-            target: x86_64-pc-windows-msvc
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -41,15 +37,6 @@ jobs:
         with:
           workspaces: apps/desktop/src-tauri
 
-      - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev \
-            libpipewire-0.3-dev libwayland-dev libegl1-mesa-dev libgbm-dev libdrm-dev libwebkit2gtk-4.1-dev \
-            libappindicator3-dev librsvg2-dev patchelf
-
       - run: pnpm install
 
       - uses: tauri-apps/tauri-action@v0
@@ -60,9 +47,9 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: Better Screenshoot ${{ github.ref_name }}
           releaseBody: |
-            Descarga el instalador para tu plataforma desde los assets de abajo.
+            macOS only — download the `.dmg` for your Mac (Apple Silicon or Intel) from the assets below.
 
-            Consulta el [README](https://github.com/sriverogalan/better-screenshoot#descargar) para instrucciones de instalación.
+            See the [README](https://github.com/sriverogalan/better-screenshoot#download) for installation instructions.
           releaseDraft: true
           prerelease: false
           args: --target ${{ matrix.target }}

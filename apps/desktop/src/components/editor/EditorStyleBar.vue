@@ -40,7 +40,7 @@ const emit = defineEmits<{
 
     <span class="mx-1 h-5 w-px bg-border" />
 
-    <span class="text-xs text-text-muted">Grosor</span>
+    <span class="text-xs text-text-muted">Thickness</span>
     <div class="flex items-center gap-1">
       <button
         v-for="width in STROKE_WIDTHS"
@@ -59,7 +59,7 @@ const emit = defineEmits<{
 
     <span class="mx-1 h-5 w-px bg-border" />
 
-    <span class="text-xs text-text-muted">Fuente</span>
+    <span class="text-xs text-text-muted">Font</span>
     <div class="flex items-center gap-1">
       <button
         v-for="size in FONT_SIZES"

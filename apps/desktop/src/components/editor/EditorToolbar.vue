@@ -33,13 +33,13 @@ const emit = defineEmits<{
 }>();
 
 const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: string }[] = [
-  { id: "select", label: "Seleccionar", icon: IconPointer, shortcut: "V" },
-  { id: "arrow", label: "Flecha", icon: IconArrowRight, shortcut: "A" },
-  { id: "rect", label: "Rectángulo", icon: IconRectangle, shortcut: "R" },
-  { id: "text", label: "Texto", icon: IconTypography, shortcut: "T" },
-  { id: "highlight", label: "Resaltar", icon: IconHighlight, shortcut: "H" },
-  { id: "pen", label: "Lápiz", icon: IconPencil, shortcut: "P" },
-  { id: "blur", label: "Difuminar", icon: IconBlur, shortcut: "B" },
+  { id: "select", label: "Select", icon: IconPointer, shortcut: "V" },
+  { id: "arrow", label: "Arrow", icon: IconArrowRight, shortcut: "A" },
+  { id: "rect", label: "Rectangle", icon: IconRectangle, shortcut: "R" },
+  { id: "text", label: "Text", icon: IconTypography, shortcut: "T" },
+  { id: "highlight", label: "Highlight", icon: IconHighlight, shortcut: "H" },
+  { id: "pen", label: "Pen", icon: IconPencil, shortcut: "P" },
+  { id: "blur", label: "Blur", icon: IconBlur, shortcut: "B" },
 ];
 </script>
 
@@ -64,7 +64,7 @@ const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: stri
           @click="emit('copyAndDiscard')"
         >
           <IconTrash class="size-4" />
-          Copiar y descartar
+          Copy and discard
         </button>
         <button
           type="button"
@@ -73,7 +73,7 @@ const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: stri
           @click="emit('copyAndSave')"
         >
           <IconDeviceFloppy class="size-4" />
-          Copiar y guardar
+          Copy and save
         </button>
       </div>
     </div>
@@ -107,19 +107,19 @@ const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: stri
         class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
         @click="emit('undo')"
       >
-        Deshacer
+        Undo
       </button>
       <button
         type="button"
         class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
         @click="emit('redo')"
       >
-        Rehacer
+        Redo
       </button>
 
       <p class="ml-auto hidden shrink-0 text-xs text-text-muted lg:block">
         <IconClipboardCopy class="mr-1 inline size-3.5" />
-        V seleccionar · A flecha · R rectángulo · T texto
+        V select · A arrow · R rectangle · T text
       </p>
     </div>
   </header>

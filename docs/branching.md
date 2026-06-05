@@ -1,52 +1,52 @@
-# Reglas de ramas
+# Branch rules
 
-## Ramas principales
+## Main branches
 
-| Rama | Uso |
+| Branch | Purpose |
 |---|---|
-| `main` | Producción. Siempre desplegable. Solo entra código vía PR. |
-| `feat/*` | Nuevas funcionalidades |
-| `fix/*` | Corrección de bugs |
-| `chore/*` | CI, dependencias, docs, refactors sin cambio de comportamiento |
-| `release/*` | Preparación de versión (opcional) |
+| `main` | Production. Always deployable. Code enters only via PR. |
+| `feat/*` | New features |
+| `fix/*` | Bug fixes |
+| `chore/*` | CI, dependencies, docs, refactors without behavior changes |
+| `release/*` | Version preparation (optional) |
 
-## Flujo de trabajo
+## Workflow
 
-1. Crear rama desde `main` actualizada:
+1. Create a branch from up-to-date `main`:
    ```bash
    git checkout main
    git pull origin main
-   git checkout -b feat/mi-cambio
+   git checkout -b feat/my-change
    ```
-2. Commits pequeños y descriptivos (Conventional Commits: `feat:`, `fix:`, `chore:`…).
-3. Abrir PR hacia `main`. Título: `[better-screenshoot] Descripción clara`.
-4. Esperar CI verde (`frontend`, `rust`, `tauri-build`).
-5. Merge (squash recomendado para historial limpio).
+2. Small, descriptive commits (Conventional Commits: `feat:`, `fix:`, `chore:`…).
+3. Open a PR to `main`. Title: `[better-screenshoot] Clear description`.
+4. Wait for green CI (`frontend`, `rust`, `tauri-build`).
+5. Merge (squash recommended for a clean history).
 
-## Protección de `main`
+## `main` protection
 
-Configura estas reglas en GitHub (Settings → Branches → Add rule):
+Configure these rules in GitHub (Settings → Branches → Add rule):
 
 - **Branch name pattern:** `main`
 - Require a pull request before merging
 - Require status checks to pass: `ci-success`
 - Do not allow bypassing the above settings
-- Restrict pushes (opcional): solo admins o nadie pushea directo
+- Restrict pushes (optional): admins only or no direct pushes
 
-### Aplicar con script
+### Apply with script
 
-Tras `gh auth login`:
+After `gh auth login`:
 
 ```bash
 ./scripts/setup-branch-protection.sh
 ```
 
-## Releases y versiones
+## Releases and versions
 
-- La versión vive en `Cargo.toml` (workspace), `package.json` raíz y `apps/desktop/src-tauri/tauri.conf.json`.
-- Al preparar release, sincroniza la versión en todos esos archivos.
-- Los tags siguen semver: `v0.2.0`, `v0.2.1`, `v1.0.0`.
-- **Solo se etiqueta desde `main`**, después de mergear el PR de release.
+- Version lives in `Cargo.toml` (workspace), root `package.json`, and `apps/desktop/src-tauri/tauri.conf.json`.
+- When preparing a release, sync the version across all those files.
+- Tags follow semver: `v0.2.0`, `v0.2.1`, `v1.0.0`.
+- **Tag only from `main`**, after merging the release PR.
 
 ```bash
 git checkout main
@@ -55,10 +55,10 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-GitHub Actions publicará un borrador de release con los instaladores (.dmg, .exe, .deb…).
+GitHub Actions will publish a draft release with `.dmg` installers for Apple Silicon and Intel.
 
-## Qué no hacer
+## What not to do
 
-- No pushear directamente a `main` (salvo hotfixes acordados).
-- No crear tags desde ramas de feature.
-- No mezclar bump de versión con cambios de feature no relacionados.
+- Don't push directly to `main` (except agreed hotfixes).
+- Don't create tags from feature branches.
+- Don't mix version bumps with unrelated feature changes.
