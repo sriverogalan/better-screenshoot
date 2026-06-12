@@ -125,7 +125,8 @@ else
   esac
 fi
 
-export TAURI_SIGNING_PRIVATE_KEY_PATH="$KEY_PATH"
+export CARGO_TARGET_DIR="$ROOT/apps/desktop/src-tauri/target"
+export TAURI_SIGNING_PRIVATE_KEY="$(cat "$KEY_PATH")"
 export CI=true
 
 rm -rf "$STAGING"
