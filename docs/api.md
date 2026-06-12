@@ -40,7 +40,7 @@ better-screenshoot windows
 
 ## Raycast
 
-See the extension in `packages/raycast-extension/`. It uses the URL scheme internally.
+See `packages/raycast-extension/`. Commands trigger the URL scheme above. Store publishing: `npm run publish` in that folder (see its README).
 
 ## Permissions (macOS)
 

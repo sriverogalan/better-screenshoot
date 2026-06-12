@@ -143,6 +143,8 @@ open "betterscreenshoot://capture-area"
 better-screenshoot-cli open capture-area
 ```
 
+Raycast extension: `packages/raycast-extension/` (publish with `npm run publish` inside that folder). See its README.
+
 See [docs/api.md](docs/api.md).
 
 ### Branches and releases
