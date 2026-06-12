@@ -2,7 +2,9 @@
 
 Screenshots with a built-in editor, global shortcuts, and history. **macOS only** for now.
 
-## Download
+## Get started
+
+### 1. Download
 
 **[Latest release](https://github.com/sriverogalan/better-screenshoot/releases/latest)**
 
@@ -11,21 +13,27 @@ Screenshots with a built-in editor, global shortcuts, and history. **macOS only*
 | macOS (Apple Silicon) | `Better Screenshoot_*_aarch64.dmg` | macOS 12 or later |
 | macOS (Intel) | `Better Screenshoot_*_x64.dmg` | macOS 12 or later |
 
-## Installation
+### 2. Install on macOS
 
-1. Download the `.dmg` that matches your Mac (Apple Silicon or Intel).
-2. Open the `.dmg` and drag **Better Screenshoot** to **Applications**.
-3. Open the app. If macOS shows a security warning, see [Troubleshooting](#troubleshooting).
-4. Grant **Screen Recording** permission when prompted (System Settings → Privacy & Security → Screen Recording).
-5. For reliable global shortcuts, also enable **Accessibility** if the app requests it.
+Better Screenshoot is **free and open source**. It is not signed with a paid Apple Developer certificate, so macOS shows a **one-time** security prompt on first launch. This is expected.
 
-## Getting started
+1. Open the `.dmg` and drag **Better Screenshoot** to **Applications**.
+2. **First launch only:** Finder → **Applications** → **right-click** (or Control-click) **Better Screenshoot** → **Open** → confirm **Open**.  
+   Do **not** double-click the first time — macOS will block it with a message like *"Apple cannot verify that Better Screenshoot.app…"* / *"Apple no ha podido verificar…"*.
+3. Allow **Screen Recording** when prompted (required to capture).
+4. Allow **Accessibility** if prompted (required for global shortcuts).
 
-Better Screenshoot lives in the **system tray**. From there you can capture, open history, or go to settings.
+**Español — primera apertura:** **Aplicaciones** → **clic derecho** en Better Screenshoot → **Abrir** → **Abrir**. Solo la primera vez.
+
+Still blocked? See [Troubleshooting](#troubleshooting).
+
+### 3. Use the app
+
+Better Screenshoot lives in the **menu bar** (system tray). From there you can capture, open history, or go to settings.
 
 After capturing, the **editor** opens so you can annotate the image: arrows, rectangles, text, highlight, freehand stroke, and blur. When you're done, the capture is copied to the clipboard and you can save it to disk.
 
-### Default shortcuts
+#### Default shortcuts
 
 | Action | Shortcut |
 |---|---|
@@ -40,11 +48,15 @@ You can change shortcuts in **Settings** inside the app.
 
 ### macOS won't open the app
 
-Current builds are not signed with an Apple certificate. It's normal to see *"can't be opened because it is from an unidentified developer"*.
+Unsigned builds always show a Gatekeeper warning on first launch. This is not malware — the app is built from [public source code](https://github.com/sriverogalan/better-screenshoot).
 
-**Option A:** right-click the app → **Open** → confirm.
+**Recommended:** Applications → right-click **Better Screenshoot** → **Open** → **Open**.
 
-**Option B:** System Settings → **Privacy & Security** → **Open Anyway**.
+**If that does not work:**
+
+1. Try again after copying the app from the `.dmg` to **Applications** (not running it from the disk image).
+2. System Settings → **Privacy & Security** → scroll down → **Open Anyway**.
+3. Terminal: `xattr -cr "/Applications/Better Screenshoot.app"` then right-click → **Open** again.
 
 ### Capture doesn't work on macOS
 

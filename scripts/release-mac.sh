@@ -189,11 +189,13 @@ if [[ "$DRAFT" == true ]]; then
   RELEASE_ARGS+=(--draft)
 fi
 
-RELEASE_ARGS+=(
-  --notes "macOS release built locally.
+INSTALL_NOTES_FILE="$ROOT/docs/release-install-notes.md"
+if [[ ! -f "$INSTALL_NOTES_FILE" ]]; then
+  echo "Missing release notes template: $INSTALL_NOTES_FILE" >&2
+  exit 1
+fi
 
-Download the \`.dmg\` for your Mac from the assets below. Installed apps pick up signed updates from \`latest.json\` once this release is published."
-)
+RELEASE_ARGS+=(--notes-file "$INSTALL_NOTES_FILE")
 
 if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
   echo "Release $TAG already exists — uploading assets"
