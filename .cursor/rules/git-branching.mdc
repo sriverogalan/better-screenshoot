@@ -7,8 +7,9 @@ alwaysApply: true
 
 ## Branches
 
-- `main` is production. Never commit directly unless the user explicitly asks.
-- New branches from `main`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
+- `main` is production. Releases are cut from `main` only.
+- `develop` is integration. Feature PRs target `develop` by default.
+- New branches from `develop`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
 - PRs to `main`; title `[better-screenshoot] …`.
 
 ## Commits
@@ -18,14 +19,10 @@ alwaysApply: true
 
 ## Versions
 
-Sync across all these files when bumping version:
-
-- `Cargo.toml` (`[workspace.package].version`)
-- `package.json` (root and monorepo packages)
-- `apps/desktop/src-tauri/tauri.conf.json`
+Bump only the root `package.json` version. CI syncs the rest on PRs (`pnpm sync-version`). Targets: `Cargo.toml`, `tauri.conf.json`, and workspace `package.json` files.
 
 ## Releases
 
 - Semver tag from `main`: `v0.2.0`.
-- The `.github/workflows/release.yml` workflow creates a draft release when pushing `v*`.
+- Build and upload locally from `main`: `pnpm release:mac v0.2.0 --all-arch` (script exits on other branches).
 - See `docs/branching.md` for the full flow.

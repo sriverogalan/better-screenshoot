@@ -1,21 +1,25 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { IconPhoto, IconSettings } from "@tabler/icons-vue";
 import logoUrl from "../../assets/logo.svg";
 
-const navItems = [
-  { to: "/history", label: "History", icon: IconPhoto },
-  { to: "/settings", label: "Settings", icon: IconSettings },
-] as const;
+const { t } = useI18n();
+
+const navItems = computed(() => [
+  { to: "/history", label: t("nav.history"), icon: IconPhoto },
+  { to: "/settings", label: t("nav.settings"), icon: IconSettings },
+]);
 </script>
 
 <template>
   <nav
     class="flex w-52 shrink-0 flex-col border-r border-border bg-surface-raised"
-    aria-label="Main navigation"
+    :aria-label="t('nav.mainNavigation')"
   >
     <div class="flex items-center gap-2 border-b border-border px-4 py-4">
       <img :src="logoUrl" alt="" class="size-5 shrink-0" aria-hidden="true" />
-      <span class="text-sm font-semibold">Better Screenshoot</span>
+      <span class="text-sm font-semibold">{{ t("common.appName") }}</span>
     </div>
 
     <ul class="flex flex-1 flex-col gap-1 p-3">

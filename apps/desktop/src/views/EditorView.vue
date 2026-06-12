@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useRoute, useRouter } from "vue-router";
@@ -54,6 +55,7 @@ import {
   takePendingCapture,
 } from "../lib/tauri";
 
+const { t } = useI18n();
 const captureStore = useCaptureStore();
 const route = useRoute();
 const router = useRouter();
@@ -137,8 +139,7 @@ async function loadCapture(capture: SavedCapture | null) {
   loadTimeoutId = window.setTimeout(() => {
     if (generation !== loadGeneration) return;
     if (!imagePreviewSrc.value && !imageLoadError.value) {
-      imageLoadError.value =
-        "Could not display the image. Check Screen Recording permissions.";
+      imageLoadError.value = t("errors.imageDisplayFailed");
     }
   }, IMAGE_LOAD_TIMEOUT_MS);
 
@@ -159,7 +160,7 @@ async function loadCapture(capture: SavedCapture | null) {
     if (generation !== loadGeneration) return;
     clearLoadTimeout();
     imageLoadError.value =
-      error instanceof Error ? error.message : "Error loading image";
+      error instanceof Error ? error.message : t("errors.imageLoadFailed");
   }
 }
 
@@ -557,7 +558,7 @@ async function exportPngBase64(): Promise<string> {
   const baseImage = konvaImage.value;
   const annotationLayer = canvasRef.value?.getAnnotationLayer() ?? null;
   if (!baseImage || !annotationLayer) {
-    throw new Error("Image is not ready to export yet");
+    throw new Error(t("errors.imageNotReady"));
   }
 
   return compositeCaptureExport(
@@ -657,7 +658,7 @@ async function runEditorAction(action: "discard" | "save") {
     await closeEditor();
   } catch (err) {
     actionError.value =
-      err instanceof Error ? err.message : "Could not complete action";
+      err instanceof Error ? err.message : t("errors.completeActionFailed");
   } finally {
     actionBusy.value = false;
   }

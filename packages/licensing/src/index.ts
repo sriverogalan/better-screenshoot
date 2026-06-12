@@ -2,65 +2,30 @@ export type LicenseTier = "community" | "pro" | "cloud" | "team";
 
 export interface TierDefinition {
   id: LicenseTier;
-  name: string;
   price: string;
   billing: "free" | "one-time" | "annual" | "monthly";
-  features: string[];
 }
 
 export const TIERS: Record<LicenseTier, TierDefinition> = {
   community: {
     id: "community",
-    name: "Community",
     price: "Free",
     billing: "free",
-    features: [
-      "Screen, window, and region capture",
-      "Basic annotation",
-      "Local history",
-      "CLI and URL scheme",
-      "Global shortcuts",
-    ],
   },
   pro: {
     id: "pro",
-    name: "Pro",
     price: "$24",
     billing: "one-time",
-    features: [
-      "Everything in Community",
-      "Local OCR",
-      "Scrolling capture",
-      "GIF recording",
-      "Pin to screen",
-      "Custom themes",
-    ],
   },
   cloud: {
     id: "cloud",
-    name: "Cloud",
     price: "$6/mo",
     billing: "monthly",
-    features: [
-      "Everything in Pro",
-      "Shareable links",
-      "50 GB storage",
-      "Custom domain",
-      "Link expiration",
-    ],
   },
   team: {
     id: "team",
-    name: "Team",
     price: "$8/user/mo",
     billing: "monthly",
-    features: [
-      "Everything in Cloud",
-      "SSO",
-      "Team branding",
-      "Admin panel",
-      "Retention policies",
-    ],
   },
 };
 
@@ -68,7 +33,7 @@ export interface LicenseValidationResult {
   valid: boolean;
   tier: LicenseTier;
   expiresAt: string | null;
-  message: string;
+  messageCode: string;
 }
 
 /** Placeholder — integrate Lemon Squeezy or Polar in production */
@@ -76,12 +41,14 @@ export async function validateLicenseKey(
   key: string,
   provider: "lemonsqueezy" | "polar" = "lemonsqueezy",
 ): Promise<LicenseValidationResult> {
+  void provider;
+
   if (!key.trim()) {
     return {
       valid: true,
       tier: "community",
       expiresAt: null,
-      message: "No key — Community mode",
+      messageCode: "noKey",
     };
   }
 
@@ -90,7 +57,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "pro",
       expiresAt: null,
-      message: `Valid Pro license (${provider})`,
+      messageCode: "validPro",
     };
   }
 
@@ -99,7 +66,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "cloud",
       expiresAt: null,
-      message: `Valid Cloud license (${provider})`,
+      messageCode: "validCloud",
     };
   }
 
@@ -108,7 +75,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "team",
       expiresAt: null,
-      message: `Valid Team license (${provider})`,
+      messageCode: "validTeam",
     };
   }
 
@@ -116,7 +83,7 @@ export async function validateLicenseKey(
     valid: false,
     tier: "community",
     expiresAt: null,
-    message: "Invalid license key",
+    messageCode: "invalidKey",
   };
 }
 

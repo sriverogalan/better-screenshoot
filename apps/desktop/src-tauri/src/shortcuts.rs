@@ -59,7 +59,8 @@ pub fn handle_hotkey_action(app: &AppHandle, action: &str) {
                     crate::commands::capture::capture_screen_internal(app.clone(), None).await
                 {
                     capture_session::end_generation(&app, gen);
-                    let _ = app.emit("capture-error", error);
+                    let payload = crate::errors::parse_invoke_error(&error);
+                    let _ = app.emit("capture-error", payload.to_emit_value());
                 }
             });
         }
@@ -101,9 +102,10 @@ pub fn start_area_capture(app: &AppHandle) {
         crate::capture_prep::hide_app_windows_before_capture(&app).await;
         match crate::commands::capture::capture_area_interactive_internal(app.clone()).await {
             Ok(_) => {}
-            Err(error) if error != "Capture cancelled" => {
+            Err(error) if !error.contains("captureCancelled") => {
                 capture_session::end_generation(&app, gen);
-                let _ = app.emit("capture-error", error);
+                let payload = crate::errors::parse_invoke_error(&error);
+                let _ = app.emit("capture-error", payload.to_emit_value());
             }
             Err(_) => {
                 capture_session::end_generation(&app, gen);
@@ -135,8 +137,9 @@ pub fn show_overlay(app: &AppHandle) {
                 let _ = overlay.emit("overlay-preview", &preview);
             }
             Err(error) => {
-                let _ = overlay.emit("overlay-error", &error);
-                let _ = app.emit("capture-error", error);
+                let payload = crate::errors::parse_invoke_error(&error);
+                let _ = overlay.emit("overlay-error", payload.to_emit_value());
+                let _ = app.emit("capture-error", payload.to_emit_value());
             }
         }
 

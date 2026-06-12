@@ -1,7 +1,10 @@
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { getCaptureStatus, requestScreenCapturePermission } from "../lib/tauri";
+import { translateAppError, translateMessageCode } from "../i18n/resolveError";
 
 export function useCapturePermissions() {
+  const { t } = useI18n();
   const permissionMessage = ref<string | null>(null);
   const devBinaryPath = ref<string | null>(null);
 
@@ -9,7 +12,15 @@ export function useCapturePermissions() {
     try {
       const status = await getCaptureStatus();
       if (!status.screen_capture_granted) {
-        permissionMessage.value = status.message;
+        let message = translateMessageCode(
+          t,
+          status.messageCode,
+          status.messageParams ?? undefined,
+        );
+        if (status.messageCode === "macosPermissionRequired") {
+          message += t("errors.macosDevBinaryHint");
+        }
+        permissionMessage.value = message;
         devBinaryPath.value = status.dev_binary_path;
       } else {
         permissionMessage.value = null;
@@ -17,7 +28,9 @@ export function useCapturePermissions() {
       }
     } catch (err) {
       permissionMessage.value =
-        err instanceof Error ? err.message : "Could not check permissions";
+        err instanceof Error
+          ? translateAppError(t, err.message)
+          : t("errors.checkPermissionsFailed");
     }
   }
 

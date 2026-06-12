@@ -45,7 +45,7 @@ fn resolve_monitor(window: &WebviewWindow) -> Result<Monitor, String> {
     window
         .primary_monitor()
         .map_err(|e| e.to_string())?
-        .ok_or_else(|| "No monitor found".to_string())
+        .ok_or_else(|| crate::errors::app_error("noMonitorFound"))
 }
 
 /// Monitor containing the cursor (the one the user is using right now).
@@ -142,7 +142,7 @@ pub fn restore_windowed_editor(window: &WebviewWindow) -> Result<(), String> {
 pub fn reset_editor_window_layout(app: AppHandle) -> Result<(), String> {
     let editor = app
         .get_webview_window("editor")
-        .ok_or_else(|| "Ventana editor no encontrada".to_string())?;
+        .ok_or_else(|| crate::errors::app_error("editorNotFound"))?;
     reset_editor_fullscreen_state(&editor)?;
     restore_windowed_editor(&editor)
 }
@@ -178,7 +178,7 @@ fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
 pub fn reset_main_window_layout(app: AppHandle) -> Result<(), String> {
     let main = app
         .get_webview_window("main")
-        .ok_or_else(|| "Main window not found".to_string())?;
+        .ok_or_else(|| crate::errors::app_error("mainWindowNotFound"))?;
     prepare_main_hub_window(&main)
 }
 
@@ -195,7 +195,7 @@ pub fn exit_main_editor_mode(app: AppHandle) -> Result<(), String> {
     set_main_editor_mode(false);
     let main = app
         .get_webview_window("main")
-        .ok_or_else(|| "Main window not found".to_string())?;
+        .ok_or_else(|| crate::errors::app_error("mainWindowNotFound"))?;
     reset_editor_fullscreen_state(&main)?;
     prepare_main_hub_window(&main)
 }

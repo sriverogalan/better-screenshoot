@@ -1,6 +1,8 @@
 node_modules/
 dist/
 target/
+.tauri/
+.release-staging/
 .DS_Store
 *.log
 .env

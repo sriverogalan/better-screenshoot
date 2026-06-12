@@ -15,6 +15,7 @@ use tauri_plugin_clipboard_manager::ClipboardExt;
 use uuid::Uuid;
 
 use crate::capture_session;
+use crate::errors::{app_error, AppErrorPayload};
 use crate::state::AppState;
 use crate::window_activation::activate_app_for_window;
 use crate::window_front::{bring_editor_to_front_quiet, bring_window_to_front};
@@ -69,14 +70,24 @@ async fn copy_png_to_clipboard_async(app: AppHandle, png_bytes: Vec<u8>) {
     match decoded {
         Ok(Ok((raw, width, height))) => {
             if let Err(error) = copy_rgba_to_clipboard(&app, &raw, width, height) {
-                let _ = app.emit("capture-warning", error);
+                let _ = app.emit(
+                    "capture-warning",
+                    AppErrorPayload::new("clipboardCopyFailed").to_emit_value(),
+                );
+                let _ = error;
             }
         }
-        Ok(Err(message)) => {
-            let _ = app.emit("capture-warning", message);
+        Ok(Err(_message)) => {
+            let _ = app.emit(
+                "capture-warning",
+                AppErrorPayload::new("clipboardCopyFailed").to_emit_value(),
+            );
         }
-        Err(join_error) => {
-            let _ = app.emit("capture-warning", join_error.to_string());
+        Err(_join_error) => {
+            let _ = app.emit(
+                "capture-warning",
+                AppErrorPayload::new("clipboardCopyFailed").to_emit_value(),
+            );
         }
     }
 }
@@ -186,7 +197,7 @@ async fn hide_detached_editor_window(app: &AppHandle) {
 async fn prepare_capture_surface(app: &AppHandle) -> Result<WebviewWindow, String> {
     let main = app
         .get_webview_window("main")
-        .ok_or_else(|| "Main window not found".to_string())?;
+        .ok_or_else(|| app_error("mainWindowNotFound"))?;
 
     hide_detached_editor_window(app).await;
     crate::window_layout::set_main_editor_mode(true);
@@ -290,7 +301,7 @@ async fn editor_open_failed(app: &AppHandle, record: &SavedCapture, tried_fullsc
 
     let _ = app.emit(
         "capture-error",
-        "Could not open the editor. Click «Open in editor» in the banner or use the tray menu.",
+        AppErrorPayload::new("openEditorHint").to_emit_value(),
     );
 
     show_main_hub(app);
@@ -427,7 +438,7 @@ async fn open_capture_in_editor_internal(
         Ok(())
     } else {
         editor_open_failed(app, record, fullscreen).await;
-        Err("Could not open the editor. Check that Better Screenshoot has Screen Recording permission.".into())
+        Err(app_error("openEditorPermission"))
     }
 }
 
@@ -507,12 +518,16 @@ pub async fn capture_overlay_preview_internal(
         Some(id) => displays
             .iter()
             .find(|d| d.id == id)
-            .ok_or_else(|| format!("display {id} not found"))?,
+            .ok_or_else(|| {
+                AppErrorPayload::new("displayNotFound")
+                    .with_detail("id", id)
+                    .to_invoke_error()
+            })?,
         None => displays
             .iter()
             .find(|d| d.is_primary)
             .or(displays.first())
-            .ok_or_else(|| "no displays found".to_string())?,
+            .ok_or_else(|| app_error("noDisplaysFound"))?,
     };
 
     let capture_display_id = display.id;
@@ -838,7 +853,7 @@ pub async fn open_pending_capture_in_editor(
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let Some(record) = read_pending_capture(&state)? else {
-        return Err("No hay ninguna captura pendiente".into());
+        return Err(app_error("noPendingCapture"));
     };
 
     if !PathBuf::from(&record.file_path).exists() {
@@ -860,7 +875,7 @@ pub fn clear_pending_capture(state: State<'_, AppState>) -> Result<(), String> {
 #[tauri::command]
 pub async fn read_capture_data_url(file_path: String) -> Result<String, String> {
     let bytes = fs::read(&file_path)
-        .map_err(|e| format!("Could not read image: {e}"))?;
+        .map_err(|_| app_error("readImageFailed"))?;
     if bytes.is_empty() {
         return Err("Capture file is empty".into());
     }

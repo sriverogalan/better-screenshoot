@@ -56,14 +56,34 @@ On macOS, add Better Screenshoot under **Settings → Privacy & Security → Acc
 
 ## Publishing a new release
 
-For repository maintainers:
+Releases are built **locally on macOS** (faster than CI). GitHub Actions only runs tests and typechecks on PRs.
+
+1. Bump the version in the root `package.json` (CI syncs the rest on your PR).
+2. Merge to `main`, then tag from `main`:
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.2.1
+git push origin v0.2.1   # tag only — does not trigger a remote build
 ```
 
-GitHub Actions will create a **draft release** with `.dmg` installers for Apple Silicon and Intel. Review it and publish when ready.
+3. From **`main`**, build, sign, and upload the release from your Mac:
+
+```bash
+git checkout main
+git pull origin main
+pnpm release:mac v0.2.1 --all-arch
+```
+
+The release script refuses to run on any other branch.
+
+This creates a **draft** GitHub release with `.dmg` files, signed updater bundles (`.tar.gz`), and `latest.json`. Review it on GitHub and publish when ready — installed apps only pick up updates from **published** releases.
+
+Options:
+
+- `--all-arch` — Apple Silicon + Intel (omit to build only for your current Mac)
+- `--publish` — publish immediately instead of a draft
+
+Signing key: `.tauri/better-screenshoot.key` (gitignored). A backup copy is stored in the repo secret `TAURI_SIGNING_PRIVATE_KEY`. Generate a new pair only if you lose the private key.
 
 See [docs/branching.md](docs/branching.md) for branch flow and `main` protection.
 

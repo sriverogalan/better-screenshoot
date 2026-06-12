@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Better Screenshoot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "identifier": "com.betterscreenshoot.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -59,12 +59,17 @@
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": ["$PICTURE/**", "$HOME/**", "$CACHE/**"]
+        "scope": [
+          "$PICTURE/**",
+          "$HOME/**",
+          "$CACHE/**"
+        ]
       }
     }
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "shortDescription": "Screenshots with a built-in editor",
     "longDescription": "Better Screenshoot captures screen, window, or region, edits with annotations, and saves to history.",
@@ -83,8 +88,16 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["betterscreenshoot"]
+        "schemes": [
+          "betterscreenshoot"
+        ]
       }
+    },
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMxQkNDMzhDRTE3MUIzNwpSV1EzR3hmT09Nd2JET0NCYmVkbUNmbENZL0tjZlBRUUY1SXI3UjF4bWJBQ1l1UlJ3MmE1S2d5Ygo=",
+      "endpoints": [
+        "https://github.com/sriverogalan/better-screenshoot/releases/latest/download/latest.json"
+      ]
     }
   }
 }

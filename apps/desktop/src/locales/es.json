@@ -1,0 +1,261 @@
+{
+  "common": {
+    "appName": "Better Screenshoot",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "and": "y",
+    "region": "región",
+    "screen": "pantalla",
+    "window": "ventana",
+    "untitled": "Sin título",
+    "disabled": "Desactivado",
+    "opening": "Abriendo…",
+    "replacing": "Reemplazando…",
+    "loading": "Cargando…"
+  },
+  "nav": {
+    "mainNavigation": "Navegación principal",
+    "history": "Historial",
+    "settings": "Ajustes"
+  },
+  "history": {
+    "title": "Historial",
+    "subtitle": "Todas tus capturas guardadas",
+    "captureShortcuts": "Atajos de captura",
+    "captureShortcutsHint": "Usa los atajos globales para capturar. También puedes usar el menú del icono en la bandeja.",
+    "captureRegion": "Capturar región",
+    "captureScreen": "Capturar pantalla",
+    "captureWindow": "Capturar ventana",
+    "customizeShortcuts": "Personalizar atajos en Ajustes",
+    "loadingCaptures": "Cargando capturas…",
+    "empty": "Aún no hay capturas.",
+    "emptyHint": "Pulsa uno de los atajos de arriba para capturar. Solo las capturas que guardes desde el editor aparecerán aquí.",
+    "openCaptureInEditor": "Abrir captura de {width} por {height} en el editor",
+    "captureAlt": "Captura {id}",
+    "deleteCapture": "Eliminar captura",
+    "openMacosPermissions": "Abrir permisos de macOS",
+    "devBinary": "Binario de desarrollo: {path}"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "languageOptions": {
+      "en": "English",
+      "es": "Español",
+      "fr": "Français",
+      "de": "Deutsch",
+      "pt": "Português",
+      "it": "Italiano"
+    },
+    "sections": {
+      "capture": "Captura",
+      "integrations": "Integraciones",
+      "captureMode": "Modo de captura (macOS)",
+      "globalShortcuts": "Atajos globales",
+      "license": "Licencia"
+    },
+    "saveFolder": "Carpeta de guardado",
+    "autoCopy": "Copiar al portapapeles automáticamente",
+    "autoSave": "Guardar capturas en disco",
+    "allowExternalControl": "Permitir control externo (Raycast, CLI, esquema URL)",
+    "urlSchemeHint": "Esquema URL: {scheme}",
+    "systemCaptureModeLegend": "Modo de captura del sistema",
+    "independentModeTitle": "Atajos de Better Screenshoot",
+    "independentModeHint": "macOS mantiene {cmd3}, {cmd4} y {cmd5}.",
+    "replaceModeTitle": "Reemplazar capturas del sistema",
+    "replaceModeHint": "Desactiva los atajos nativos y los reasigna a Better Screenshoot.",
+    "activeOnMacos": "Activo en macOS",
+    "restoreSystemCaptures": "Restaurar capturas del sistema",
+    "restoreSystemCapturesHint": "Reactiva {cmd3}, {cmd4} y {cmd5} de macOS y vuelve a los atajos propios de la app.",
+    "repairState": "Reparar estado",
+    "hotkeys": {
+      "captureArea": "Capturar región",
+      "captureAreaHint": "En macOS abre el selector nativo del sistema",
+      "captureScreen": "Capturar pantalla",
+      "captureWindow": "Capturar ventana",
+      "openHistory": "Abrir historial",
+      "managedByReplace": "Gestionado por «Reemplazar capturas del sistema» ({shortcut})."
+    },
+    "license": {
+      "currentPlan": "Plan actual:",
+      "licenseKey": "Clave de licencia",
+      "licenseKeyPlaceholder": "BS-PRO-…",
+      "activate": "Activar licencia",
+      "tierLabels": {
+        "community": "Community (gratis)",
+        "pro": "Pro",
+        "cloud": "Cloud",
+        "team": "Team"
+      }
+    }
+  },
+  "overlay": {
+    "regionSelector": "Selector de región de captura",
+    "preparing": "Preparando captura…",
+    "hint": "Arrastra para seleccionar · Esc para cancelar"
+  },
+  "captureWindow": {
+    "title": "Capturar ventana",
+    "subtitle": "Selecciona la ventana a capturar",
+    "searching": "Buscando ventanas…",
+    "empty": "No se encontraron ventanas."
+  },
+  "editor": {
+    "title": "Editor",
+    "dimensions": "{width} × {height} px · {zoom}%",
+    "copyAndDiscard": "Copiar y descartar",
+    "copyAndSave": "Copiar y guardar",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "shortcutHint": "V seleccionar · A flecha · R rectángulo · T texto",
+    "tools": {
+      "select": "Seleccionar",
+      "arrow": "Flecha",
+      "rect": "Rectángulo",
+      "text": "Texto",
+      "highlight": "Resaltar",
+      "pen": "Lápiz",
+      "blur": "Desenfoque"
+    },
+    "style": {
+      "color": "Color",
+      "colorAria": "Color {color}",
+      "thickness": "Grosor",
+      "font": "Fuente"
+    },
+    "loadingImage": "Cargando imagen…",
+    "empty": "Haz una captura para empezar a editar.",
+    "textPlaceholder": "Escribe aquí…",
+    "editAnnotationText": "Editar texto de la anotación"
+  },
+  "pendingCapture": {
+    "title": "Captura lista pero el editor no se abrió",
+    "description": "{width}×{height} — guardada temporalmente hasta que la edites o la descartes.",
+    "openInEditor": "Abrir en el editor"
+  },
+  "systemScreenshotDialog": {
+    "title": "¿Reemplazar capturas del sistema?",
+    "description": "Better Screenshoot desactivará los atajos nativos de macOS y los reasignará a sus propias capturas. Guardaremos una copia de seguridad para restaurarlos si cambias de opinión.",
+    "willBeDisabled": "Se desactivará",
+    "confirm": "Reemplazar atajos del sistema"
+  },
+  "licensing": {
+    "tiers": {
+      "community": {
+        "name": "Community",
+        "features": [
+          "Captura de pantalla, ventana y región",
+          "Anotación básica",
+          "Historial local",
+          "CLI y esquema URL",
+          "Atajos globales"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "features": [
+          "Todo lo de Community",
+          "OCR local",
+          "Captura con desplazamiento",
+          "Grabación GIF",
+          "Fijar en pantalla",
+          "Temas personalizados"
+        ]
+      },
+      "cloud": {
+        "name": "Cloud",
+        "features": [
+          "Todo lo de Pro",
+          "Enlaces compartibles",
+          "50 GB de almacenamiento",
+          "Dominio personalizado",
+          "Caducidad de enlaces"
+        ]
+      },
+      "team": {
+        "name": "Team",
+        "features": [
+          "Todo lo de Cloud",
+          "SSO",
+          "Marca de equipo",
+          "Panel de administración",
+          "Políticas de retención"
+        ]
+      }
+    },
+    "messages": {
+      "noKey": "Sin clave — modo Community",
+      "validPro": "Licencia Pro válida",
+      "validCloud": "Licencia Cloud válida",
+      "validTeam": "Licencia Team válida",
+      "invalidKey": "Clave de licencia no válida"
+    }
+  },
+  "systemShortcuts": {
+    "captureScreen": "Capturar pantalla (⌘⇧3)",
+    "copyScreen": "Copiar pantalla al portapapeles (⌃⌘⇧3)",
+    "captureRegion": "Capturar región (⌘⇧4)",
+    "copyRegion": "Copiar región al portapapeles (⌃⌘⇧4)",
+    "captureOptions": "Opciones de captura (⌘⇧5)"
+  },
+  "errors": {
+    "appStartFailed": "Error al iniciar la aplicación",
+    "loadHistoryFailed": "No se pudo cargar el historial",
+    "openEditorFailed": "No se pudo abrir el editor",
+    "checkPermissionsFailed": "No se pudieron comprobar los permisos",
+    "checkCaptureModeFailed": "No se pudo comprobar el modo de captura",
+    "changeCaptureModeFailed": "No se pudo cambiar el modo de captura",
+    "loadPreviewFailed": "No se pudo cargar la vista previa",
+    "completeCaptureFailed": "No se pudo completar la captura",
+    "completeActionFailed": "No se pudo completar la acción",
+    "imageLoadFailed": "Error al cargar la imagen",
+    "imageDisplayFailed": "No se pudo mostrar la imagen. Comprueba los permisos de Grabación de pantalla.",
+    "imageNotReady": "La imagen aún no está lista para exportar",
+    "captureFailed": "La captura falló",
+    "captureCancelled": "Captura cancelada",
+    "editorNotFound": "Ventana del editor no encontrada",
+    "mainWindowNotFound": "Ventana principal no encontrada",
+    "noMonitorFound": "No se encontró ningún monitor",
+    "displayNotFound": "Pantalla {id} no encontrada",
+    "noDisplaysFound": "No se encontraron pantallas",
+    "invalidPortalPath": "Ruta de captura del portal no válida",
+    "noPendingCapture": "No hay ninguna captura pendiente",
+    "readImageFailed": "No se pudo leer la imagen",
+    "openEditorHint": "No se pudo abrir el editor. Haz clic en «Abrir en el editor» en el banner o usa el menú de la bandeja.",
+    "openEditorPermission": "No se pudo abrir el editor. Comprueba que Better Screenshoot tiene permiso de Grabación de pantalla.",
+    "clipboardCopyFailed": "No se pudo copiar la imagen al portapapeles",
+    "storageFailed": "Error en la operación de almacenamiento",
+    "homeDirectoryNotFound": "No se pudo resolver el directorio home",
+    "plistBuddyFailed": "No se pudo ejecutar PlistBuddy",
+    "systemShortcutsWriteFailed": "No se pudieron escribir los atajos del sistema",
+    "systemShortcutsModifyFailed": "No se pudieron modificar los atajos del sistema",
+    "systemChangesFailed": "No se pudieron aplicar los cambios del sistema",
+    "openSystemSettingsFailed": "No se pudo abrir Ajustes del sistema",
+    "macosOnly": "Esta acción solo está disponible en macOS",
+    "macosShortcutsOnly": "Los atajos de captura del sistema solo se pueden configurar en macOS",
+    "displaysDetected": "{count} pantalla(s) detectada(s).",
+    "macosPermissionRequired": "macOS no permite la captura de pantalla. Ve a Ajustes del sistema → Privacidad y seguridad → Grabación de pantalla y activa Better Screenshoot.",
+    "macosDevBinaryHint": " Si usas `pnpm dev`, autoriza también el binario en target/debug/better-screenshoot.",
+    "noDisplaysDetected": "No se detectaron pantallas.",
+    "systemCapturesRestored": "Capturas del sistema restauradas.",
+    "alreadyIndependent": "Ya se usan los atajos de Better Screenshoot.",
+    "alreadyReplaced": "Las capturas del sistema ya están reemplazadas.",
+    "independentModeActive": "Modo independiente activo.",
+    "systemCapturesRestoredFull": "Capturas del sistema restauradas. Better Screenshoot usa sus propios atajos.",
+    "systemCapturesReplaced": "Capturas del sistema reemplazadas: ⌘⇧3 pantalla, ⌘⇧4 región, ⌘⇧5 ventana.",
+    "driftReplaceIndependent": "Los atajos de macOS siguen activos aunque la app está en modo de reemplazo.",
+    "driftIndependentReplace": "macOS tiene las capturas del sistema desactivadas pero la app no está en modo de reemplazo.",
+    "driftNoBackup": "macOS tiene las capturas del sistema desactivadas sin copia de seguridad. Repara el estado para reactivarlas.",
+    "driftGeneric": "El estado de captura del sistema no coincide con los ajustes.",
+    "generic": "Algo salió mal"
+  },
+  "tray": {
+    "tooltip": "Better Screenshoot",
+    "captureArea": "Capturar región",
+    "captureScreen": "Capturar pantalla",
+    "captureWindow": "Capturar ventana",
+    "history": "Historial",
+    "settings": "Ajustes",
+    "quit": "Salir"
+  }
+}

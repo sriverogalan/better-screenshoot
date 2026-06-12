@@ -1,0 +1,261 @@
+{
+  "common": {
+    "appName": "Better Screenshoot",
+    "cancel": "Annulla",
+    "close": "Chiudi",
+    "and": "e",
+    "region": "regione",
+    "screen": "schermo",
+    "window": "finestra",
+    "untitled": "Senza titolo",
+    "disabled": "Disattivato",
+    "opening": "Apertura…",
+    "replacing": "Sostituzione…",
+    "loading": "Caricamento…"
+  },
+  "nav": {
+    "mainNavigation": "Navigazione principale",
+    "history": "Cronologia",
+    "settings": "Impostazioni"
+  },
+  "history": {
+    "title": "Cronologia",
+    "subtitle": "Tutte le tue catture salvate",
+    "captureShortcuts": "Scorciatoie di cattura",
+    "captureShortcutsHint": "Usa le scorciatoie globali per catturare. Puoi anche usare il menu dell'icona nella barra dei menu.",
+    "captureRegion": "Cattura regione",
+    "captureScreen": "Cattura schermo",
+    "captureWindow": "Cattura finestra",
+    "customizeShortcuts": "Personalizza le scorciatoie in Impostazioni",
+    "loadingCaptures": "Caricamento catture…",
+    "empty": "Nessuna cattura ancora.",
+    "emptyHint": "Premi una delle scorciatoie sopra per catturare. Solo le catture salvate dall'editor appariranno qui.",
+    "openCaptureInEditor": "Apri cattura {width} per {height} nell'editor",
+    "captureAlt": "Cattura {id}",
+    "deleteCapture": "Elimina cattura",
+    "openMacosPermissions": "Apri autorizzazioni macOS",
+    "devBinary": "Binario di sviluppo: {path}"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "language": "Lingua",
+    "languageOptions": {
+      "en": "English",
+      "es": "Español",
+      "fr": "Français",
+      "de": "Deutsch",
+      "pt": "Português",
+      "it": "Italiano"
+    },
+    "sections": {
+      "capture": "Cattura",
+      "integrations": "Integrazioni",
+      "captureMode": "Modalità di cattura (macOS)",
+      "globalShortcuts": "Scorciatoie globali",
+      "license": "Licenza"
+    },
+    "saveFolder": "Cartella di salvataggio",
+    "autoCopy": "Copia automaticamente negli appunti",
+    "autoSave": "Salva le catture su disco",
+    "allowExternalControl": "Consenti controllo esterno (Raycast, CLI, schema URL)",
+    "urlSchemeHint": "Schema URL: {scheme}",
+    "systemCaptureModeLegend": "Modalità di cattura di sistema",
+    "independentModeTitle": "Scorciatoie Better Screenshoot",
+    "independentModeHint": "macOS mantiene {cmd3}, {cmd4} e {cmd5}.",
+    "replaceModeTitle": "Sostituisci catture di sistema",
+    "replaceModeHint": "Disattiva le scorciatoie native e le riassegna a Better Screenshoot.",
+    "activeOnMacos": "Attivo su macOS",
+    "restoreSystemCaptures": "Ripristina catture di sistema",
+    "restoreSystemCapturesHint": "Riattiva {cmd3}, {cmd4} e {cmd5} su macOS e torna alle scorciatoie dell'app.",
+    "repairState": "Ripara stato",
+    "hotkeys": {
+      "captureArea": "Cattura regione",
+      "captureAreaHint": "Su macOS apre il selettore nativo di sistema",
+      "captureScreen": "Cattura schermo",
+      "captureWindow": "Cattura finestra",
+      "openHistory": "Apri cronologia",
+      "managedByReplace": "Gestito da «Sostituisci catture di sistema» ({shortcut})."
+    },
+    "license": {
+      "currentPlan": "Piano attuale:",
+      "licenseKey": "Chiave di licenza",
+      "licenseKeyPlaceholder": "BS-PRO-…",
+      "activate": "Attiva licenza",
+      "tierLabels": {
+        "community": "Community (gratuito)",
+        "pro": "Pro",
+        "cloud": "Cloud",
+        "team": "Team"
+      }
+    }
+  },
+  "overlay": {
+    "regionSelector": "Selettore regione di cattura",
+    "preparing": "Preparazione cattura…",
+    "hint": "Trascina per selezionare · Esc per annullare"
+  },
+  "captureWindow": {
+    "title": "Cattura finestra",
+    "subtitle": "Seleziona la finestra da catturare",
+    "searching": "Ricerca finestre…",
+    "empty": "Nessuna finestra trovata."
+  },
+  "editor": {
+    "title": "Editor",
+    "dimensions": "{width} × {height} px · {zoom}%",
+    "copyAndDiscard": "Copia e scarta",
+    "copyAndSave": "Copia e salva",
+    "undo": "Annulla",
+    "redo": "Ripeti",
+    "shortcutHint": "V seleziona · A freccia · R rettangolo · T testo",
+    "tools": {
+      "select": "Seleziona",
+      "arrow": "Freccia",
+      "rect": "Rettangolo",
+      "text": "Testo",
+      "highlight": "Evidenzia",
+      "pen": "Penna",
+      "blur": "Sfocatura"
+    },
+    "style": {
+      "color": "Colore",
+      "colorAria": "Colore {color}",
+      "thickness": "Spessore",
+      "font": "Carattere"
+    },
+    "loadingImage": "Caricamento immagine…",
+    "empty": "Fai una cattura per iniziare a modificare.",
+    "textPlaceholder": "Scrivi qui…",
+    "editAnnotationText": "Modifica testo annotazione"
+  },
+  "pendingCapture": {
+    "title": "Cattura pronta ma l'editor non si è aperto",
+    "description": "{width}×{height} — salvata temporaneamente finché non la modifichi o la scarti.",
+    "openInEditor": "Apri nell'editor"
+  },
+  "systemScreenshotDialog": {
+    "title": "Sostituire le catture di sistema?",
+    "description": "Better Screenshoot disattiverà le scorciatoie native di macOS e le riassegnerà alle proprie catture. Conserveremo un backup per ripristinarle se cambi idea.",
+    "willBeDisabled": "Sarà disattivato",
+    "confirm": "Sostituisci scorciatoie di sistema"
+  },
+  "licensing": {
+    "tiers": {
+      "community": {
+        "name": "Community",
+        "features": [
+          "Cattura schermo, finestra e regione",
+          "Annotazione di base",
+          "Cronologia locale",
+          "CLI e schema URL",
+          "Scorciatoie globali"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "features": [
+          "Tutto di Community",
+          "OCR locale",
+          "Cattura con scorrimento",
+          "Registrazione GIF",
+          "Fissa sullo schermo",
+          "Temi personalizzati"
+        ]
+      },
+      "cloud": {
+        "name": "Cloud",
+        "features": [
+          "Tutto di Pro",
+          "Link condivisibili",
+          "50 GB di archiviazione",
+          "Dominio personalizzato",
+          "Scadenza link"
+        ]
+      },
+      "team": {
+        "name": "Team",
+        "features": [
+          "Tutto di Cloud",
+          "SSO",
+          "Branding del team",
+          "Pannello di amministrazione",
+          "Politiche di conservazione"
+        ]
+      }
+    },
+    "messages": {
+      "noKey": "Nessuna chiave — modalità Community",
+      "validPro": "Licenza Pro valida",
+      "validCloud": "Licenza Cloud valida",
+      "validTeam": "Licenza Team valida",
+      "invalidKey": "Chiave di licenza non valida"
+    }
+  },
+  "systemShortcuts": {
+    "captureScreen": "Cattura schermo (⌘⇧3)",
+    "copyScreen": "Copia schermo negli appunti (⌃⌘⇧3)",
+    "captureRegion": "Cattura regione (⌘⇧4)",
+    "copyRegion": "Copia regione negli appunti (⌃⌘⇧4)",
+    "captureOptions": "Opzioni di cattura (⌘⇧5)"
+  },
+  "errors": {
+    "appStartFailed": "Errore all'avvio dell'applicazione",
+    "loadHistoryFailed": "Impossibile caricare la cronologia",
+    "openEditorFailed": "Impossibile aprire l'editor",
+    "checkPermissionsFailed": "Impossibile verificare le autorizzazioni",
+    "checkCaptureModeFailed": "Impossibile verificare la modalità di cattura",
+    "changeCaptureModeFailed": "Impossibile cambiare la modalità di cattura",
+    "loadPreviewFailed": "Impossibile caricare l'anteprima",
+    "completeCaptureFailed": "Impossibile completare la cattura",
+    "completeActionFailed": "Impossibile completare l'azione",
+    "imageLoadFailed": "Errore nel caricamento dell'immagine",
+    "imageDisplayFailed": "Impossibile visualizzare l'immagine. Controlla le autorizzazioni di Registrazione schermo.",
+    "imageNotReady": "L'immagine non è ancora pronta per l'esportazione",
+    "captureFailed": "Cattura non riuscita",
+    "captureCancelled": "Cattura annullata",
+    "editorNotFound": "Finestra dell'editor non trovata",
+    "mainWindowNotFound": "Finestra principale non trovata",
+    "noMonitorFound": "Nessun monitor trovato",
+    "displayNotFound": "Schermo {id} non trovato",
+    "noDisplaysFound": "Nessuno schermo trovato",
+    "invalidPortalPath": "Percorso screenshot del portale non valido",
+    "noPendingCapture": "Nessuna cattura in sospeso",
+    "readImageFailed": "Impossibile leggere l'immagine",
+    "openEditorHint": "Impossibile aprire l'editor. Fai clic su «Apri nell'editor» nel banner o usa il menu della barra dei menu.",
+    "openEditorPermission": "Impossibile aprire l'editor. Verifica che Better Screenshoot abbia l'autorizzazione di Registrazione schermo.",
+    "clipboardCopyFailed": "Impossibile copiare l'immagine negli appunti",
+    "storageFailed": "Operazione di archiviazione non riuscita",
+    "homeDirectoryNotFound": "Impossibile risolvere la directory home",
+    "plistBuddyFailed": "Impossibile eseguire PlistBuddy",
+    "systemShortcutsWriteFailed": "Impossibile scrivere le scorciatoie di sistema",
+    "systemShortcutsModifyFailed": "Impossibile modificare le scorciatoie di sistema",
+    "systemChangesFailed": "Impossibile applicare le modifiche di sistema",
+    "openSystemSettingsFailed": "Impossibile aprire Impostazioni di sistema",
+    "macosOnly": "Questa azione è disponibile solo su macOS",
+    "macosShortcutsOnly": "Le scorciatoie di cattura di sistema possono essere configurate solo su macOS",
+    "displaysDetected": "{count} schermo/i rilevato/i.",
+    "macosPermissionRequired": "macOS non consente la cattura dello schermo. Vai in Impostazioni di sistema → Privacy e sicurezza → Registrazione schermo e attiva Better Screenshoot.",
+    "macosDevBinaryHint": " Se usi `pnpm dev`, autorizza anche il binario in target/debug/better-screenshoot.",
+    "noDisplaysDetected": "Nessuno schermo rilevato.",
+    "systemCapturesRestored": "Catture di sistema ripristinate.",
+    "alreadyIndependent": "Sono già in uso le scorciatoie di Better Screenshoot.",
+    "alreadyReplaced": "Le catture di sistema sono già sostituite.",
+    "independentModeActive": "Modalità indipendente attiva.",
+    "systemCapturesRestoredFull": "Catture di sistema ripristinate. Better Screenshoot usa le proprie scorciatoie.",
+    "systemCapturesReplaced": "Catture di sistema sostituite: ⌘⇧3 schermo, ⌘⇧4 regione, ⌘⇧5 finestra.",
+    "driftReplaceIndependent": "Le scorciatoie di macOS sono ancora attive anche se l'app è in modalità sostituzione.",
+    "driftIndependentReplace": "macOS ha disattivato le catture di sistema ma l'app non è in modalità sostituzione.",
+    "driftNoBackup": "macOS ha disattivato le catture di sistema senza backup. Ripara lo stato per riattivarle.",
+    "driftGeneric": "Lo stato di cattura di sistema non corrisponde alle impostazioni.",
+    "generic": "Qualcosa è andato storto"
+  },
+  "tray": {
+    "tooltip": "Better Screenshoot",
+    "captureArea": "Cattura regione",
+    "captureScreen": "Cattura schermo",
+    "captureWindow": "Cattura finestra",
+    "history": "Cronologia",
+    "settings": "Impostazioni",
+    "quit": "Esci"
+  }
+}

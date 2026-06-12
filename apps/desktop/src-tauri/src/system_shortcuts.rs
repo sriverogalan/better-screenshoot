@@ -114,12 +114,14 @@ pub struct SystemCaptureStatus {
     pub can_restore: bool,
     pub system_shortcuts: Vec<SystemScreenshotShortcut>,
     pub app_hotkeys: HotkeyConfig,
-    pub message: Option<String>,
+    #[serde(rename = "messageCode", skip_serializing_if = "Option::is_none")]
+    pub message_code: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct SystemCaptureModeResult {
-    pub message: String,
+    #[serde(rename = "messageCode")]
+    pub message_code: String,
     pub status: SystemCaptureStatus,
     pub settings: AppSettings,
 }
@@ -127,7 +129,7 @@ pub struct SystemCaptureModeResult {
 fn symbolic_hotkeys_plist() -> Result<PathBuf, String> {
     dirs::home_dir()
         .map(|home| home.join("Library/Preferences/com.apple.symbolichotkeys.plist"))
-        .ok_or_else(|| "Could not resolve home directory.".into())
+        .ok_or_else(|| crate::errors::app_error("homeDirectoryNotFound"))
 }
 
 fn run_plist_buddy(plist: &Path, command: &str) -> Result<String, String> {
@@ -136,7 +138,7 @@ fn run_plist_buddy(plist: &Path, command: &str) -> Result<String, String> {
         .arg(command)
         .arg(plist)
         .output()
-        .map_err(|error| format!("Could not run PlistBuddy: {error}"))?;
+        .map_err(|_| crate::errors::app_error("plistBuddyFailed"))?;
 
     if output.status.success() {
         return Ok(String::from_utf8_lossy(&output.stdout).trim().to_string());
@@ -185,12 +187,12 @@ fn create_hotkey_entry(id: u32, parameters: [i64; 3], enabled: bool) -> Result<(
         .arg(id.to_string())
         .arg(&xml)
         .status()
-        .map_err(|error| format!("Could not write system shortcuts: {error}"))?;
+        .map_err(|_| crate::errors::app_error("systemShortcutsWriteFailed"))?;
 
     if status.success() {
         Ok(())
     } else {
-        Err("Could not modify system shortcuts.".into())
+        Err(crate::errors::app_error("systemShortcutsModifyFailed"))
     }
 }
 
@@ -206,7 +208,7 @@ fn apply_hotkey_changes() -> Result<(), String> {
     let status = Command::new(ACTIVATE_SETTINGS)
         .arg("-u")
         .status()
-        .map_err(|error| format!("Could not apply system changes: {error}"))?;
+        .map_err(|_| crate::errors::app_error("systemChangesFailed"))?;
 
     if status.success() {
         Ok(())
@@ -307,25 +309,21 @@ fn detect_drift(
         return (false, None);
     }
 
-    let message = match (configured_mode, effective_mode) {
+    let message_code = match (configured_mode, effective_mode) {
         (SystemCaptureMode::ReplaceSystem, SystemCaptureMode::Independent) => {
-            Some("macOS shortcuts are still active even though the app is in replacement mode.".into())
+            Some("driftReplaceIndependent".into())
         }
         (SystemCaptureMode::Independent, SystemCaptureMode::ReplaceSystem) => {
             if has_backup {
-                Some(
-                    "macOS has system captures disabled but the app is not in replacement mode.".into(),
-                )
+                Some("driftIndependentReplace".into())
             } else {
-                Some(
-                    "macOS has system captures disabled with no backup. Repair the state to re-enable them.".into(),
-                )
+                Some("driftNoBackup".into())
             }
         }
-        _ => Some("System capture state does not match settings.".into()),
+        _ => Some("driftGeneric".into()),
     };
 
-    (true, message)
+    (true, message_code)
 }
 
 #[cfg(target_os = "macos")]
@@ -338,7 +336,7 @@ pub fn build_status(
     let has_backup = backup.is_some();
     let system_shortcuts = collect_system_shortcuts(&plist)?;
     let effective_mode = effective_mode_from_plist(&plist, has_backup)?;
-    let (drift_detected, message) =
+    let (drift_detected, message_code) =
         detect_drift(settings.system_capture_mode, effective_mode, has_backup);
 
     Ok(SystemCaptureStatus {
@@ -349,7 +347,7 @@ pub fn build_status(
         can_restore: has_backup || settings.system_capture_mode == SystemCaptureMode::ReplaceSystem,
         system_shortcuts,
         app_hotkeys: settings.hotkeys.clone(),
-        message,
+        message_code,
     })
 }
 
@@ -363,7 +361,7 @@ pub fn build_status(_app_data_dir: &Path, settings: &AppSettings) -> Result<Syst
         can_restore: false,
         system_shortcuts: Vec::new(),
         app_hotkeys: settings.hotkeys.clone(),
-        message: None,
+        message_code: None,
     })
 }
 
@@ -497,7 +495,7 @@ pub fn apply_mode(
                 restore_to_independent(app_data_dir, settings)?;
                 let status = build_status(app_data_dir, settings)?;
                 return Ok(SystemCaptureModeResult {
-                    message: "System captures restored.".into(),
+                    message_code: "systemCapturesRestored".into(),
                     status,
                     settings: settings.clone(),
                 });
@@ -505,14 +503,12 @@ pub fn apply_mode(
         }
 
         let status = build_status(app_data_dir, settings)?;
-        let message = match target_mode {
-            SystemCaptureMode::Independent => "Already using Better Screenshoot shortcuts.".into(),
-            SystemCaptureMode::ReplaceSystem => {
-                "System captures are already replaced.".into()
-            }
+        let message_code = match target_mode {
+            SystemCaptureMode::Independent => "alreadyIndependent".into(),
+            SystemCaptureMode::ReplaceSystem => "alreadyReplaced".into(),
         };
         return Ok(SystemCaptureModeResult {
-            message,
+            message_code,
             status,
             settings: settings.clone(),
         });
@@ -543,17 +539,13 @@ pub fn apply_mode(
     }
 
     let status = build_status(app_data_dir, settings)?;
-    let message = match target_mode {
-        SystemCaptureMode::Independent => {
-            "System captures restored. Better Screenshoot uses its own shortcuts.".into()
-        }
-        SystemCaptureMode::ReplaceSystem => {
-            "System captures replaced: ⌘⇧3 screen, ⌘⇧4 region, ⌘⇧5 window.".into()
-        }
+    let message_code = match target_mode {
+        SystemCaptureMode::Independent => "systemCapturesRestoredFull".into(),
+        SystemCaptureMode::ReplaceSystem => "systemCapturesReplaced".into(),
     };
 
     Ok(SystemCaptureModeResult {
-        message,
+        message_code,
         status,
         settings: settings.clone(),
     })
@@ -566,13 +558,13 @@ pub fn apply_mode(
     target_mode: SystemCaptureMode,
 ) -> Result<SystemCaptureModeResult, String> {
     if target_mode == SystemCaptureMode::ReplaceSystem {
-        return Err("This action is only available on macOS.".into());
+        return Err(crate::errors::app_error("macosOnly"));
     }
 
     settings.system_capture_mode = SystemCaptureMode::Independent;
     let status = build_status(_app_data_dir, settings)?;
     Ok(SystemCaptureModeResult {
-        message: "Independent mode active.".into(),
+        message_code: "independentModeActive".into(),
         status,
         settings: settings.clone(),
     })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import type {
   KonvaNode,
   KonvaStageRef,
@@ -18,6 +19,8 @@ import {
   normalizeRect,
 } from "../../lib/editor/utils";
 import type { PointerPosition } from "../../lib/editor/utils";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   imagePreviewSrc: string | null;
@@ -472,13 +475,13 @@ defineExpose({
       v-else-if="!imagePreviewSrc && hasCapture"
       class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
     >
-      Loading image…
+      {{ t("editor.loadingImage") }}
     </p>
     <p
       v-else-if="!hasCapture"
       class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
     >
-      Take a capture to start editing.
+      {{ t("editor.empty") }}
     </p>
   </div>
 </template>

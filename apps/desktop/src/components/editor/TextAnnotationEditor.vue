@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import type { Annotation, DisplayLayout, TextEditorState } from "../../lib/editor/types";
 import { measureTextBlock } from "../../lib/editor/utils";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   editor: TextEditorState;
@@ -107,8 +110,8 @@ function onKeydown(event: KeyboardEvent) {
     rows="1"
     class="pointer-events-auto absolute z-20 resize-none overflow-hidden rounded-md border-2 border-accent bg-black/85 px-2 py-1 shadow-lg outline-none ring-2 ring-accent/30 placeholder:text-white/50"
     :style="editorStyle"
-    placeholder="Type here…"
-    aria-label="Edit annotation text"
+    :placeholder="t('editor.textPlaceholder')"
+    :aria-label="t('editor.editAnnotationText')"
     @input="onInput"
     @blur="onBlur"
     @mousedown.stop

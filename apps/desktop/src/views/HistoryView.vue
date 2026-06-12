@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { IconTrash } from "@tabler/icons-vue";
@@ -9,8 +10,11 @@ import { deleteHistoryItem, getHistory, openCaptureInEditor } from "../lib/tauri
 import { useCapturePermissions } from "../composables/useCapturePermissions";
 import { useSettingsStore } from "../stores/settings";
 import { formatHotkey } from "../lib/format-hotkey";
+import { translateAppError } from "../i18n/resolveError";
+import type { AppErrorPayload } from "../i18n/resolveError";
 import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
 
+const { t } = useI18n();
 const items = ref<CaptureRecord[]>([]);
 const loading = ref(true);
 const openingId = ref<string | null>(null);
@@ -21,9 +25,9 @@ const { permissionMessage, devBinaryPath, checkPermissions, requestPermission } 
   useCapturePermissions();
 
 const captureShortcuts = computed(() => [
-  { label: "Capture region", hotkey: settingsStore.settings.hotkeys.capture_area },
-  { label: "Capture screen", hotkey: settingsStore.settings.hotkeys.capture_screen },
-  { label: "Capture window", hotkey: settingsStore.settings.hotkeys.capture_window },
+  { label: t("history.captureRegion"), hotkey: settingsStore.settings.hotkeys.capture_area },
+  { label: t("history.captureScreen"), hotkey: settingsStore.settings.hotkeys.capture_screen },
+  { label: t("history.captureWindow"), hotkey: settingsStore.settings.hotkeys.capture_window },
 ]);
 
 async function load() {
@@ -33,7 +37,9 @@ async function load() {
     items.value = await getHistory();
   } catch (err) {
     error.value =
-      err instanceof Error ? err.message : "Could not load history";
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.loadHistoryFailed");
   } finally {
     loading.value = false;
   }
@@ -54,7 +60,9 @@ async function openInEditor(id: string) {
     await openCaptureInEditor(id);
   } catch (err) {
     error.value =
-      err instanceof Error ? err.message : "Could not open editor";
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.openEditorFailed");
   } finally {
     openingId.value = null;
   }
@@ -71,8 +79,8 @@ onMounted(async () => {
     listen<SavedCapture>("capture-complete", () => {
       void load();
     }),
-    listen<string>("capture-error", (event) => {
-      error.value = event.payload;
+    listen<string | AppErrorPayload>("capture-error", (event) => {
+      error.value = translateAppError(t, event.payload);
     }),
   ]);
 });
@@ -85,8 +93,8 @@ onUnmounted(() => {
 <template>
   <div class="flex min-h-full flex-col p-6">
     <header class="mb-6">
-      <h1 class="text-lg font-semibold">History</h1>
-      <p class="mt-1 text-sm text-text-muted">All your saved captures</p>
+      <h1 class="text-lg font-semibold">{{ t("history.title") }}</h1>
+      <p class="mt-1 text-sm text-text-muted">{{ t("history.subtitle") }}</p>
     </header>
 
     <PendingCaptureBanner />
@@ -98,14 +106,14 @@ onUnmounted(() => {
     >
       <p>{{ permissionMessage }}</p>
       <p v-if="devBinaryPath" class="mt-2 font-mono text-xs text-amber-200/80">
-        Dev binary: {{ devBinaryPath }}
+        {{ t("history.devBinary", { path: devBinaryPath }) }}
       </p>
       <button
         type="button"
         class="mt-3 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
         @click="requestPermission"
       >
-        Open macOS permissions
+        {{ t("history.openMacosPermissions") }}
       </button>
     </div>
 
@@ -114,10 +122,10 @@ onUnmounted(() => {
       aria-labelledby="capture-shortcuts-heading"
     >
       <h2 id="capture-shortcuts-heading" class="text-sm font-medium">
-        Capture shortcuts
+        {{ t("history.captureShortcuts") }}
       </h2>
       <p class="mt-1 text-xs text-text-muted">
-        Use global shortcuts to capture. You can also use the tray icon menu.
+        {{ t("history.captureShortcutsHint") }}
       </p>
       <ul class="mt-3 space-y-2">
         <li
@@ -137,18 +145,15 @@ onUnmounted(() => {
         to="/settings"
         class="mt-3 inline-block text-xs text-accent hover:text-accent-hover"
       >
-        Customize shortcuts in Settings
+        {{ t("history.customizeShortcuts") }}
       </RouterLink>
     </section>
 
-    <p v-if="loading" class="text-sm text-text-muted">Loading captures…</p>
+    <p v-if="loading" class="text-sm text-text-muted">{{ t("history.loadingCaptures") }}</p>
     <p v-else-if="error" class="text-sm text-red-400">{{ error }}</p>
     <div v-else-if="items.length === 0" class="space-y-3 text-sm text-text-muted">
-      <p>No captures yet.</p>
-      <p class="text-xs">
-        Press one of the shortcuts above to capture. Only captures you save from the
-        editor will appear here.
-      </p>
+      <p>{{ t("history.empty") }}</p>
+      <p class="text-xs">{{ t("history.emptyHint") }}</p>
     </div>
     <ul v-else class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       <li
@@ -160,12 +165,17 @@ onUnmounted(() => {
           type="button"
           class="block w-full text-left disabled:opacity-50"
           :disabled="openingId === item.id"
-          :aria-label="`Open ${item.width} by ${item.height} capture in editor`"
+          :aria-label="
+            t('history.openCaptureInEditor', {
+              width: item.width,
+              height: item.height,
+            })
+          "
           @click="openInEditor(item.id)"
         >
           <img
             :src="previewSrc(item.file_path)"
-            :alt="`Capture ${item.id}`"
+            :alt="t('history.captureAlt', { id: item.id })"
             class="aspect-video w-full object-cover"
           />
         </button>
@@ -176,7 +186,7 @@ onUnmounted(() => {
           <button
             type="button"
             class="rounded p-1 opacity-0 transition group-hover:opacity-100 hover:bg-border hover:text-red-400"
-            aria-label="Delete capture"
+            :aria-label="t('history.deleteCapture')"
             @click.stop="remove(item.id)"
           >
             <IconTrash class="size-4" />

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { completeAreaCapture } from "../lib/tauri";
 import type { Region } from "@better-screenshoot/shared-types";
+import { translateAppError } from "../i18n/resolveError";
+import type { AppErrorPayload } from "../i18n/resolveError";
 
 interface OverlayPreview {
   preview_path: string;
@@ -16,6 +19,7 @@ interface OverlayPreview {
   scale_factor: number;
 }
 
+const { t } = useI18n();
 const preview = ref<OverlayPreview | null>(null);
 const loading = ref(true);
 const error = ref<string | null>(null);
@@ -94,7 +98,7 @@ function onPreviewImageLoad() {
 }
 
 function onPreviewImageError() {
-  error.value = "Could not load preview";
+  error.value = t("errors.loadPreviewFailed");
   loading.value = false;
 }
 
@@ -129,7 +133,9 @@ async function onPointerUp() {
     await completeAreaCapture(preview.value.display_id, region);
   } catch (err) {
     error.value =
-      err instanceof Error ? err.message : "Could not complete capture";
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.completeCaptureFailed");
   } finally {
     if (!error.value) {
       await closeOverlay();
@@ -174,8 +180,8 @@ onMounted(async () => {
       preview.value = event.payload;
       loading.value = true;
     }),
-    listen<string>("overlay-error", (event) => {
-      error.value = event.payload;
+    listen<string | AppErrorPayload>("overlay-error", (event) => {
+      error.value = translateAppError(t, event.payload);
       loading.value = false;
     }),
   ]);
@@ -194,7 +200,7 @@ onUnmounted(() => {
   <div
     class="fixed inset-0 cursor-crosshair select-none overflow-hidden bg-transparent"
     role="application"
-    aria-label="Capture region selector"
+    :aria-label="t('overlay.regionSelector')"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
@@ -241,7 +247,7 @@ onUnmounted(() => {
       class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40"
     >
       <p class="rounded-full bg-black/70 px-5 py-2.5 text-sm text-white">
-        Preparing capture…
+        {{ t("overlay.preparing") }}
       </p>
     </div>
 
@@ -256,7 +262,7 @@ onUnmounted(() => {
       v-if="!loading && preview && !error"
       class="pointer-events-none fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-5 py-2.5 text-sm text-white/90 shadow-lg"
     >
-      Drag to select · Esc to cancel
+      {{ t("overlay.hint") }}
     </p>
   </div>
 </template>
