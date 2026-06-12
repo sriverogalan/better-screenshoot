@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { WindowInfo } from "@better-screenshoot/shared-types";
 import { captureWindow, listWindows } from "../lib/tauri";
+
+const { t } = useI18n();
 const windows = ref<WindowInfo[]>([]);
 const loading = ref(true);
 const capturing = ref<number | null>(null);
@@ -34,14 +37,16 @@ onMounted(load);
 <template>
   <div class="flex min-h-full flex-col p-6">
     <header class="mb-6">
-      <h1 class="text-lg font-semibold">Capturar ventana</h1>
-      <p class="mt-1 text-sm text-text-muted">Selecciona la ventana a capturar</p>
+      <h1 class="text-lg font-semibold">{{ t("captureWindow.title") }}</h1>
+      <p class="mt-1 text-sm text-text-muted">{{ t("captureWindow.subtitle") }}</p>
     </header>
 
     <main class="flex-1">
-      <p v-if="loading" class="text-sm text-text-muted">Buscando ventanas…</p>
+      <p v-if="loading" class="text-sm text-text-muted">
+        {{ t("captureWindow.searching") }}
+      </p>
       <p v-else-if="windows.length === 0" class="text-sm text-text-muted">
-        No se encontraron ventanas. En Linux Wayland usa la captura por portal.
+        {{ t("captureWindow.empty") }}
       </p>
       <ul v-else class="space-y-2">
         <li v-for="win in windows" :key="win.id">
@@ -52,7 +57,9 @@ onMounted(load);
             @click="capture(win.id)"
           >
             <span>
-              <span class="block text-sm font-medium">{{ win.title || "Sin título" }}</span>
+              <span class="block text-sm font-medium">
+                {{ win.title || t("common.untitled") }}
+              </span>
               <span class="text-xs text-text-muted">{{ win.app_name }}</span>
             </span>
             <span class="text-xs text-text-muted">{{ win.width }}×{{ win.height }}</span>

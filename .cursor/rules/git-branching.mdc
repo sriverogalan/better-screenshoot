@@ -1,31 +1,28 @@
 ---
-description: Reglas de ramas, PRs y releases de better-screenshoot
+description: Better Screenshoot branch, PR, and release rules
 alwaysApply: true
 ---
 
-# Git: ramas y releases
+# Git: branches and releases
 
-## Ramas
+## Branches
 
-- `main` es producción. Nunca commitear directo salvo que el usuario lo pida explícitamente.
-- Nuevas ramas desde `main`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
-- PRs hacia `main`; título `[better-screenshoot] …`.
+- `main` is production. Releases are cut from `main` only.
+- `develop` is integration. Feature PRs target `develop` by default.
+- New branches from `develop`: `feat/*`, `fix/*`, `chore/*`, `release/*`.
+- PRs to `main`; title `[better-screenshoot] …`.
 
 ## Commits
 
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `ci:`.
-- Un PR = un objetivo. No mezclar feature + bump de versión sin motivo.
+- One PR = one goal. Don't mix feature + version bump without reason.
 
-## Versiones
+## Versions
 
-Sincronizar en todos estos archivos al subir versión:
-
-- `Cargo.toml` (`[workspace.package].version`)
-- `package.json` (raíz y paquetes del monorepo)
-- `apps/desktop/src-tauri/tauri.conf.json`
+Bump only the root `package.json` version. CI syncs the rest on PRs (`pnpm sync-version`). Targets: `Cargo.toml`, `tauri.conf.json`, and workspace `package.json` files.
 
 ## Releases
 
-- Tag semver desde `main`: `v0.2.0`.
-- El workflow `.github/workflows/release.yml` crea draft release al pushear `v*`.
-- Ver `docs/branching.md` para el flujo completo.
+- Semver tag from `main`: `v0.2.0`.
+- Build and upload locally from `main`: `pnpm release:mac v0.2.0 --all-arch` (script exits on other branches).
+- See `docs/branching.md` for the full flow.

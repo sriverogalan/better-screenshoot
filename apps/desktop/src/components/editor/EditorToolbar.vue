@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   IconArrowRight,
   IconBlur,
@@ -32,27 +34,35 @@ const emit = defineEmits<{
   copyAndSave: [];
 }>();
 
-const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: string }[] = [
-  { id: "select", label: "Seleccionar", icon: IconPointer, shortcut: "V" },
-  { id: "arrow", label: "Flecha", icon: IconArrowRight, shortcut: "A" },
-  { id: "rect", label: "Rectángulo", icon: IconRectangle, shortcut: "R" },
-  { id: "text", label: "Texto", icon: IconTypography, shortcut: "T" },
-  { id: "highlight", label: "Resaltar", icon: IconHighlight, shortcut: "H" },
-  { id: "pen", label: "Lápiz", icon: IconPencil, shortcut: "P" },
-  { id: "blur", label: "Difuminar", icon: IconBlur, shortcut: "B" },
-];
+const { t } = useI18n();
+
+const tools = computed(() => [
+  { id: "select" as const, label: t("editor.tools.select"), icon: IconPointer, shortcut: "V" },
+  { id: "arrow" as const, label: t("editor.tools.arrow"), icon: IconArrowRight, shortcut: "A" },
+  { id: "rect" as const, label: t("editor.tools.rect"), icon: IconRectangle, shortcut: "R" },
+  { id: "text" as const, label: t("editor.tools.text"), icon: IconTypography, shortcut: "T" },
+  { id: "highlight" as const, label: t("editor.tools.highlight"), icon: IconHighlight, shortcut: "H" },
+  { id: "pen" as const, label: t("editor.tools.pen"), icon: IconPencil, shortcut: "P" },
+  { id: "blur" as const, label: t("editor.tools.blur"), icon: IconBlur, shortcut: "B" },
+]);
 </script>
 
 <template>
   <header class="shrink-0 border-b border-border">
     <div class="flex items-center justify-between gap-4 px-4 py-3">
       <div class="min-w-0">
-        <h1 class="text-sm font-medium">Editor</h1>
+        <h1 class="text-sm font-medium">{{ t("editor.title") }}</h1>
         <p
           v-if="hasCapture"
           class="truncate text-xs text-text-muted"
         >
-          {{ imageWidth }} × {{ imageHeight }} px · {{ zoomPercent }}%
+          {{
+            t("editor.dimensions", {
+              width: imageWidth,
+              height: imageHeight,
+              zoom: zoomPercent,
+            })
+          }}
         </p>
       </div>
 
@@ -64,7 +74,7 @@ const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: stri
           @click="emit('copyAndDiscard')"
         >
           <IconTrash class="size-4" />
-          Copiar y descartar
+          {{ t("editor.copyAndDiscard") }}
         </button>
         <button
           type="button"
@@ -73,7 +83,7 @@ const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: stri
           @click="emit('copyAndSave')"
         >
           <IconDeviceFloppy class="size-4" />
-          Copiar y guardar
+          {{ t("editor.copyAndSave") }}
         </button>
       </div>
     </div>
@@ -107,19 +117,19 @@ const tools: { id: Tool; label: string; icon: typeof IconPointer; shortcut: stri
         class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
         @click="emit('undo')"
       >
-        Deshacer
+        {{ t("editor.undo") }}
       </button>
       <button
         type="button"
         class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
         @click="emit('redo')"
       >
-        Rehacer
+        {{ t("editor.redo") }}
       </button>
 
       <p class="ml-auto hidden shrink-0 text-xs text-text-muted lg:block">
         <IconClipboardCopy class="mr-1 inline size-3.5" />
-        V seleccionar · A flecha · R rectángulo · T texto
+        {{ t("editor.shortcutHint") }}
       </p>
     </div>
   </header>

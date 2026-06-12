@@ -2,24 +2,20 @@
 set -euo pipefail
 
 REPO="${GITHUB_REPO:-sriverogalan/better-screenshoot}"
-BRANCH="${1:-main}"
+BRANCHES=("main" "develop")
 
 if ! command -v gh >/dev/null 2>&1; then
-  echo "Instala GitHub CLI: https://cli.github.com/"
+  echo "Install GitHub CLI: https://cli.github.com/"
   exit 1
 fi
 
 if ! gh auth status >/dev/null 2>&1; then
-  echo "Ejecuta primero: gh auth login"
+  echo "Run: gh auth login"
   exit 1
 fi
 
-echo "Configurando protección de rama '${BRANCH}' en ${REPO}…"
-
-gh api \
-  --method PUT \
-  "repos/${REPO}/branches/${BRANCH}/protection" \
-  --input - <<EOF
+protection_payload() {
+  cat <<'EOF'
 {
   "required_status_checks": {
     "strict": true,
@@ -36,5 +32,14 @@ gh api \
   "allow_deletions": false
 }
 EOF
+}
 
-echo "Listo. Revisa en GitHub → Settings → Branches → ${BRANCH}."
+for branch in "${BRANCHES[@]}"; do
+  echo "Configuring branch protection for '${branch}' on ${REPO}…"
+  gh api \
+    --method PUT \
+    "repos/${REPO}/branches/${branch}/protection" \
+    --input - <<<"$(protection_payload)"
+done
+
+echo "Done. Protected branches: ${BRANCHES[*]}"

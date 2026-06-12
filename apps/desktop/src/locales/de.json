@@ -1,0 +1,261 @@
+{
+  "common": {
+    "appName": "Better Screenshoot",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "and": "und",
+    "region": "Bereich",
+    "screen": "Bildschirm",
+    "window": "Fenster",
+    "untitled": "Ohne Titel",
+    "disabled": "Deaktiviert",
+    "opening": "Wird geöffnet…",
+    "replacing": "Wird ersetzt…",
+    "loading": "Wird geladen…"
+  },
+  "nav": {
+    "mainNavigation": "Hauptnavigation",
+    "history": "Verlauf",
+    "settings": "Einstellungen"
+  },
+  "history": {
+    "title": "Verlauf",
+    "subtitle": "Alle gespeicherten Aufnahmen",
+    "captureShortcuts": "Aufnahme-Tastenkürzel",
+    "captureShortcutsHint": "Verwenden Sie globale Tastenkürzel zum Aufnehmen. Sie können auch das Menüleistensymbol verwenden.",
+    "captureRegion": "Bereich aufnehmen",
+    "captureScreen": "Bildschirm aufnehmen",
+    "captureWindow": "Fenster aufnehmen",
+    "customizeShortcuts": "Tastenkürzel in Einstellungen anpassen",
+    "loadingCaptures": "Aufnahmen werden geladen…",
+    "empty": "Noch keine Aufnahmen.",
+    "emptyHint": "Drücken Sie eines der Tastenkürzel oben, um aufzunehmen. Nur im Editor gespeicherte Aufnahmen erscheinen hier.",
+    "openCaptureInEditor": "Aufnahme {width} × {height} im Editor öffnen",
+    "captureAlt": "Aufnahme {id}",
+    "deleteCapture": "Aufnahme löschen",
+    "openMacosPermissions": "macOS-Berechtigungen öffnen",
+    "devBinary": "Entwickler-Binary: {path}"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "languageOptions": {
+      "en": "English",
+      "es": "Español",
+      "fr": "Français",
+      "de": "Deutsch",
+      "pt": "Português",
+      "it": "Italiano"
+    },
+    "sections": {
+      "capture": "Aufnahme",
+      "integrations": "Integrationen",
+      "captureMode": "Aufnahmemodus (macOS)",
+      "globalShortcuts": "Globale Tastenkürzel",
+      "license": "Lizenz"
+    },
+    "saveFolder": "Speicherordner",
+    "autoCopy": "Automatisch in die Zwischenablage kopieren",
+    "autoSave": "Aufnahmen auf der Festplatte speichern",
+    "allowExternalControl": "Externe Steuerung erlauben (Raycast, CLI, URL-Schema)",
+    "urlSchemeHint": "URL-Schema: {scheme}",
+    "systemCaptureModeLegend": "System-Aufnahmemodus",
+    "independentModeTitle": "Better Screenshoot-Tastenkürzel",
+    "independentModeHint": "macOS behält {cmd3}, {cmd4} und {cmd5}.",
+    "replaceModeTitle": "Systemaufnahmen ersetzen",
+    "replaceModeHint": "Deaktiviert native Tastenkürzel und weist sie Better Screenshoot zu.",
+    "activeOnMacos": "Aktiv auf macOS",
+    "restoreSystemCaptures": "Systemaufnahmen wiederherstellen",
+    "restoreSystemCapturesHint": "Aktiviert macOS {cmd3}, {cmd4} und {cmd5} wieder und kehrt zu den eigenen Tastenkürzeln der App zurück.",
+    "repairState": "Zustand reparieren",
+    "hotkeys": {
+      "captureArea": "Bereich aufnehmen",
+      "captureAreaHint": "Öffnet auf macOS den nativen Systemselektor",
+      "captureScreen": "Bildschirm aufnehmen",
+      "captureWindow": "Fenster aufnehmen",
+      "openHistory": "Verlauf öffnen",
+      "managedByReplace": "Verwaltet durch «Systemaufnahmen ersetzen» ({shortcut})."
+    },
+    "license": {
+      "currentPlan": "Aktueller Plan:",
+      "licenseKey": "Lizenzschlüssel",
+      "licenseKeyPlaceholder": "BS-PRO-…",
+      "activate": "Lizenz aktivieren",
+      "tierLabels": {
+        "community": "Community (kostenlos)",
+        "pro": "Pro",
+        "cloud": "Cloud",
+        "team": "Team"
+      }
+    }
+  },
+  "overlay": {
+    "regionSelector": "Bereichsauswahl für Aufnahme",
+    "preparing": "Aufnahme wird vorbereitet…",
+    "hint": "Ziehen zum Auswählen · Esc zum Abbrechen"
+  },
+  "captureWindow": {
+    "title": "Fenster aufnehmen",
+    "subtitle": "Wählen Sie das aufzunehmende Fenster",
+    "searching": "Fenster werden gesucht…",
+    "empty": "Keine Fenster gefunden."
+  },
+  "editor": {
+    "title": "Editor",
+    "dimensions": "{width} × {height} px · {zoom} %",
+    "copyAndDiscard": "Kopieren und verwerfen",
+    "copyAndSave": "Kopieren und speichern",
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
+    "shortcutHint": "V Auswahl · A Pfeil · R Rechteck · T Text",
+    "tools": {
+      "select": "Auswahl",
+      "arrow": "Pfeil",
+      "rect": "Rechteck",
+      "text": "Text",
+      "highlight": "Markierung",
+      "pen": "Stift",
+      "blur": "Unschärfe"
+    },
+    "style": {
+      "color": "Farbe",
+      "colorAria": "Farbe {color}",
+      "thickness": "Stärke",
+      "font": "Schrift"
+    },
+    "loadingImage": "Bild wird geladen…",
+    "empty": "Nehmen Sie eine Aufnahme auf, um mit der Bearbeitung zu beginnen.",
+    "textPlaceholder": "Hier eingeben…",
+    "editAnnotationText": "Anmerkungstext bearbeiten"
+  },
+  "pendingCapture": {
+    "title": "Aufnahme bereit, aber Editor hat sich nicht geöffnet",
+    "description": "{width}×{height} — vorübergehend gespeichert, bis Sie sie bearbeiten oder verwerfen.",
+    "openInEditor": "Im Editor öffnen"
+  },
+  "systemScreenshotDialog": {
+    "title": "Systemaufnahmen ersetzen?",
+    "description": "Better Screenshoot deaktiviert die nativen macOS-Tastenkürzel und weist sie eigenen Aufnahmen zu. Wir behalten ein Backup, um sie bei Bedarf wiederherzustellen.",
+    "willBeDisabled": "Wird deaktiviert",
+    "confirm": "System-Tastenkürzel ersetzen"
+  },
+  "licensing": {
+    "tiers": {
+      "community": {
+        "name": "Community",
+        "features": [
+          "Bildschirm-, Fenster- und Bereichsaufnahme",
+          "Einfache Anmerkungen",
+          "Lokaler Verlauf",
+          "CLI und URL-Schema",
+          "Globale Tastenkürzel"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "features": [
+          "Alles aus Community",
+          "Lokale OCR",
+          "Scroll-Aufnahme",
+          "GIF-Aufzeichnung",
+          "Auf Bildschirm anheften",
+          "Eigene Designs"
+        ]
+      },
+      "cloud": {
+        "name": "Cloud",
+        "features": [
+          "Alles aus Pro",
+          "Teilbare Links",
+          "50 GB Speicher",
+          "Eigene Domain",
+          "Link-Ablauf"
+        ]
+      },
+      "team": {
+        "name": "Team",
+        "features": [
+          "Alles aus Cloud",
+          "SSO",
+          "Team-Branding",
+          "Administrationsbereich",
+          "Aufbewahrungsrichtlinien"
+        ]
+      }
+    },
+    "messages": {
+      "noKey": "Kein Schlüssel — Community-Modus",
+      "validPro": "Gültige Pro-Lizenz",
+      "validCloud": "Gültige Cloud-Lizenz",
+      "validTeam": "Gültige Team-Lizenz",
+      "invalidKey": "Ungültiger Lizenzschlüssel"
+    }
+  },
+  "systemShortcuts": {
+    "captureScreen": "Bildschirm aufnehmen (⌘⇧3)",
+    "copyScreen": "Bildschirm in Zwischenablage kopieren (⌃⌘⇧3)",
+    "captureRegion": "Bereich aufnehmen (⌘⇧4)",
+    "copyRegion": "Bereich in Zwischenablage kopieren (⌃⌘⇧4)",
+    "captureOptions": "Aufnahmeoptionen (⌘⇧5)"
+  },
+  "errors": {
+    "appStartFailed": "Fehler beim Starten der Anwendung",
+    "loadHistoryFailed": "Verlauf konnte nicht geladen werden",
+    "openEditorFailed": "Editor konnte nicht geöffnet werden",
+    "checkPermissionsFailed": "Berechtigungen konnten nicht geprüft werden",
+    "checkCaptureModeFailed": "Aufnahmemodus konnte nicht geprüft werden",
+    "changeCaptureModeFailed": "Aufnahmemodus konnte nicht geändert werden",
+    "loadPreviewFailed": "Vorschau konnte nicht geladen werden",
+    "completeCaptureFailed": "Aufnahme konnte nicht abgeschlossen werden",
+    "completeActionFailed": "Aktion konnte nicht abgeschlossen werden",
+    "imageLoadFailed": "Fehler beim Laden des Bildes",
+    "imageDisplayFailed": "Bild konnte nicht angezeigt werden. Prüfen Sie die Bildschirmaufnahme-Berechtigungen.",
+    "imageNotReady": "Bild ist noch nicht zum Export bereit",
+    "captureFailed": "Aufnahme fehlgeschlagen",
+    "captureCancelled": "Aufnahme abgebrochen",
+    "editorNotFound": "Editor-Fenster nicht gefunden",
+    "mainWindowNotFound": "Hauptfenster nicht gefunden",
+    "noMonitorFound": "Kein Monitor gefunden",
+    "displayNotFound": "Bildschirm {id} nicht gefunden",
+    "noDisplaysFound": "Keine Bildschirme gefunden",
+    "invalidPortalPath": "Ungültiger Portal-Screenshot-Pfad",
+    "noPendingCapture": "Keine ausstehende Aufnahme",
+    "readImageFailed": "Bild konnte nicht gelesen werden",
+    "openEditorHint": "Editor konnte nicht geöffnet werden. Klicken Sie in der Leiste auf «Im Editor öffnen» oder nutzen Sie das Menüleistensymbol.",
+    "openEditorPermission": "Editor konnte nicht geöffnet werden. Prüfen Sie, ob Better Screenshoot die Bildschirmaufnahme-Berechtigung hat.",
+    "clipboardCopyFailed": "Bild konnte nicht in die Zwischenablage kopiert werden",
+    "storageFailed": "Speichervorgang fehlgeschlagen",
+    "homeDirectoryNotFound": "Home-Verzeichnis konnte nicht ermittelt werden",
+    "plistBuddyFailed": "PlistBuddy konnte nicht ausgeführt werden",
+    "systemShortcutsWriteFailed": "System-Tastenkürzel konnten nicht geschrieben werden",
+    "systemShortcutsModifyFailed": "System-Tastenkürzel konnten nicht geändert werden",
+    "systemChangesFailed": "Systemänderungen konnten nicht angewendet werden",
+    "openSystemSettingsFailed": "Systemeinstellungen konnten nicht geöffnet werden",
+    "macosOnly": "Diese Aktion ist nur auf macOS verfügbar",
+    "macosShortcutsOnly": "System-Aufnahme-Tastenkürzel können nur auf macOS konfiguriert werden",
+    "displaysDetected": "{count} Bildschirm(e) erkannt.",
+    "macosPermissionRequired": "macOS erlaubt keine Bildschirmaufnahme. Gehen Sie zu Systemeinstellungen → Datenschutz & Sicherheit → Bildschirmaufnahme und aktivieren Sie Better Screenshoot.",
+    "macosDevBinaryHint": " Wenn Sie `pnpm dev` verwenden, autorisieren Sie auch die Binary unter target/debug/better-screenshoot.",
+    "noDisplaysDetected": "Keine Bildschirme erkannt.",
+    "systemCapturesRestored": "Systemaufnahmen wiederhergestellt.",
+    "alreadyIndependent": "Better Screenshoot-Tastenkürzel werden bereits verwendet.",
+    "alreadyReplaced": "Systemaufnahmen sind bereits ersetzt.",
+    "independentModeActive": "Unabhängiger Modus aktiv.",
+    "systemCapturesRestoredFull": "Systemaufnahmen wiederhergestellt. Better Screenshoot verwendet eigene Tastenkürzel.",
+    "systemCapturesReplaced": "Systemaufnahmen ersetzt: ⌘⇧3 Bildschirm, ⌘⇧4 Bereich, ⌘⇧5 Fenster.",
+    "driftReplaceIndependent": "macOS-Tastenkürzel sind noch aktiv, obwohl die App im Ersetzungsmodus ist.",
+    "driftIndependentReplace": "macOS hat Systemaufnahmen deaktiviert, aber die App ist nicht im Ersetzungsmodus.",
+    "driftNoBackup": "macOS hat Systemaufnahmen ohne Backup deaktiviert. Reparieren Sie den Zustand, um sie wieder zu aktivieren.",
+    "driftGeneric": "Der Systemaufnahme-Zustand stimmt nicht mit den Einstellungen überein.",
+    "generic": "Etwas ist schiefgelaufen"
+  },
+  "tray": {
+    "tooltip": "Better Screenshoot",
+    "captureArea": "Bereich aufnehmen",
+    "captureScreen": "Bildschirm aufnehmen",
+    "captureWindow": "Fenster aufnehmen",
+    "history": "Verlauf",
+    "settings": "Einstellungen",
+    "quit": "Beenden"
+  }
+}

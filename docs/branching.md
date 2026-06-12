@@ -1,64 +1,68 @@
-# Reglas de ramas
+# Branch rules
 
-## Ramas principales
+## Main branches
 
-| Rama | Uso |
+| Branch | Purpose |
 |---|---|
-| `main` | Producción. Siempre desplegable. Solo entra código vía PR. |
-| `feat/*` | Nuevas funcionalidades |
-| `fix/*` | Corrección de bugs |
-| `chore/*` | CI, dependencias, docs, refactors sin cambio de comportamiento |
-| `release/*` | Preparación de versión (opcional) |
+| `main` | Production. Always deployable. Releases are cut from here. |
+| `develop` | Integration branch. Day-to-day work merges here first. |
+| `feat/*` | New features |
+| `fix/*` | Bug fixes |
+| `chore/*` | CI, dependencies, docs, refactors without behavior changes |
+| `release/*` | Version preparation (optional) |
 
-## Flujo de trabajo
+## Workflow
 
-1. Crear rama desde `main` actualizada:
+1. Create a branch from up-to-date `main`:
    ```bash
    git checkout main
    git pull origin main
-   git checkout -b feat/mi-cambio
+   git checkout -b feat/my-change
    ```
-2. Commits pequeños y descriptivos (Conventional Commits: `feat:`, `fix:`, `chore:`…).
-3. Abrir PR hacia `main`. Título: `[better-screenshoot] Descripción clara`.
-4. Esperar CI verde (`frontend`, `rust`, `tauri-build`).
-5. Merge (squash recomendado para historial limpio).
+2. Small, descriptive commits (Conventional Commits: `feat:`, `fix:`, `chore:`…).
+3. Open a PR to `develop` (or `main` for hotfixes). Title: `[better-screenshoot] Clear description`.
+4. Wait for green CI (`sync-version`, `frontend`, `rust`).
+5. Merge (squash recommended for a clean history).
+6. Open a PR from `develop` → `main` when ready to release.
 
-## Protección de `main`
+## `main` protection
 
-Configura estas reglas en GitHub (Settings → Branches → Add rule):
+Configure these rules in GitHub (Settings → Branches → Add rule):
 
-- **Branch name pattern:** `main`
+- **Branch name patterns:** `main`, `develop`
 - Require a pull request before merging
 - Require status checks to pass: `ci-success`
 - Do not allow bypassing the above settings
-- Restrict pushes (opcional): solo admins o nadie pushea directo
+- Restrict pushes (optional): admins only or no direct pushes
 
-### Aplicar con script
+### Apply with script
 
-Tras `gh auth login`:
+After `gh auth login`:
 
 ```bash
 ./scripts/setup-branch-protection.sh
 ```
 
-## Releases y versiones
+## Releases and versions
 
-- La versión vive en `Cargo.toml` (workspace), `package.json` raíz y `apps/desktop/src-tauri/tauri.conf.json`.
-- Al preparar release, sincroniza la versión en todos esos archivos.
-- Los tags siguen semver: `v0.2.0`, `v0.2.1`, `v1.0.0`.
-- **Solo se etiqueta desde `main`**, después de mergear el PR de release.
+- Bump the version in the **root** `package.json` only.
+- On pull requests, CI runs `pnpm sync-version` and commits the matching updates to `Cargo.toml`, `tauri.conf.json`, and workspace `package.json` files.
+- On `main`, CI fails if any of those files drift from the root version.
+- Tags follow semver: `v0.2.0`, `v0.2.1`, `v1.0.0`.
+- **Tag only from `main`**, after merging the release PR.
 
 ```bash
 git checkout main
 git pull origin main
 git tag v0.2.0
 git push origin v0.2.0
+pnpm release:mac v0.2.0 --all-arch
 ```
 
-GitHub Actions publicará un borrador de release con los instaladores (.dmg, .exe, .deb…).
+The release script only runs on `main`. It builds and signs on your Mac, then uploads a draft release with `.dmg` installers and updater artifacts. Publish the draft on GitHub when ready.
 
-## Qué no hacer
+## What not to do
 
-- No pushear directamente a `main` (salvo hotfixes acordados).
-- No crear tags desde ramas de feature.
-- No mezclar bump de versión con cambios de feature no relacionados.
+- Don't push directly to `main` (except agreed hotfixes).
+- Don't create tags from feature branches.
+- Don't mix version bumps with unrelated feature changes.

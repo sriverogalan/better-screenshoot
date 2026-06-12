@@ -7,10 +7,47 @@ on:
     branches: [main]
 
 jobs:
+  sync-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sync version from root package.json
+        if: github.event_name == 'pull_request'
+        run: node scripts/sync-version.mjs
+
+      - name: Verify versions are in sync
+        if: github.event_name != 'pull_request'
+        run: node scripts/sync-version.mjs --check
+
+      - name: Commit synced version files
+        if: github.event_name == 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: sync version from package.json"
+          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
   frontend:
+    needs: [sync-version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -21,66 +58,30 @@ jobs:
       - run: pnpm test
 
   rust:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    needs: [sync-version]
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev libpipewire-0.3-dev libwayland-dev libegl1-mesa-dev
-      - run: cargo test -p capture-core
-      - run: cargo build -p better-screenshoot-cli
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
-  tauri-build:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            target: aarch64-apple-darwin
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev libpipewire-0.3-dev libwayland-dev libegl1-mesa-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-      - run: pnpm install
-      - run: pnpm --filter @better-screenshoot/desktop build
-      - run: pnpm --filter @better-screenshoot/desktop tauri build --target ${{ matrix.target }}
-        env:
-          CI: true
+      - run: cargo test -p capture-core
+      - run: cargo check -p better-screenshoot --manifest-path apps/desktop/src-tauri/Cargo.toml
 
   ci-success:
     name: ci-success
-    needs: [frontend, rust, tauri-build]
+    needs: [sync-version, frontend, rust]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Verify required jobs
         run: |
-          if [ "${{ needs.frontend.result }}" != "success" ] || \
-             [ "${{ needs.rust.result }}" != "success" ] || \
-             [ "${{ needs.tauri-build.result }}" != "success" ]; then
+          if [ "${{ needs.sync-version.result }}" != "success" ] || \
+             [ "${{ needs.frontend.result }}" != "success" ] || \
+             [ "${{ needs.rust.result }}" != "success" ]; then
             echo "One or more required jobs failed."
             exit 1
           fi

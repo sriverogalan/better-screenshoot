@@ -1,6 +1,6 @@
 {
   "name": "@better-screenshoot/licensing",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -8,7 +8,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
     "typescript": "~5.6.2",

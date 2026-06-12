@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { TIERS } from "@better-screenshoot/licensing";
 import {
   DEFAULT_HOTKEYS,
   SYSTEM_REPLACEMENT_HOTKEYS,
+  type AppLocale,
   type HotkeyConfig,
   type LicenseTier,
   type SystemCaptureMode,
 } from "@better-screenshoot/shared-types";
 import { useSettingsStore } from "../stores/settings";
 import SystemScreenshotPermissionDialog from "../components/settings/SystemScreenshotPermissionDialog.vue";
+import AppUpdateSection from "../components/settings/AppUpdateSection.vue";
 import {
   getSystemCaptureStatus,
   setSystemCaptureMode,
@@ -19,15 +21,24 @@ import {
 } from "../lib/tauri";
 import { formatHotkey } from "../lib/format-hotkey";
 import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
+import { SUPPORTED_LOCALES, setLocale } from "../i18n";
+import { translateAppError, translateMessageCode } from "../i18n/resolveError";
+import { getLocalizedTiers, translateLicenseMessage } from "../lib/licensing-i18n";
+import { systemShortcutLabelKey } from "../lib/system-shortcut-labels";
 
+const { t, tm } = useI18n();
 const settingsStore = useSettingsStore();
 
-const hotkeyFields: Array<{ key: keyof HotkeyConfig; label: string; hint?: string }> = [
-  { key: "capture_area", label: "Capturar región", hint: "En macOS abre el selector nativo del sistema" },
-  { key: "capture_screen", label: "Capturar pantalla" },
-  { key: "capture_window", label: "Capturar ventana" },
-  { key: "open_history", label: "Abrir historial" },
-];
+const hotkeyFields = computed(() => [
+  {
+    key: "capture_area" as const,
+    label: t("settings.hotkeys.captureArea"),
+    hint: t("settings.hotkeys.captureAreaHint"),
+  },
+  { key: "capture_screen" as const, label: t("settings.hotkeys.captureScreen") },
+  { key: "capture_window" as const, label: t("settings.hotkeys.captureWindow") },
+  { key: "open_history" as const, label: t("settings.hotkeys.openHistory") },
+]);
 
 const captureHotkeyKeys: Array<keyof HotkeyConfig> = [
   "capture_area",
@@ -43,35 +54,57 @@ const systemSuccess = ref<string | null>(null);
 const systemBusy = ref(false);
 const showReplaceDialog = ref(false);
 const captureStatus = ref<SystemCaptureStatus | null>(null);
+const localizedTiers = computed(() => getLocalizedTiers(t, tm));
+
+const languageOptions = computed(() =>
+  SUPPORTED_LOCALES.map((locale) => ({
+    value: locale,
+    label: t(`settings.languageOptions.${locale}`),
+  })),
+);
 
 const independentHotkeyPreview = computed(() =>
   [
-    `${formatHotkey(DEFAULT_HOTKEYS.capture_area)} región`,
-    `${formatHotkey(DEFAULT_HOTKEYS.capture_screen)} pantalla`,
-    `${formatHotkey(DEFAULT_HOTKEYS.capture_window)} ventana`,
+    `${formatHotkey(DEFAULT_HOTKEYS.capture_area)} ${t("common.region")}`,
+    `${formatHotkey(DEFAULT_HOTKEYS.capture_screen)} ${t("common.screen")}`,
+    `${formatHotkey(DEFAULT_HOTKEYS.capture_window)} ${t("common.window")}`,
   ].join(" · "),
 );
 
 const replacementHotkeyPreview = computed(() =>
   [
-    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen)} pantalla`,
-    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area)} región`,
-    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window)} ventana`,
+    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen)} ${t("common.screen")}`,
+    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area)} ${t("common.region")}`,
+    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window)} ${t("common.window")}`,
   ].join(" · "),
 );
 
 const currentMode = computed(() => settings.value.system_capture_mode);
 const isReplaceMode = computed(() => currentMode.value === "replace_system");
 const driftDetected = computed(() => captureStatus.value?.drift_detected ?? false);
-const driftMessage = computed(() => captureStatus.value?.message ?? null);
+const driftMessage = computed(() => {
+  const code = captureStatus.value?.messageCode;
+  return code ? translateMessageCode(t, code) : null;
+});
 
 function isCaptureHotkeyLocked(key: keyof HotkeyConfig) {
   return isReplaceMode.value && captureHotkeyKeys.includes(key);
 }
 
+function shortcutLabel(id: number, fallback: string) {
+  const key = systemShortcutLabelKey(id);
+  return key ? t(key) : fallback;
+}
+
+function managedShortcut(key: keyof HotkeyConfig) {
+  if (key === "capture_screen") return "⌘⇧3";
+  if (key === "capture_area") return "⌘⇧4";
+  return "⌘⇧5";
+}
+
 async function applyLicense() {
   const result = await validateLicenseKey(licenseKey.value);
-  licenseMessage.value = result.message;
+  licenseMessage.value = translateLicenseMessage(t, result.messageCode);
   if (result.valid) {
     await settingsStore.save({
       ...settings.value,
@@ -80,18 +113,23 @@ async function applyLicense() {
   }
 }
 
-const tierLabels: Record<LicenseTier, string> = {
-  community: "Community (gratis)",
-  pro: "Pro",
-  cloud: "Cloud",
-  team: "Team",
-};
+const tierLabels = computed<Record<LicenseTier, string>>(() => ({
+  community: t("settings.license.tierLabels.community"),
+  pro: t("settings.license.tierLabels.pro"),
+  cloud: t("settings.license.tierLabels.cloud"),
+  team: t("settings.license.tierLabels.team"),
+}));
 
 async function updateField<K extends keyof typeof settings.value>(
   key: K,
   value: (typeof settings.value)[K],
 ) {
   await settingsStore.save({ ...settings.value, [key]: value });
+}
+
+async function updateLocale(locale: AppLocale) {
+  await settingsStore.save({ ...settings.value, locale });
+  await setLocale(locale);
 }
 
 async function updateHotkey(
@@ -109,7 +147,9 @@ async function loadCaptureStatus() {
     captureStatus.value = await getSystemCaptureStatus();
   } catch (err) {
     systemMessage.value =
-      err instanceof Error ? err.message : "No se pudo comprobar el modo de captura";
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.checkCaptureModeFailed");
   }
 }
 
@@ -121,10 +161,12 @@ async function applyCaptureMode(mode: SystemCaptureMode) {
     const result = await setSystemCaptureMode(mode);
     settingsStore.settings = result.settings;
     captureStatus.value = result.status;
-    systemSuccess.value = result.message;
+    systemSuccess.value = translateMessageCode(t, result.messageCode);
   } catch (err) {
     systemMessage.value =
-      err instanceof Error ? err.message : "No se pudo cambiar el modo de captura";
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.changeCaptureModeFailed");
     await loadCaptureStatus();
   } finally {
     systemBusy.value = false;
@@ -162,7 +204,9 @@ onMounted(async () => {
   await loadCaptureStatus();
   unlisteners = await Promise.all([
     listen<string>("system-capture-drift", (event) => {
-      systemMessage.value = event.payload;
+      if (event.payload) {
+        systemMessage.value = translateMessageCode(t, event.payload);
+      }
       void loadCaptureStatus();
     }),
   ]);
@@ -176,17 +220,43 @@ onUnmounted(() => {
 <template>
   <div class="flex min-h-full flex-col">
     <header class="border-b border-border px-6 py-4">
-      <h1 class="text-lg font-semibold">Ajustes</h1>
+      <h1 class="text-lg font-semibold">{{ t("settings.title") }}</h1>
     </header>
 
     <main class="mx-auto w-full max-w-2xl flex-1 space-y-8 p-6">
       <PendingCaptureBanner />
 
       <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">Captura</h2>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">
+          {{ t("settings.language") }}
+        </h2>
+        <div class="rounded-xl border border-border bg-surface-raised p-4">
+          <label class="block">
+            <span class="mb-1 block text-sm">{{ t("settings.language") }}</span>
+            <select
+              :value="settings.locale"
+              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+              @change="updateLocale(($event.target as HTMLSelectElement).value as AppLocale)"
+            >
+              <option
+                v-for="option in languageOptions"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">
+          {{ t("settings.sections.capture") }}
+        </h2>
         <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
           <label class="block">
-            <span class="mb-1 block text-sm">Carpeta de guardado</span>
+            <span class="mb-1 block text-sm">{{ t("settings.saveFolder") }}</span>
             <input
               :value="settings.save_directory"
               type="text"
@@ -201,7 +271,7 @@ onUnmounted(() => {
               class="size-4 rounded border-border"
               @change="updateField('auto_copy', ($event.target as HTMLInputElement).checked)"
             />
-            <span class="text-sm">Copiar al portapapeles automáticamente</span>
+            <span class="text-sm">{{ t("settings.autoCopy") }}</span>
           </label>
           <label class="flex items-center gap-3">
             <input
@@ -210,13 +280,15 @@ onUnmounted(() => {
               class="size-4 rounded border-border"
               @change="updateField('auto_save', ($event.target as HTMLInputElement).checked)"
             />
-            <span class="text-sm">Guardar capturas en disco</span>
+            <span class="text-sm">{{ t("settings.autoSave") }}</span>
           </label>
         </div>
       </section>
 
       <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">Integraciones</h2>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">
+          {{ t("settings.sections.integrations") }}
+        </h2>
         <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
           <label class="flex items-center gap-3">
             <input
@@ -230,16 +302,22 @@ onUnmounted(() => {
                 )
               "
             />
-            <span class="text-sm">Permitir control externo (Raycast, CLI, URL scheme)</span>
+            <span class="text-sm">{{ t("settings.allowExternalControl") }}</span>
           </label>
           <p class="text-xs text-text-muted">
-            URL scheme: <code class="text-accent">betterscreenshoot://capture-area</code>
+            {{
+              t("settings.urlSchemeHint", {
+                scheme: "betterscreenshoot://capture-area",
+              })
+            }}
           </p>
         </div>
       </section>
 
       <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">Modo de captura (macOS)</h2>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">
+          {{ t("settings.sections.captureMode") }}
+        </h2>
         <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
           <div
             v-if="driftDetected"
@@ -253,7 +331,7 @@ onUnmounted(() => {
               :disabled="systemBusy"
               @click="repairDrift"
             >
-              Reparar estado
+              {{ t("settings.repairState") }}
             </button>
           </div>
 
@@ -261,7 +339,7 @@ onUnmounted(() => {
             class="space-y-3"
             :disabled="systemBusy || captureStatus?.platform_supported === false"
           >
-            <legend class="sr-only">Modo de captura del sistema</legend>
+            <legend class="sr-only">{{ t("settings.systemCaptureModeLegend") }}</legend>
 
             <label
               class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
@@ -280,14 +358,20 @@ onUnmounted(() => {
                 @change="onModeChange('independent')"
               />
               <span class="space-y-1">
-                <span class="block text-sm font-medium">Atajos propios de Better Screenshoot</span>
+                <span class="block text-sm font-medium">
+                  {{ t("settings.independentModeTitle") }}
+                </span>
                 <span class="block text-xs text-text-muted">
                   {{ independentHotkeyPreview }}
                 </span>
                 <span class="block text-xs text-text-muted">
-                  macOS conserva <code class="text-accent">⌘⇧3</code>,
-                  <code class="text-accent">⌘⇧4</code> y
-                  <code class="text-accent">⌘⇧5</code>.
+                  {{
+                    t("settings.independentModeHint", {
+                      cmd3: "⌘⇧3",
+                      cmd4: "⌘⇧4",
+                      cmd5: "⌘⇧5",
+                    })
+                  }}
                 </span>
               </span>
             </label>
@@ -309,12 +393,14 @@ onUnmounted(() => {
                 @change="onModeChange('replace_system')"
               />
               <span class="space-y-1">
-                <span class="block text-sm font-medium">Sustituir capturas del sistema</span>
+                <span class="block text-sm font-medium">
+                  {{ t("settings.replaceModeTitle") }}
+                </span>
                 <span class="block text-xs text-text-muted">
                   {{ replacementHotkeyPreview }}
                 </span>
                 <span class="block text-xs text-text-muted">
-                  Desactiva los atajos nativos y los reasigna a Better Screenshoot.
+                  {{ t("settings.replaceModeHint") }}
                 </span>
               </span>
             </label>
@@ -329,7 +415,9 @@ onUnmounted(() => {
               :key="shortcut.id"
               class="flex items-center justify-between gap-3"
             >
-              <span class="text-text-muted">{{ shortcut.label }}</span>
+              <span class="text-text-muted">
+                {{ shortcutLabel(shortcut.id, shortcut.label) }}
+              </span>
               <span
                 class="rounded-md px-2 py-0.5 text-xs"
                 :class="
@@ -338,7 +426,11 @@ onUnmounted(() => {
                     : 'bg-emerald-950/50 text-emerald-100'
                 "
               >
-                {{ shortcut.enabled ? "Activo en macOS" : "Desactivado" }}
+                {{
+                  shortcut.enabled
+                    ? t("settings.activeOnMacos")
+                    : t("common.disabled")
+                }}
               </span>
             </li>
           </ul>
@@ -350,12 +442,16 @@ onUnmounted(() => {
             :disabled="systemBusy"
             @click="restoreSystemCaptures"
           >
-            Restaurar capturas del sistema
+            {{ t("settings.restoreSystemCaptures") }}
           </button>
           <p v-if="isReplaceMode" class="text-xs text-text-muted">
-            Reactiva <code class="text-accent">⌘⇧3</code>,
-            <code class="text-accent">⌘⇧4</code> y
-            <code class="text-accent">⌘⇧5</code> de macOS y vuelve a los atajos propios de la app.
+            {{
+              t("settings.restoreSystemCapturesHint", {
+                cmd3: "⌘⇧3",
+                cmd4: "⌘⇧4",
+                cmd5: "⌘⇧5",
+              })
+            }}
           </p>
 
           <p v-if="systemSuccess" class="text-xs text-emerald-400" role="status">
@@ -368,7 +464,9 @@ onUnmounted(() => {
       </section>
 
       <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">Atajos globales</h2>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">
+          {{ t("settings.sections.globalShortcuts") }}
+        </h2>
         <div class="space-y-3 rounded-xl border border-border bg-surface-raised p-4">
           <label v-for="field in hotkeyFields" :key="field.key" class="block">
             <span class="mb-1 block text-sm">
@@ -386,31 +484,33 @@ onUnmounted(() => {
               v-if="isCaptureHotkeyLocked(field.key)"
               class="mt-1 text-xs text-text-muted"
             >
-              Gestionado por «Sustituir capturas del sistema» ({{
-                field.key === "capture_screen"
-                  ? "⌘⇧3"
-                  : field.key === "capture_area"
-                    ? "⌘⇧4"
-                    : "⌘⇧5"
-              }}).
+              {{
+                t("settings.hotkeys.managedByReplace", {
+                  shortcut: managedShortcut(field.key),
+                })
+              }}
             </p>
           </label>
         </div>
       </section>
 
+      <AppUpdateSection />
+
       <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">Licencia</h2>
+        <h2 class="mb-4 text-sm font-medium text-text-muted">
+          {{ t("settings.sections.license") }}
+        </h2>
         <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
           <p class="text-sm">
-            Plan actual:
+            {{ t("settings.license.currentPlan") }}
             <span class="font-medium text-accent">{{ tierLabels[settings.tier] }}</span>
           </p>
           <label class="block">
-            <span class="mb-1 block text-sm">Clave de licencia</span>
+            <span class="mb-1 block text-sm">{{ t("settings.license.licenseKey") }}</span>
             <input
               v-model="licenseKey"
               type="text"
-              placeholder="BS-PRO-..."
+              :placeholder="t('settings.license.licenseKeyPlaceholder')"
               class="w-full rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm"
             />
           </label>
@@ -419,11 +519,11 @@ onUnmounted(() => {
             class="rounded-lg bg-accent px-4 py-2 text-sm text-white hover:bg-accent-hover"
             @click="applyLicense"
           >
-            Activar licencia
+            {{ t("settings.license.activate") }}
           </button>
           <p v-if="licenseMessage" class="text-xs text-text-muted">{{ licenseMessage }}</p>
           <ul class="space-y-2 text-xs text-text-muted">
-            <li v-for="tier in Object.values(TIERS)" :key="tier.id">
+            <li v-for="tier in Object.values(localizedTiers)" :key="tier.id">
               <strong class="text-text">{{ tier.name }}</strong> — {{ tier.price }}:
               {{ tier.features.slice(0, 2).join(", ") }}…
             </li>

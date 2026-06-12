@@ -32,6 +32,17 @@ impl Default for HotkeyConfig {
     }
 }
 
+fn default_locale() -> String {
+    "en".into()
+}
+
+fn normalize_locale(locale: String) -> String {
+    match locale.as_str() {
+        "en" | "es" | "fr" | "de" | "pt" | "it" => locale,
+        _ => "en".into(),
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct AppSettings {
     pub save_directory: String,
@@ -41,6 +52,7 @@ pub struct AppSettings {
     pub system_capture_mode: SystemCaptureMode,
     pub hotkeys: HotkeyConfig,
     pub tier: String,
+    pub locale: String,
 }
 
 impl Default for AppSettings {
@@ -58,6 +70,7 @@ impl Default for AppSettings {
             system_capture_mode: SystemCaptureMode::Independent,
             hotkeys: HotkeyConfig::default(),
             tier: "community".into(),
+            locale: default_locale(),
         }
     }
 }
@@ -84,6 +97,8 @@ impl<'de> Deserialize<'de> for AppSettings {
             hotkeys: HotkeyConfig,
             #[serde(default = "default_tier")]
             tier: String,
+            #[serde(default = "default_locale")]
+            locale: String,
         }
 
         fn default_true() -> bool {
@@ -109,6 +124,7 @@ impl<'de> Deserialize<'de> for AppSettings {
             system_capture_mode,
             hotkeys: raw.hotkeys,
             tier: raw.tier,
+            locale: normalize_locale(raw.locale),
         })
     }
 }

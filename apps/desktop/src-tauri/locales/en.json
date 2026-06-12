@@ -1,0 +1,11 @@
+{
+  "tray": {
+    "tooltip": "Better Screenshoot",
+    "captureArea": "Capture Area",
+    "captureScreen": "Capture Screen",
+    "captureWindow": "Capture Window",
+    "history": "History",
+    "settings": "Settings",
+    "quit": "Quit"
+  }
+}

@@ -119,7 +119,7 @@ describe("loadCaptureImage", () => {
 
   it("rejects when capture has no image source", async () => {
     await expect(loadCaptureImage(createCapture())).rejects.toThrow(
-      "La captura no tiene imagen",
+      "Capture has no image",
     );
   });
 });
@@ -180,7 +180,7 @@ describe("loadHtmlImage", () => {
     });
 
     await expect(loadHtmlImage("data:image/png;base64,broken")).rejects.toThrow(
-      "Error al decodificar la imagen",
+      "Error decoding image",
     );
   });
 });

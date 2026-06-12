@@ -60,8 +60,8 @@ pub fn reconcile_system_capture(app: &AppHandle, state: &AppState) -> Result<Opt
         };
         save_settings(app, state)?;
         register_hotkeys(app)?;
-        return Ok(Some(result.message));
+        return Ok(Some(result.message_code));
     }
 
-    Ok(status.message)
+    Ok(status.message_code)
 }

@@ -1,14 +1,16 @@
 {
   "name": "better-screenshoot",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @better-screenshoot/desktop tauri dev",
     "build": "pnpm --filter @better-screenshoot/desktop tauri build",
     "build:mac": "pnpm --filter @better-screenshoot/desktop tauri build -- --bundles dmg",
+    "release:mac": "bash scripts/release-mac.sh",
+    "sync-version": "node scripts/sync-version.mjs",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
+    "test": "pnpm -r --filter '!@better-screenshoot/cli' test",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {

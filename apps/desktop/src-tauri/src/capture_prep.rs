@@ -25,7 +25,7 @@ async fn hide_windows(app: &AppHandle, labels: &[&str]) {
                 requested_hide.push((*label).to_string());
             } else if window.is_visible().unwrap_or(false) {
                 if *label == "editor" {
-                    // Salir de la pantalla completa nativa antes de ocultar para no dejar Spaces vacíos.
+                    // Exit native fullscreen before hiding to avoid leaving empty Spaces.
                     #[cfg(target_os = "macos")]
                     let _ = window.set_simple_fullscreen(false);
                     let _ = window.set_fullscreen(false);

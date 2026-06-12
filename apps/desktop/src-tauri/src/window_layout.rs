@@ -21,8 +21,8 @@ pub fn reset_editor_fullscreen_state(window: &WebviewWindow) -> Result<(), Strin
     Ok(())
 }
 
-/// Deja el editor en un estado neutro antes de presentarlo: sin overlay, sin always-on-top
-/// y fuera de cualquier modo de pantalla completa previo.
+/// Leaves the editor in a neutral state before presenting: no overlay, no always-on-top,
+/// and out of any previous fullscreen mode.
 pub fn reset_editor_presentation_state(window: &WebviewWindow) {
     #[cfg(target_os = "macos")]
     {
@@ -45,10 +45,10 @@ fn resolve_monitor(window: &WebviewWindow) -> Result<Monitor, String> {
     window
         .primary_monitor()
         .map_err(|e| e.to_string())?
-        .ok_or_else(|| "No se encontró ningún monitor".to_string())
+        .ok_or_else(|| crate::errors::app_error("noMonitorFound"))
 }
 
-/// Monitor que contiene el cursor (el que el usuario está usando ahora mismo).
+/// Monitor containing the cursor (the one the user is using right now).
 fn monitor_under_cursor(window: &WebviewWindow) -> Option<Monitor> {
     let app = window.app_handle();
     let cursor = app.cursor_position().ok()?;
@@ -65,8 +65,8 @@ fn monitor_under_cursor(window: &WebviewWindow) -> Option<Monitor> {
     })
 }
 
-/// Mueve el editor al monitor donde está el cursor para que aparezca donde el usuario trabaja.
-/// Imprescindible en multi-monitor: si no, la ventana se abre a pantalla completa en el monitor equivocado.
+/// Moves the editor to the monitor where the cursor is so it appears where the user is working.
+/// Essential on multi-monitor: otherwise the window opens fullscreen on the wrong monitor.
 pub fn move_editor_to_active_monitor(window: &WebviewWindow) -> Result<(), String> {
     let Some(monitor) = monitor_under_cursor(window) else {
         return Ok(());
@@ -142,7 +142,7 @@ pub fn restore_windowed_editor(window: &WebviewWindow) -> Result<(), String> {
 pub fn reset_editor_window_layout(app: AppHandle) -> Result<(), String> {
     let editor = app
         .get_webview_window("editor")
-        .ok_or_else(|| "Ventana editor no encontrada".to_string())?;
+        .ok_or_else(|| crate::errors::app_error("editorNotFound"))?;
     reset_editor_fullscreen_state(&editor)?;
     restore_windowed_editor(&editor)
 }
@@ -178,7 +178,7 @@ fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
 pub fn reset_main_window_layout(app: AppHandle) -> Result<(), String> {
     let main = app
         .get_webview_window("main")
-        .ok_or_else(|| "Ventana principal no encontrada".to_string())?;
+        .ok_or_else(|| crate::errors::app_error("mainWindowNotFound"))?;
     prepare_main_hub_window(&main)
 }
 
@@ -195,7 +195,7 @@ pub fn exit_main_editor_mode(app: AppHandle) -> Result<(), String> {
     set_main_editor_mode(false);
     let main = app
         .get_webview_window("main")
-        .ok_or_else(|| "Ventana principal no encontrada".to_string())?;
+        .ok_or_else(|| crate::errors::app_error("mainWindowNotFound"))?;
     reset_editor_fullscreen_state(&main)?;
     prepare_main_hub_window(&main)
 }

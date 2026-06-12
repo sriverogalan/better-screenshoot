@@ -3,6 +3,7 @@ mod capture_prep;
 mod capture_session;
 mod commands;
 mod deep_link;
+mod errors;
 mod shortcuts;
 mod state;
 mod system_capture;
@@ -26,6 +27,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(
@@ -78,7 +81,7 @@ pub fn run() {
                 let _ = window_layout::prepare_main_hub_window(&main);
             }
 
-            // Precalienta el webview del editor (Tauri puede diferir la carga si nunca se mostró).
+            // Warm up the editor webview (Tauri may defer loading if it was never shown).
             if let Some(editor) = app.get_webview_window("editor") {
                 window_activation::activate_app_for_window(&handle);
                 let _ = editor.show();
@@ -139,6 +142,7 @@ pub fn run() {
             window_layout::reset_main_window_layout,
             window_layout::exit_main_editor_mode,
             shortcuts::handle_capture_action,
+            tray::rebuild_tray_menu,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

@@ -2,65 +2,30 @@ export type LicenseTier = "community" | "pro" | "cloud" | "team";
 
 export interface TierDefinition {
   id: LicenseTier;
-  name: string;
   price: string;
   billing: "free" | "one-time" | "annual" | "monthly";
-  features: string[];
 }
 
 export const TIERS: Record<LicenseTier, TierDefinition> = {
   community: {
     id: "community",
-    name: "Community",
-    price: "Gratis",
+    price: "Free",
     billing: "free",
-    features: [
-      "Captura pantalla, ventana y región",
-      "Anotación básica",
-      "Historial local",
-      "CLI y URL scheme",
-      "Atajos globales",
-    ],
   },
   pro: {
     id: "pro",
-    name: "Pro",
     price: "$24",
     billing: "one-time",
-    features: [
-      "Todo Community",
-      "OCR local",
-      "Scrolling capture",
-      "GIF recording",
-      "Pin to screen",
-      "Temas personalizados",
-    ],
   },
   cloud: {
     id: "cloud",
-    name: "Cloud",
-    price: "$6/mes",
+    price: "$6/mo",
     billing: "monthly",
-    features: [
-      "Todo Pro",
-      "Links compartibles",
-      "50 GB almacenamiento",
-      "Dominio propio",
-      "Expiración de links",
-    ],
   },
   team: {
     id: "team",
-    name: "Team",
-    price: "$8/usuario/mes",
+    price: "$8/user/mo",
     billing: "monthly",
-    features: [
-      "Todo Cloud",
-      "SSO",
-      "Branding de equipo",
-      "Panel de administración",
-      "Políticas de retención",
-    ],
   },
 };
 
@@ -68,20 +33,22 @@ export interface LicenseValidationResult {
   valid: boolean;
   tier: LicenseTier;
   expiresAt: string | null;
-  message: string;
+  messageCode: string;
 }
 
-/** Placeholder — integrar Lemon Squeezy o Polar en producción */
+/** Placeholder — integrate Lemon Squeezy or Polar in production */
 export async function validateLicenseKey(
   key: string,
   provider: "lemonsqueezy" | "polar" = "lemonsqueezy",
 ): Promise<LicenseValidationResult> {
+  void provider;
+
   if (!key.trim()) {
     return {
       valid: true,
       tier: "community",
       expiresAt: null,
-      message: "Sin clave — modo Community",
+      messageCode: "noKey",
     };
   }
 
@@ -90,7 +57,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "pro",
       expiresAt: null,
-      message: `Licencia Pro válida (${provider})`,
+      messageCode: "validPro",
     };
   }
 
@@ -99,7 +66,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "cloud",
       expiresAt: null,
-      message: `Licencia Cloud válida (${provider})`,
+      messageCode: "validCloud",
     };
   }
 
@@ -108,7 +75,7 @@ export async function validateLicenseKey(
       valid: true,
       tier: "team",
       expiresAt: null,
-      message: `Licencia Team válida (${provider})`,
+      messageCode: "validTeam",
     };
   }
 
@@ -116,7 +83,7 @@ export async function validateLicenseKey(
     valid: false,
     tier: "community",
     expiresAt: null,
-    message: "Clave de licencia no válida",
+    messageCode: "invalidKey",
   };
 }
 
@@ -130,7 +97,7 @@ export interface CloudShareResponse {
   expiresAt: string;
 }
 
-/** Beta stub — reemplazar con API real de cloud */
+/** Beta stub — replace with real cloud API */
 export async function uploadForShare(
   request: CloudShareRequest,
 ): Promise<CloudShareResponse> {

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import { usePendingCaptureRecovery } from "../composables/usePendingCaptureRecovery";
 
+const { t } = useI18n();
 const {
   pendingCapture,
   recoveryBusy,
@@ -16,10 +18,15 @@ const {
     role="status"
   >
     <p class="font-medium text-text">
-      Captura lista pero el editor no se abrió
+      {{ t("pendingCapture.title") }}
     </p>
     <p class="mt-1 text-xs text-text-muted">
-      {{ pendingCapture.width }}×{{ pendingCapture.height }} — guardada temporalmente hasta que la edites o descartes.
+      {{
+        t("pendingCapture.description", {
+          width: pendingCapture.width,
+          height: pendingCapture.height,
+        })
+      }}
     </p>
     <p v-if="recoveryError" class="mt-2 text-xs text-red-400">
       {{ recoveryError }}
@@ -30,7 +37,9 @@ const {
       :disabled="recoveryBusy"
       @click="openPendingInEditor"
     >
-      {{ recoveryBusy ? "Abriendo…" : "Abrir en editor" }}
+      {{
+        recoveryBusy ? t("common.opening") : t("pendingCapture.openInEditor")
+      }}
     </button>
   </div>
 </template>

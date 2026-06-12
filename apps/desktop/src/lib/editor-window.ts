@@ -19,8 +19,7 @@ export async function hideEditorWindow(
   if (isMacOsUserAgent(navigator.userAgent)) {
     await win.setSimpleFullscreen(false);
     if (await win.isFullscreen()) {
-      // Salir de la pantalla completa nativa de macOS antes de ocultar: si ocultamos
-      // durante la animación queda un Space negro vacío.
+      // Exit native macOS fullscreen before hiding: hiding during the animation leaves an empty black Space.
       await win.setFullscreen(false);
       await new Promise((resolve) => setTimeout(resolve, 520));
     }
@@ -31,7 +30,7 @@ export async function hideEditorWindow(
   try {
     await invoke("reset_editor_window_layout");
   } catch {
-    // La ventana puede estar ya reseteándose.
+    // The window may already be resetting.
   }
 
   await win.hide();
@@ -56,7 +55,7 @@ export async function exitCaptureEditor(
     try {
       await invoke("exit_main_editor_mode");
     } catch {
-      // La ventana puede estar ya reseteándose.
+      // The window may already be resetting.
     }
 
     await win.hide();

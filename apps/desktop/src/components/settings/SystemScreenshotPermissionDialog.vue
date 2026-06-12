@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { IconX } from "@tabler/icons-vue";
 import { SYSTEM_REPLACEMENT_HOTKEYS } from "@better-screenshoot/shared-types";
 import { nextTick, onUnmounted, ref, watch } from "vue";
 import type { SystemScreenshotShortcut } from "../../lib/tauri";
 import { formatHotkey } from "../../lib/format-hotkey";
+import { systemShortcutLabelKey } from "../../lib/system-shortcut-labels";
 
 const props = defineProps<{
   open: boolean;
@@ -16,22 +19,28 @@ const emit = defineEmits<{
   confirm: [];
 }>();
 
+const { t } = useI18n();
 const closeButtonRef = ref<HTMLButtonElement | null>(null);
 
-const replacements = [
+const replacements = computed(() => [
   {
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen),
-    action: "Capturar pantalla",
+    action: t("history.captureScreen"),
   },
   {
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area),
-    action: "Capturar región",
+    action: t("history.captureRegion"),
   },
   {
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window),
-    action: "Capturar ventana",
+    action: t("history.captureWindow"),
   },
-];
+]);
+
+function shortcutLabel(shortcut: SystemScreenshotShortcut) {
+  const key = systemShortcutLabelKey(shortcut.id);
+  return key ? t(key) : shortcut.label;
+}
 
 function onKeydown(event: KeyboardEvent) {
   if (event.key === "Escape" && !props.busy) {
@@ -84,22 +93,20 @@ onUnmounted(() => {
               id="system-screenshot-permission-title"
               class="text-base font-semibold text-text"
             >
-              ¿Sustituir capturas del sistema?
+              {{ t("systemScreenshotDialog.title") }}
             </h2>
             <p
               id="system-screenshot-permission-description"
               class="mt-1 text-sm text-text-muted"
             >
-              Better Screenshoot desactivará los atajos nativos de macOS y los
-              reasignará a sus propias capturas. Guardaremos una copia para
-              restaurarlos si cambias de opinión.
+              {{ t("systemScreenshotDialog.description") }}
             </p>
           </div>
           <button
             ref="closeButtonRef"
             type="button"
             class="rounded-lg p-1 text-text-muted hover:bg-border hover:text-text disabled:opacity-50"
-            aria-label="Cerrar"
+            :aria-label="t('common.close')"
             :disabled="busy"
             @click="emit('close')"
           >
@@ -129,7 +136,7 @@ onUnmounted(() => {
             :key="shortcut.id"
             class="flex items-center justify-between gap-3"
           >
-            <span class="text-text-muted">{{ shortcut.label }}</span>
+            <span class="text-text-muted">{{ shortcutLabel(shortcut) }}</span>
             <span
               class="rounded-md px-2 py-0.5 text-xs"
               :class="
@@ -138,7 +145,11 @@ onUnmounted(() => {
                   : 'bg-emerald-950/50 text-emerald-100'
               "
             >
-              {{ shortcut.enabled ? "Activo en macOS" : "Se desactivará" }}
+              {{
+                shortcut.enabled
+                  ? t("settings.activeOnMacos")
+                  : t("systemScreenshotDialog.willBeDisabled")
+              }}
             </span>
           </li>
         </ul>
@@ -150,7 +161,7 @@ onUnmounted(() => {
             :disabled="busy"
             @click="emit('close')"
           >
-            Cancelar
+            {{ t("common.cancel") }}
           </button>
           <button
             type="button"
@@ -158,7 +169,11 @@ onUnmounted(() => {
             :disabled="busy"
             @click="emit('confirm')"
           >
-            {{ busy ? "Sustituyendo…" : "Sustituir atajos del sistema" }}
+            {{
+              busy
+                ? t("common.replacing")
+                : t("systemScreenshotDialog.confirm")
+            }}
           </button>
         </div>
       </div>

@@ -1,4 +1,3 @@
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type {
   AppSettings,
   CaptureRecord,
@@ -8,6 +7,7 @@ import type {
   SystemCaptureMode,
   WindowInfo,
 } from "@better-screenshoot/shared-types";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 
 export interface SavedCapture {
   id: string;
@@ -18,7 +18,7 @@ export interface SavedCapture {
   data_url: string;
 }
 
-export function frontendLog(_scope: string, _message: string): void {}
+export function frontendLog(_scope: string, _message: string): void { }
 
 export async function listDisplays(): Promise<DisplayInfo[]> {
   return invoke("list_displays");
@@ -31,7 +31,8 @@ export async function listWindows(): Promise<WindowInfo[]> {
 export interface CaptureStatus {
   displays_found: number;
   screen_capture_granted: boolean;
-  message: string;
+  messageCode: string;
+  messageParams?: Record<string, string | number> | null;
   dev_binary_path: string | null;
 }
 
@@ -57,11 +58,11 @@ export interface SystemCaptureStatus {
   can_restore: boolean;
   system_shortcuts: SystemScreenshotShortcut[];
   app_hotkeys: HotkeyConfig;
-  message?: string | null;
+  messageCode?: string | null;
 }
 
 export interface SystemCaptureModeResult {
-  message: string;
+  messageCode: string;
   status: SystemCaptureStatus;
   settings: AppSettings;
 }
@@ -209,8 +210,8 @@ export async function saveImageWithDialog(
 export interface LicenseValidationResult {
   valid: boolean;
   tier: string;
-  expires_at: string | null;
-  message: string;
+  expiresAt: string | null;
+  messageCode: string;
 }
 
 export async function validateLicenseKey(key: string): Promise<LicenseValidationResult> {

@@ -1,0 +1,261 @@
+{
+  "common": {
+    "appName": "Better Screenshoot",
+    "cancel": "Cancel",
+    "close": "Close",
+    "and": "and",
+    "region": "region",
+    "screen": "screen",
+    "window": "window",
+    "untitled": "Untitled",
+    "disabled": "Disabled",
+    "opening": "Opening…",
+    "replacing": "Replacing…",
+    "loading": "Loading…"
+  },
+  "nav": {
+    "mainNavigation": "Main navigation",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "history": {
+    "title": "History",
+    "subtitle": "All your saved captures",
+    "captureShortcuts": "Capture shortcuts",
+    "captureShortcutsHint": "Use global shortcuts to capture. You can also use the tray icon menu.",
+    "captureRegion": "Capture region",
+    "captureScreen": "Capture screen",
+    "captureWindow": "Capture window",
+    "customizeShortcuts": "Customize shortcuts in Settings",
+    "loadingCaptures": "Loading captures…",
+    "empty": "No captures yet.",
+    "emptyHint": "Press one of the shortcuts above to capture. Only captures you save from the editor will appear here.",
+    "openCaptureInEditor": "Open {width} by {height} capture in editor",
+    "captureAlt": "Capture {id}",
+    "deleteCapture": "Delete capture",
+    "openMacosPermissions": "Open macOS permissions",
+    "devBinary": "Dev binary: {path}"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageOptions": {
+      "en": "English",
+      "es": "Español",
+      "fr": "Français",
+      "de": "Deutsch",
+      "pt": "Português",
+      "it": "Italiano"
+    },
+    "sections": {
+      "capture": "Capture",
+      "integrations": "Integrations",
+      "captureMode": "Capture mode (macOS)",
+      "globalShortcuts": "Global shortcuts",
+      "license": "License"
+    },
+    "saveFolder": "Save folder",
+    "autoCopy": "Copy to clipboard automatically",
+    "autoSave": "Save captures to disk",
+    "allowExternalControl": "Allow external control (Raycast, CLI, URL scheme)",
+    "urlSchemeHint": "URL scheme: {scheme}",
+    "systemCaptureModeLegend": "System capture mode",
+    "independentModeTitle": "Better Screenshoot shortcuts",
+    "independentModeHint": "macOS keeps {cmd3}, {cmd4} and {cmd5}.",
+    "replaceModeTitle": "Replace system captures",
+    "replaceModeHint": "Disables native shortcuts and reassigns them to Better Screenshoot.",
+    "activeOnMacos": "Active on macOS",
+    "restoreSystemCaptures": "Restore system captures",
+    "restoreSystemCapturesHint": "Re-enables macOS {cmd3}, {cmd4}, and {cmd5} and returns to the app's own shortcuts.",
+    "repairState": "Repair state",
+    "hotkeys": {
+      "captureArea": "Capture region",
+      "captureAreaHint": "On macOS opens the native system selector",
+      "captureScreen": "Capture screen",
+      "captureWindow": "Capture window",
+      "openHistory": "Open history",
+      "managedByReplace": "Managed by «Replace system captures» ({shortcut})."
+    },
+    "license": {
+      "currentPlan": "Current plan:",
+      "licenseKey": "License key",
+      "licenseKeyPlaceholder": "BS-PRO-…",
+      "activate": "Activate license",
+      "tierLabels": {
+        "community": "Community (free)",
+        "pro": "Pro",
+        "cloud": "Cloud",
+        "team": "Team"
+      }
+    }
+  },
+  "overlay": {
+    "regionSelector": "Capture region selector",
+    "preparing": "Preparing capture…",
+    "hint": "Drag to select · Esc to cancel"
+  },
+  "captureWindow": {
+    "title": "Capture window",
+    "subtitle": "Select the window to capture",
+    "searching": "Searching for windows…",
+    "empty": "No windows found."
+  },
+  "editor": {
+    "title": "Editor",
+    "dimensions": "{width} × {height} px · {zoom}%",
+    "copyAndDiscard": "Copy and discard",
+    "copyAndSave": "Copy and save",
+    "undo": "Undo",
+    "redo": "Redo",
+    "shortcutHint": "V select · A arrow · R rectangle · T text",
+    "tools": {
+      "select": "Select",
+      "arrow": "Arrow",
+      "rect": "Rectangle",
+      "text": "Text",
+      "highlight": "Highlight",
+      "pen": "Pen",
+      "blur": "Blur"
+    },
+    "style": {
+      "color": "Color",
+      "colorAria": "Color {color}",
+      "thickness": "Thickness",
+      "font": "Font"
+    },
+    "loadingImage": "Loading image…",
+    "empty": "Take a capture to start editing.",
+    "textPlaceholder": "Type here…",
+    "editAnnotationText": "Edit annotation text"
+  },
+  "pendingCapture": {
+    "title": "Capture ready but editor did not open",
+    "description": "{width}×{height} — temporarily saved until you edit or discard it.",
+    "openInEditor": "Open in editor"
+  },
+  "systemScreenshotDialog": {
+    "title": "Replace system captures?",
+    "description": "Better Screenshoot will disable macOS native shortcuts and reassign them to its own captures. We'll keep a backup to restore them if you change your mind.",
+    "willBeDisabled": "Will be disabled",
+    "confirm": "Replace system shortcuts"
+  },
+  "licensing": {
+    "tiers": {
+      "community": {
+        "name": "Community",
+        "features": [
+          "Screen, window, and region capture",
+          "Basic annotation",
+          "Local history",
+          "CLI and URL scheme",
+          "Global shortcuts"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "features": [
+          "Everything in Community",
+          "Local OCR",
+          "Scrolling capture",
+          "GIF recording",
+          "Pin to screen",
+          "Custom themes"
+        ]
+      },
+      "cloud": {
+        "name": "Cloud",
+        "features": [
+          "Everything in Pro",
+          "Shareable links",
+          "50 GB storage",
+          "Custom domain",
+          "Link expiration"
+        ]
+      },
+      "team": {
+        "name": "Team",
+        "features": [
+          "Everything in Cloud",
+          "SSO",
+          "Team branding",
+          "Admin panel",
+          "Retention policies"
+        ]
+      }
+    },
+    "messages": {
+      "noKey": "No key — Community mode",
+      "validPro": "Valid Pro license",
+      "validCloud": "Valid Cloud license",
+      "validTeam": "Valid Team license",
+      "invalidKey": "Invalid license key"
+    }
+  },
+  "systemShortcuts": {
+    "captureScreen": "Capture screen (⌘⇧3)",
+    "copyScreen": "Copy screen to clipboard (⌃⌘⇧3)",
+    "captureRegion": "Capture region (⌘⇧4)",
+    "copyRegion": "Copy region to clipboard (⌃⌘⇧4)",
+    "captureOptions": "Capture options (⌘⇧5)"
+  },
+  "errors": {
+    "appStartFailed": "Error starting application",
+    "loadHistoryFailed": "Could not load history",
+    "openEditorFailed": "Could not open editor",
+    "checkPermissionsFailed": "Could not check permissions",
+    "checkCaptureModeFailed": "Could not check capture mode",
+    "changeCaptureModeFailed": "Could not change capture mode",
+    "loadPreviewFailed": "Could not load preview",
+    "completeCaptureFailed": "Could not complete capture",
+    "completeActionFailed": "Could not complete action",
+    "imageLoadFailed": "Error loading image",
+    "imageDisplayFailed": "Could not display the image. Check Screen Recording permissions.",
+    "imageNotReady": "Image is not ready to export yet",
+    "captureFailed": "Capture failed",
+    "captureCancelled": "Capture cancelled",
+    "editorNotFound": "Editor window not found",
+    "mainWindowNotFound": "Main window not found",
+    "noMonitorFound": "No monitor found",
+    "displayNotFound": "Display {id} not found",
+    "noDisplaysFound": "No displays found",
+    "invalidPortalPath": "Invalid portal screenshot path",
+    "noPendingCapture": "No pending capture",
+    "readImageFailed": "Could not read image",
+    "openEditorHint": "Could not open the editor. Click «Open in editor» in the banner or use the tray menu.",
+    "openEditorPermission": "Could not open the editor. Check that Better Screenshoot has Screen Recording permission.",
+    "clipboardCopyFailed": "Could not copy image to clipboard",
+    "storageFailed": "Storage operation failed",
+    "homeDirectoryNotFound": "Could not resolve home directory",
+    "plistBuddyFailed": "Could not run PlistBuddy",
+    "systemShortcutsWriteFailed": "Could not write system shortcuts",
+    "systemShortcutsModifyFailed": "Could not modify system shortcuts",
+    "systemChangesFailed": "Could not apply system changes",
+    "openSystemSettingsFailed": "Could not open system settings",
+    "macosOnly": "This action is only available on macOS",
+    "macosShortcutsOnly": "System capture shortcuts can only be configured on macOS",
+    "displaysDetected": "{count} display(s) detected.",
+    "macosPermissionRequired": "macOS does not allow screen capture. Go to System Settings → Privacy & Security → Screen Recording and enable Better Screenshoot.",
+    "macosDevBinaryHint": " If you use `pnpm dev`, also authorize the binary at target/debug/better-screenshoot.",
+    "noDisplaysDetected": "No displays detected.",
+    "systemCapturesRestored": "System captures restored.",
+    "alreadyIndependent": "Already using Better Screenshoot shortcuts.",
+    "alreadyReplaced": "System captures are already replaced.",
+    "independentModeActive": "Independent mode active.",
+    "systemCapturesRestoredFull": "System captures restored. Better Screenshoot uses its own shortcuts.",
+    "systemCapturesReplaced": "System captures replaced: ⌘⇧3 screen, ⌘⇧4 region, ⌘⇧5 window.",
+    "driftReplaceIndependent": "macOS shortcuts are still active even though the app is in replacement mode.",
+    "driftIndependentReplace": "macOS has system captures disabled but the app is not in replacement mode.",
+    "driftNoBackup": "macOS has system captures disabled with no backup. Repair the state to re-enable them.",
+    "driftGeneric": "System capture state does not match settings.",
+    "generic": "Something went wrong"
+  },
+  "tray": {
+    "tooltip": "Better Screenshoot",
+    "captureArea": "Capture Area",
+    "captureScreen": "Capture Screen",
+    "captureWindow": "Capture Window",
+    "history": "History",
+    "settings": "Settings",
+    "quit": "Quit"
+  }
+}

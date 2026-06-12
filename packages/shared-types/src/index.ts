@@ -53,6 +53,7 @@ export interface AppSettings {
   system_capture_mode: SystemCaptureMode;
   hotkeys: HotkeyConfig;
   tier: LicenseTier;
+  locale: AppLocale;
 }
 
 export interface HotkeyConfig {
@@ -63,6 +64,8 @@ export interface HotkeyConfig {
 }
 
 export type LicenseTier = "community" | "pro" | "cloud" | "team";
+
+export type AppLocale = "en" | "es" | "fr" | "de" | "pt" | "it";
 
 export type DeepLinkAction =
   | "capture-area"
@@ -78,7 +81,7 @@ export const DEFAULT_HOTKEYS: HotkeyConfig = {
   open_history: "CommandOrControl+Shift+H",
 };
 
-/** Atajos que sustituyen a las capturas nativas de macOS. */
+/** Shortcuts that replace native macOS captures. */
 export const SYSTEM_REPLACEMENT_HOTKEYS = {
   capture_screen: "Command+Shift+3",
   capture_area: "Command+Shift+4",
@@ -93,4 +96,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   system_capture_mode: "independent",
   hotkeys: DEFAULT_HOTKEYS,
   tier: "community",
+  locale: "en",
 };

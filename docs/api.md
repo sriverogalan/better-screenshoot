@@ -1,62 +1,48 @@
-# Better Screenshoot — API de integración
+# Better Screenshoot — Integration API
 
 ## URL Scheme
 
-Registro: `betterscreenshoot://`
+Registered: `betterscreenshoot://`
 
-Requiere que **Permitir control externo** esté activado en Ajustes.
+Requires **Allow external control** to be enabled in Settings.
 
-| URL | Acción |
+| URL | Action |
 |-----|--------|
-| `betterscreenshoot://capture-area` | Abre el selector de región |
-| `betterscreenshoot://capture-screen` | Captura la pantalla principal |
-| `betterscreenshoot://capture-window` | Abre el selector de ventanas |
-| `betterscreenshoot://open-history` | Abre el historial |
-| `betterscreenshoot://open-settings` | Abre ajustes |
+| `betterscreenshoot://capture-area` | Opens the region selector |
+| `betterscreenshoot://capture-screen` | Captures the primary screen |
+| `betterscreenshoot://capture-window` | Opens the window selector |
+| `betterscreenshoot://open-history` | Opens history |
+| `betterscreenshoot://open-settings` | Opens settings |
 
-### Ejemplo (macOS / Linux)
+### Example
 
 ```bash
 open "betterscreenshoot://capture-area"
 ```
 
-### Ejemplo (Windows)
-
-```powershell
-start betterscreenshoot://capture-area
-```
-
 ## CLI
 
-Binario: `better-screenshoot`
+Binary: `better-screenshoot`
 
 ```bash
-# Disparar acción vía app (GUI)
+# Trigger action via app (GUI)
 better-screenshoot-cli open capture-area
 
-# Captura headless
+# Headless capture
 better-screenshoot-cli capture --output ~/Desktop/shot.png screen
 better-screenshoot-cli capture --output shot.png --json window 12345
 better-screenshoot-cli capture --output region.png region --display 0 --x 100 --y 100 --width 400 --height 300
 
-# Listar displays y ventanas
+# List displays and windows
 better-screenshoot displays
 better-screenshoot windows
 ```
 
 ## Raycast
 
-Ver extensión en `packages/raycast-extension/`. Usa el URL scheme internamente.
+See the extension in `packages/raycast-extension/`. It uses the URL scheme internally.
 
-## Permisos por plataforma
+## Permissions (macOS)
 
-### macOS
-- **Grabación de pantalla** — obligatorio para capturas
-- **Accesibilidad** — recomendado para atajos globales fiables
-
-### Windows
-- Sin permisos especiales en la mayoría de configuraciones
-
-### Linux
-- **X11**: captura directa vía xcap
-- **Wayland**: requiere `xdg-desktop-portal` y backend del compositor; usar `capture via portal` o Flatpak
+- **Screen Recording** — required for captures
+- **Accessibility** — recommended for reliable global shortcuts

@@ -32,7 +32,7 @@ const baseLines: Annotation[] = [
 ];
 
 describe("commitPendingText", () => {
-  it("aplica texto pendiente y marca historial como cambiado", () => {
+  it("applies pending text and marks history as changed", () => {
     const editor: TextEditorState = { annotationId: "text-1", value: "  nuevo texto  " };
 
     const result = commitPendingText(editor, baseLines);
@@ -41,7 +41,7 @@ describe("commitPendingText", () => {
     expect(result.lines.find((line) => line.id === "text-1")?.text).toBe("nuevo texto");
   });
 
-  it("elimina anotación de texto vacía sin cambiar historial", () => {
+  it("removes empty text annotation without changing history", () => {
     const editor: TextEditorState = { annotationId: "text-1", value: "   " };
 
     const result = commitPendingText(editor, baseLines);
@@ -51,7 +51,7 @@ describe("commitPendingText", () => {
     expect(result.lines).toHaveLength(1);
   });
 
-  it("no modifica líneas si la anotación no existe", () => {
+  it("does not modify lines when annotation does not exist", () => {
     const editor: TextEditorState = { annotationId: "missing", value: "texto" };
 
     const result = commitPendingText(editor, baseLines);

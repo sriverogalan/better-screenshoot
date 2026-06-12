@@ -2,15 +2,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LicenseValidationResult {
+    #[serde(rename = "valid")]
     pub valid: bool,
     pub tier: String,
+    #[serde(rename = "expiresAt")]
     pub expires_at: Option<String>,
-    pub message: String,
+    #[serde(rename = "messageCode")]
+    pub message_code: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CloudShareResponse {
     pub url: String,
+    #[serde(rename = "expiresAt")]
     pub expires_at: String,
 }
 
@@ -22,7 +26,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "community".into(),
             expires_at: None,
-            message: "Sin clave — modo Community".into(),
+            message_code: "noKey".into(),
         });
     }
 
@@ -31,7 +35,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "pro".into(),
             expires_at: None,
-            message: "Licencia Pro válida".into(),
+            message_code: "validPro".into(),
         });
     }
 
@@ -40,7 +44,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "cloud".into(),
             expires_at: None,
-            message: "Licencia Cloud válida".into(),
+            message_code: "validCloud".into(),
         });
     }
 
@@ -49,7 +53,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
             valid: true,
             tier: "team".into(),
             expires_at: None,
-            message: "Licencia Team válida".into(),
+            message_code: "validTeam".into(),
         });
     }
 
@@ -57,7 +61,7 @@ pub async fn validate_license_key(key: String) -> Result<LicenseValidationResult
         valid: false,
         tier: "community".into(),
         expires_at: None,
-        message: "Clave de licencia no válida".into(),
+        message_code: "invalidKey".into(),
     })
 }
 

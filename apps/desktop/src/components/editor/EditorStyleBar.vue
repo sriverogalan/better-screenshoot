@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import type { EditorStyle } from "../../lib/editor/types";
 import {
   COLOR_PRESETS,
@@ -15,11 +16,13 @@ const emit = defineEmits<{
   "update:strokeWidth": [value: number];
   "update:fontSize": [value: number];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
   <div class="flex flex-wrap items-center gap-2 border-t border-border/60 px-4 py-2">
-    <span class="text-xs text-text-muted">Color</span>
+    <span class="text-xs text-text-muted">{{ t("editor.style.color") }}</span>
     <div class="flex items-center gap-1">
       <button
         v-for="color in COLOR_PRESETS"
@@ -32,7 +35,7 @@ const emit = defineEmits<{
             : 'border-transparent'
         "
         :style="{ backgroundColor: color }"
-        :aria-label="`Color ${color}`"
+        :aria-label="t('editor.style.colorAria', { color })"
         :aria-pressed="props.style.stroke === color"
         @click="emit('update:stroke', color)"
       />
@@ -40,7 +43,7 @@ const emit = defineEmits<{
 
     <span class="mx-1 h-5 w-px bg-border" />
 
-    <span class="text-xs text-text-muted">Grosor</span>
+    <span class="text-xs text-text-muted">{{ t("editor.style.thickness") }}</span>
     <div class="flex items-center gap-1">
       <button
         v-for="width in STROKE_WIDTHS"
@@ -59,7 +62,7 @@ const emit = defineEmits<{
 
     <span class="mx-1 h-5 w-px bg-border" />
 
-    <span class="text-xs text-text-muted">Fuente</span>
+    <span class="text-xs text-text-muted">{{ t("editor.style.font") }}</span>
     <div class="flex items-center gap-1">
       <button
         v-for="size in FONT_SIZES"

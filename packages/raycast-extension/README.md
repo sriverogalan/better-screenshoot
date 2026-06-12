@@ -1,27 +1,27 @@
 # Better Screenshoot — Raycast Extension
 
-Extensión para macOS que dispara capturas vía URL scheme.
+macOS extension that triggers captures via URL scheme.
 
-## Comandos
+## Commands
 
 - Capture Area
 - Capture Screen
 - Capture Window
 - Open History
 
-## Desarrollo
+## Development
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Requiere Better Screenshoot instalado y **Permitir control externo** activado.
+Requires Better Screenshoot installed and **Allow external control** enabled.
 
-## Publicación
+## Publishing
 
 ```bash
 pnpm build
 ```
 
-Publicar en [Raycast Store](https://www.raycast.com/store) con licencia MIT.
+Publish to the [Raycast Store](https://www.raycast.com/store) under the MIT license.

@@ -1,141 +1,142 @@
 # Better Screenshoot
 
-Capturas de pantalla con editor integrado, atajos globales e historial. Disponible para macOS, Windows y Linux.
+Screenshots with a built-in editor, global shortcuts, and history. **macOS only** for now.
 
-## Descargar
+## Download
 
-**[Última versión](https://github.com/sriverogalan/better-screenshoot/releases/latest)**
+**[Latest release](https://github.com/sriverogalan/better-screenshoot/releases/latest)**
 
-| Plataforma | Archivo | Requisitos |
+| Platform | File | Requirements |
 |---|---|---|
-| macOS (Apple Silicon) | `Better Screenshoot_*_aarch64.dmg` | macOS 12 o posterior |
-| macOS (Intel) | `Better Screenshoot_*_x64.dmg` | macOS 12 o posterior |
-| Windows | `*_x64-setup.exe` o `.msi` | Windows 10 o posterior |
-| Linux | `.AppImage` o `.deb` | Ver [nota Wayland](#linux) |
+| macOS (Apple Silicon) | `Better Screenshoot_*_aarch64.dmg` | macOS 12 or later |
+| macOS (Intel) | `Better Screenshoot_*_x64.dmg` | macOS 12 or later |
 
-## Instalación
+## Installation
 
-### macOS
+1. Download the `.dmg` that matches your Mac (Apple Silicon or Intel).
+2. Open the `.dmg` and drag **Better Screenshoot** to **Applications**.
+3. Open the app. If macOS shows a security warning, see [Troubleshooting](#troubleshooting).
+4. Grant **Screen Recording** permission when prompted (System Settings → Privacy & Security → Screen Recording).
+5. For reliable global shortcuts, also enable **Accessibility** if the app requests it.
 
-1. Descarga el `.dmg` que corresponda a tu Mac (Apple Silicon o Intel).
-2. Abre el `.dmg` y arrastra **Better Screenshoot** a la carpeta **Aplicaciones**.
-3. Abre la app. Si macOS muestra una advertencia de seguridad, consulta [Solución de problemas](#solución-de-problemas).
-4. Concede el permiso de **Grabación de pantalla** cuando te lo pida (Ajustes del sistema → Privacidad y seguridad → Grabación de pantalla).
-5. Para atajos globales fiables, activa también **Accesibilidad** si la app lo solicita.
+## Getting started
 
-### Windows
+Better Screenshoot lives in the **system tray**. From there you can capture, open history, or go to settings.
 
-1. Descarga el instalador `.exe` o `.msi`.
-2. Ejecuta el instalador y sigue los pasos.
-3. Abre Better Screenshoot desde el menú Inicio. La app queda en la bandeja del sistema.
+After capturing, the **editor** opens so you can annotate the image: arrows, rectangles, text, highlight, freehand stroke, and blur. When you're done, the capture is copied to the clipboard and you can save it to disk.
 
-### Linux
+### Default shortcuts
 
-1. Descarga el `.AppImage` o el paquete `.deb`.
-2. **AppImage**: haz el archivo ejecutable (`chmod +x`) y ábrelo.
-3. **Debian/Ubuntu**: instala con `sudo dpkg -i better-screenshoot_*.deb`.
+| Action | Shortcut |
+|---|---|
+| Capture area | ⌘⇧X |
+| Capture screen | ⌘⇧⌥S |
+| Capture window | ⌘⇧⌥W |
+| Open history | ⌘⇧H |
 
-> **Nota Wayland:** en entornos Wayland puede hacer falta el portal de escritorio (`xdg-desktop-portal`). Consulta [docs/api.md](docs/api.md#linux) para más detalle.
+You can change shortcuts in **Settings** inside the app.
 
-## Primeros pasos
+## Troubleshooting
 
-Better Screenshoot vive en la **bandeja del sistema**. Desde ahí puedes capturar, abrir el historial o ir a ajustes.
+### macOS won't open the app
 
-Tras capturar, se abre el **editor** para anotar la imagen: flechas, rectángulos, texto, resaltado, trazo libre y desenfoque. Al terminar, la captura se copia al portapapeles y puedes guardarla en disco.
+Current builds are not signed with an Apple certificate. It's normal to see *"can't be opened because it is from an unidentified developer"*.
 
-### Atajos por defecto
+**Option A:** right-click the app → **Open** → confirm.
 
-| Acción | macOS | Windows / Linux |
-|---|---|---|
-| Capturar área | ⌘⇧X | Ctrl+⇧X |
-| Capturar pantalla | ⌘⇧⌥S | Ctrl+⇧Alt+S |
-| Capturar ventana | ⌘⇧⌥W | Ctrl+⇧Alt+W |
-| Abrir historial | ⌘⇧H | Ctrl+⇧H |
+**Option B:** System Settings → **Privacy & Security** → **Open Anyway**.
 
-Puedes cambiar los atajos en **Ajustes** dentro de la app.
+### Capture doesn't work on macOS
 
-## Solución de problemas
+Go to **System Settings → Privacy & Security → Screen Recording** and enable Better Screenshoot. Restart the app if it was already open.
 
-### macOS no deja abrir la app
+### Global shortcuts don't respond
 
-Las versiones actuales no están firmadas con certificado de Apple. Es normal ver el aviso *“no se puede abrir porque proviene de un desarrollador no identificado”*.
+On macOS, add Better Screenshoot under **Settings → Privacy & Security → Accessibility**.
 
-**Opción A:** clic derecho sobre la app → **Abrir** → confirmar.
+## Publishing a new release
 
-**Opción B:** Ajustes del sistema → **Privacidad y seguridad** → botón **Abrir de todos modos**.
+Releases are built **locally on macOS** (faster than CI). GitHub Actions only runs tests and typechecks on PRs.
 
-### La captura no funciona en macOS
-
-Ve a **Ajustes del sistema → Privacidad y seguridad → Grabación de pantalla** y activa Better Screenshoot. Reinicia la app si ya la tenías abierta.
-
-### Los atajos globales no responden
-
-En macOS, añade Better Screenshoot en **Ajustes → Privacidad y seguridad → Accesibilidad**.
-
-## Publicar una nueva versión
-
-Para mantenedores del repositorio:
+1. Bump the version in the root `package.json` (CI syncs the rest on your PR).
+2. Merge to `main`, then tag from `main`:
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.2.1
+git push origin v0.2.1   # tag only — does not trigger a remote build
 ```
 
-GitHub Actions creará un **borrador de release** con los instaladores (.dmg, .exe, .deb, etc.). Revísalo y publícalo cuando esté listo.
+3. From **`main`**, build, sign, and upload the release from your Mac:
 
-Ver [docs/branching.md](docs/branching.md) para el flujo de ramas y protección de `main`.
+```bash
+git checkout main
+git pull origin main
+pnpm release:mac v0.2.1 --all-arch
+```
+
+The release script refuses to run on any other branch.
+
+This creates a **draft** GitHub release with `.dmg` files, signed updater bundles (`.tar.gz`), and `latest.json`. Review it on GitHub and publish when ready — installed apps only pick up updates from **published** releases.
+
+Options:
+
+- `--all-arch` — Apple Silicon + Intel (omit to build only for your current Mac)
+- `--publish` — publish immediately instead of a draft
+
+Signing key: `.tauri/better-screenshoot.key` (gitignored). A backup copy is stored in the repo secret `TAURI_SIGNING_PRIVATE_KEY`. Generate a new pair only if you lose the private key.
+
+See [docs/branching.md](docs/branching.md) for branch flow and `main` protection.
 
 ---
 
-## Para desarrolladores
+## For developers
 
 ### Stack
 
 - **Tauri 2** + **Vue 3** + **TypeScript** + **Tailwind CSS**
-- **Rust** (`capture-core`) para captura nativa
-- **Pinia** para estado, **SQLite** para historial
+- **Rust** (`capture-core`) for native capture
+- **Pinia** for state, **SQLite** for history
 
-### Desarrollo local
+### Local development
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Compilar instaladores:
+Build the macOS installer:
 
 ```bash
-pnpm build          # todas las plataformas soportadas en tu OS
-pnpm build:mac      # solo .dmg en macOS
+pnpm build:mac      # .dmg (macOS only)
 ```
 
-El `.dmg` se genera en `apps/desktop/src-tauri/target/release/bundle/dmg/`.
+The `.dmg` is generated in `apps/desktop/src-tauri/target/release/bundle/dmg/`.
 
-### Estructura
+### Structure
 
 ```
-apps/desktop/          # App Tauri + Vue
-packages/capture-core/ # Motor de captura Rust
-packages/shared-types/ # Tipos IPC compartidos
-packages/licensing/    # Tiers open core + validación de licencias
-packages/raycast-extension/ # Extensión Raycast (macOS)
-cli/                   # CLI better-screenshoot
-docs/api.md            # URL scheme y CLI
+apps/desktop/          # Tauri + Vue app
+packages/capture-core/ # Rust capture engine
+packages/shared-types/ # Shared IPC types
+packages/licensing/    # Open core tiers + license validation
+packages/raycast-extension/ # Raycast extension (macOS)
+cli/                   # better-screenshoot CLI
+docs/api.md            # URL scheme and CLI
 ```
 
-### Integraciones
+### Integrations
 
 ```bash
 open "betterscreenshoot://capture-area"
-better-screenshoot-cli open capture-screen
+better-screenshoot-cli open capture-area
 ```
 
-Ver [docs/api.md](docs/api.md).
+See [docs/api.md](docs/api.md).
 
-### Ramas y releases
+### Branches and releases
 
-Flujo de trabajo, protección de `main` y versionado: [docs/branching.md](docs/branching.md).
+Workflow, `main` protection, and versioning: [docs/branching.md](docs/branching.md).
 
-## Licencia
+## License
 
-Open core — Community (OSS) + tiers Pro/Cloud/Team de pago.
+Open core — Community (OSS) + paid Pro/Cloud/Team tiers.

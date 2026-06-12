@@ -1,14 +1,17 @@
 import { onMounted, onUnmounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
   openPendingCaptureInEditor,
   peekPendingCapture,
   type SavedCapture,
 } from "../lib/tauri";
+import { translateAppError } from "../i18n/resolveError";
 
 const EDITOR_OPEN_GRACE_MS = 2500;
 
 export function usePendingCaptureRecovery() {
+  const { t } = useI18n();
   const pendingCapture = ref<SavedCapture | null>(null);
   const recoveryBusy = ref(false);
   const recoveryError = ref<string | null>(null);
@@ -34,7 +37,9 @@ export function usePendingCaptureRecovery() {
       }
     } catch (err) {
       recoveryError.value =
-        err instanceof Error ? err.message : "No se pudo abrir el editor";
+        err instanceof Error
+          ? translateAppError(t, err.message)
+          : t("errors.openEditorFailed");
       await refreshPendingCapture();
     } finally {
       recoveryBusy.value = false;
