@@ -40,7 +40,7 @@ better-screenshoot windows
 
 ## Raycast
 
-See `packages/raycast-extension/`. Commands trigger the URL scheme above. Store publishing: `npm run publish` in that folder (see its README).
+See `packages/better-screenshoot/`. Commands trigger the URL scheme above. Local dev: `pnpm raycast:dev` from repo root. Store publishing: `npm run publish` in that folder (see its README).
 
 ## Permissions (macOS)
 

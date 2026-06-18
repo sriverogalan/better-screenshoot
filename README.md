@@ -131,7 +131,7 @@ apps/desktop/          # Tauri + Vue app
 packages/capture-core/ # Rust capture engine
 packages/shared-types/ # Shared IPC types
 packages/licensing/    # Open core tiers + license validation
-packages/raycast-extension/ # Raycast extension (macOS)
+packages/better-screenshoot/ # Raycast extension (macOS, npm only)
 cli/                   # better-screenshoot CLI
 docs/api.md            # URL scheme and CLI
 ```
@@ -143,7 +143,7 @@ open "betterscreenshoot://capture-area"
 better-screenshoot-cli open capture-area
 ```
 
-Raycast extension: `packages/raycast-extension/` (publish with `npm run publish` inside that folder). See its README.
+Raycast extension: `packages/better-screenshoot/` — local dev: `pnpm raycast:dev` (import once via Raycast → Import Extension). See its README.
 
 See [docs/api.md](docs/api.md).
 
