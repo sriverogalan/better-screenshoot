@@ -2,6 +2,33 @@
 
 Screenshots with a built-in editor, global shortcuts, and history. **macOS only** for now.
 
+## Install
+
+This build is **not** signed with an Apple Developer certificate. Install via Homebrew to avoid macOS security warnings automatically.
+
+### Homebrew (recommended — no security warnings)
+
+```sh
+brew install --cask sriverogalan/better-screenshoot/better-screenshoot
+```
+
+### Direct download
+
+Download the `.dmg` from [Releases](https://github.com/sriverogalan/better-screenshoot/releases).
+
+If macOS shows **"Better Screenshoot is damaged and can't be opened"**, run once in Terminal:
+
+```sh
+xattr -cr "/Applications/Better Screenshoot.app"
+```
+
+## Requirements
+
+- macOS 12.0 (Monterey) or later
+- Screen Recording permission (prompted on first launch)
+
+For full install instructions, troubleshooting, and a bilingual guide, see [docs/release-install-notes.md](docs/release-install-notes.md).
+
 ## Get started
 
 ### 1. Download
@@ -15,15 +42,7 @@ Screenshots with a built-in editor, global shortcuts, and history. **macOS only*
 
 ### 2. Install on macOS
 
-Better Screenshoot is **free and open source**. It is not signed with a paid Apple Developer certificate, so macOS shows a **one-time** security prompt on first launch. This is expected.
-
-1. Open the `.dmg` and drag **Better Screenshoot** to **Applications**.
-2. **First launch only:** Finder → **Applications** → **right-click** (or Control-click) **Better Screenshoot** → **Open** → confirm **Open**.  
-   Do **not** double-click the first time — macOS will block it with a message like *"Apple cannot verify that Better Screenshoot.app…"* / *"Apple no ha podido verificar…"*.
-3. Allow **Screen Recording** when prompted (required to capture).
-4. Allow **Accessibility** if prompted (required for global shortcuts).
-
-**Español — primera apertura:** **Aplicaciones** → **clic derecho** en Better Screenshoot → **Abrir** → **Abrir**. Solo la primera vez.
+See the [Install](#install) section above.
 
 Still blocked? See [Troubleshooting](#troubleshooting).
 
