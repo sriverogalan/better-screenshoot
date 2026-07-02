@@ -41,6 +41,10 @@ onMounted(async () => {
 
     await settingsStore.load();
     initLocaleFromSettings(normalizeLocale(settingsStore.settings.locale));
+
+    if (!settingsStore.settings.onboarding_completed && !isOverlay.value) {
+      await router.replace("/onboarding");
+    }
   } catch (error) {
     notice.value =
       error instanceof Error
