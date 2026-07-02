@@ -52,8 +52,10 @@
       "integrations": "Integrationen",
       "captureMode": "Aufnahmemodus (macOS)",
       "globalShortcuts": "Globale Tastenkürzel",
-      "license": "Lizenz"
+      "license": "Lizenz",
+      "setup": "Einrichtung"
     },
+    "runSetupWizard": "Einrichtungsassistenten erneut ausführen",
     "saveFolder": "Speicherordner",
     "autoCopy": "Automatisch in die Zwischenablage kopieren",
     "autoSave": "Aufnahmen auf der Festplatte speichern",
@@ -86,6 +88,28 @@
         "pro": "Pro",
         "cloud": "Cloud",
         "team": "Team"
+      }
+    },
+    "updates": {
+      "title": "Updates",
+      "currentVersion": "Aktuelle Version:",
+      "description": "Die App sucht beim Start und auf diesem Bildschirm nach signierten Updates.",
+      "checkForUpdates": "Nach Updates suchen",
+      "installVersion": "v{version} installieren",
+      "updateNow": "Jetzt aktualisieren",
+      "later": "Später",
+      "downloadingAction": "Wird heruntergeladen…",
+      "dismissNotification": "Update-Benachrichtigung schließen",
+      "status": {
+        "checking": "Es wird nach Updates gesucht…",
+        "downloading": "Update wird heruntergeladen…",
+        "downloadingWithPercent": "Update wird heruntergeladen… {percent} %",
+        "available": "Version {version} ist verfügbar.",
+        "unsupported": "Updates sind nur in Release-Builds verfügbar.",
+        "latest": "Sie verwenden die neueste Version.",
+        "checkFailed": "Es konnte nicht nach Updates gesucht werden.",
+        "captureActive": "Beenden Sie die aktuelle Aufnahme, bevor Sie aktualisieren.",
+        "installFailed": "Das Update konnte nicht installiert werden."
       }
     }
   },
@@ -247,7 +271,43 @@
     "driftIndependentReplace": "macOS hat Systemaufnahmen deaktiviert, aber die App ist nicht im Ersetzungsmodus.",
     "driftNoBackup": "macOS hat Systemaufnahmen ohne Backup deaktiviert. Reparieren Sie den Zustand, um sie wieder zu aktivieren.",
     "driftGeneric": "Der Systemaufnahme-Zustand stimmt nicht mit den Einstellungen überein.",
+    "macosPermissionGrantedNoDisplays": "Bildschirmaufnahme ist erlaubt, aber es wurden keine Bildschirme erkannt. Dies kann in VMs oder CI-Umgebungen auftreten.",
     "generic": "Etwas ist schiefgelaufen"
+  },
+  "onboarding": {
+    "stepWelcome": {
+      "title": "Willkommen bei Better Screenshoot",
+      "description": "Richten Sie alles in wenigen Schritten ein.",
+      "next": "Loslegen"
+    },
+    "stepPermission": {
+      "title": "Bildschirmaufnahme",
+      "description": "Better Screenshoot benötigt die Berechtigung zur Bildschirmaufnahme.",
+      "openSettings": "Systemeinstellungen öffnen",
+      "next": "Weiter",
+      "waiting": "Warte auf Berechtigung…",
+      "skip": "Überspringen (kein Bildschirm erkannt)"
+    },
+    "stepAutostart": {
+      "title": "Beim Anmelden starten",
+      "description": "Starten Sie Better Screenshoot automatisch beim Anmelden, damit es immer bereit ist.",
+      "toggle": "Better Screenshoot beim Anmelden starten",
+      "next": "Weiter"
+    },
+    "stepQuickSettings": {
+      "title": "Schnellkonfiguration",
+      "description": "Wählen Sie Ihr bevorzugtes Aufnahmeverhalten.",
+      "autoCopy": "Aufnahmen automatisch in die Zwischenablage kopieren",
+      "autoSave": "Aufnahmen auf Disk speichern",
+      "next": "Weiter"
+    },
+    "stepDone": {
+      "title": "Alles bereit!",
+      "description": "Better Screenshoot ist einsatzbereit. Drücken Sie einen globalen Kurzbefehl oder verwenden Sie das Menüleistensymbol zum Aufnehmen.",
+      "done": "Better Screenshoot verwenden"
+    },
+    "language": "Sprache",
+    "step": "Schritt {current} von {total}"
   },
   "tray": {
     "tooltip": "Better Screenshoot",

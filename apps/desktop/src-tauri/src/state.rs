@@ -53,6 +53,7 @@ pub struct AppSettings {
     pub hotkeys: HotkeyConfig,
     pub tier: String,
     pub locale: String,
+    pub onboarding_completed: bool,
 }
 
 impl Default for AppSettings {
@@ -71,6 +72,7 @@ impl Default for AppSettings {
             hotkeys: HotkeyConfig::default(),
             tier: "community".into(),
             locale: default_locale(),
+            onboarding_completed: false,
         }
     }
 }
@@ -99,6 +101,8 @@ impl<'de> Deserialize<'de> for AppSettings {
             tier: String,
             #[serde(default = "default_locale")]
             locale: String,
+            #[serde(default)]
+            onboarding_completed: bool,
         }
 
         fn default_true() -> bool {
@@ -125,6 +129,7 @@ impl<'de> Deserialize<'de> for AppSettings {
             hotkeys: raw.hotkeys,
             tier: raw.tier,
             locale: normalize_locale(raw.locale),
+            onboarding_completed: raw.onboarding_completed,
         })
     }
 }
@@ -176,6 +181,49 @@ pub fn save_settings(app: &AppHandle, state: &AppState) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // --- 8.3: onboarding_completed deserializes to false when absent ---
+
+    #[test]
+    fn onboarding_completed_defaults_to_false_when_key_absent() {
+        let json = r#"{
+            "save_directory": "/tmp",
+            "auto_copy": true,
+            "auto_save": true,
+            "allow_external_control": true,
+            "hotkeys": {
+                "capture_area": "CommandOrControl+Shift+X",
+                "capture_screen": "CommandOrControl+Shift+Option+S",
+                "capture_window": "CommandOrControl+Shift+Option+W",
+                "open_history": "CommandOrControl+Shift+H"
+            },
+            "tier": "community"
+        }"#;
+
+        let settings: AppSettings = serde_json::from_str(json).expect("parse settings");
+        assert!(!settings.onboarding_completed);
+    }
+
+    #[test]
+    fn onboarding_completed_reads_true_when_set() {
+        let json = r#"{
+            "save_directory": "/tmp",
+            "auto_copy": true,
+            "auto_save": true,
+            "allow_external_control": true,
+            "onboarding_completed": true,
+            "hotkeys": {
+                "capture_area": "CommandOrControl+Shift+X",
+                "capture_screen": "CommandOrControl+Shift+Option+S",
+                "capture_window": "CommandOrControl+Shift+Option+W",
+                "open_history": "CommandOrControl+Shift+H"
+            },
+            "tier": "community"
+        }"#;
+
+        let settings: AppSettings = serde_json::from_str(json).expect("parse settings");
+        assert!(settings.onboarding_completed);
+    }
 
     #[test]
     fn migrates_legacy_replace_system_screenshots_flag() {

@@ -14,6 +14,7 @@ mod window_front;
 mod window_layout;
 
 use tauri::{Emitter, Manager};
+use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_single_instance::init as single_instance;
 
 use state::{load_settings, save_settings, AppState};
@@ -24,6 +25,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .manage(app_state)
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
@@ -79,6 +81,9 @@ pub fn run() {
 
             if let Some(main) = app.get_webview_window("main") {
                 let _ = window_layout::prepare_main_hub_window(&main);
+                window_activation::activate_app_for_window(&handle);
+                let _ = main.show();
+                let _ = main.set_focus();
             }
 
             // Warm up the editor webview (Tauri may defer loading if it was never shown).
@@ -125,6 +130,7 @@ pub fn run() {
             commands::reload_settings,
             commands::validate_license_key,
             commands::upload_for_share,
+            commands::set_launch_at_login,
             commands::get_capture_status,
             commands::request_screen_capture_permission,
             commands::open_system_screenshot_shortcuts_settings,

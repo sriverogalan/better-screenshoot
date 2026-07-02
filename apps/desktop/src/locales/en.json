@@ -52,8 +52,10 @@
       "integrations": "Integrations",
       "captureMode": "Capture mode (macOS)",
       "globalShortcuts": "Global shortcuts",
-      "license": "License"
+      "license": "License",
+      "setup": "Setup"
     },
+    "runSetupWizard": "Run setup wizard again",
     "saveFolder": "Save folder",
     "autoCopy": "Copy to clipboard automatically",
     "autoSave": "Save captures to disk",
@@ -86,6 +88,28 @@
         "pro": "Pro",
         "cloud": "Cloud",
         "team": "Team"
+      }
+    },
+    "updates": {
+      "title": "Updates",
+      "currentVersion": "Current version:",
+      "description": "The app checks for signed updates when it starts and from this screen.",
+      "checkForUpdates": "Check for updates",
+      "installVersion": "Install v{version}",
+      "updateNow": "Update now",
+      "later": "Later",
+      "downloadingAction": "Downloading…",
+      "dismissNotification": "Dismiss update notification",
+      "status": {
+        "checking": "Checking for updates…",
+        "downloading": "Downloading update…",
+        "downloadingWithPercent": "Downloading update… {percent}%",
+        "available": "Version {version} is available.",
+        "unsupported": "Updates are only available in release builds.",
+        "latest": "You're on the latest version.",
+        "checkFailed": "Could not check for updates.",
+        "captureActive": "Finish the current capture before updating.",
+        "installFailed": "Could not install the update."
       }
     }
   },
@@ -247,7 +271,43 @@
     "driftIndependentReplace": "macOS has system captures disabled but the app is not in replacement mode.",
     "driftNoBackup": "macOS has system captures disabled with no backup. Repair the state to re-enable them.",
     "driftGeneric": "System capture state does not match settings.",
+    "macosPermissionGrantedNoDisplays": "Screen Recording is allowed, but no displays were detected. This can happen in VMs or CI environments.",
     "generic": "Something went wrong"
+  },
+  "onboarding": {
+    "stepWelcome": {
+      "title": "Welcome to Better Screenshoot",
+      "description": "Let's get you set up in just a few steps.",
+      "next": "Get Started"
+    },
+    "stepPermission": {
+      "title": "Screen Recording",
+      "description": "Better Screenshoot needs Screen Recording permission to capture your screen.",
+      "openSettings": "Open System Settings",
+      "next": "Continue",
+      "waiting": "Waiting for permission…",
+      "skip": "Skip (no display detected)"
+    },
+    "stepAutostart": {
+      "title": "Launch at Login",
+      "description": "Start Better Screenshoot automatically when you log in so it's always ready.",
+      "toggle": "Start Better Screenshoot at login",
+      "next": "Next"
+    },
+    "stepQuickSettings": {
+      "title": "Quick Setup",
+      "description": "Choose your preferred capture behavior.",
+      "autoCopy": "Copy captures to clipboard automatically",
+      "autoSave": "Save captures to disk",
+      "next": "Next"
+    },
+    "stepDone": {
+      "title": "You're all set!",
+      "description": "Better Screenshoot is ready to use. Press a global shortcut or use the tray icon to capture.",
+      "done": "Start using Better Screenshoot"
+    },
+    "language": "Language",
+    "step": "Step {current} of {total}"
   },
   "tray": {
     "tooltip": "Better Screenshoot",

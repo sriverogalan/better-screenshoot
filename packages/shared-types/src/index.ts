@@ -54,6 +54,7 @@ export interface AppSettings {
   hotkeys: HotkeyConfig;
   tier: LicenseTier;
   locale: AppLocale;
+  onboarding_completed: boolean;
 }
 
 export interface HotkeyConfig {
@@ -97,4 +98,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   hotkeys: DEFAULT_HOTKEYS,
   tier: "community",
   locale: "en",
+  onboarding_completed: false,
 };

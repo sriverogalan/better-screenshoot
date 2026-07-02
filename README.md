@@ -4,53 +4,25 @@ Screenshots with a built-in editor, global shortcuts, and history. **macOS only*
 
 ## Install
 
-This build is **not** signed with an Apple Developer certificate. Install via Homebrew to avoid macOS security warnings automatically.
-
-### Homebrew (recommended — no security warnings)
-
 ```sh
-brew install --cask sriverogalan/better-screenshoot/better-screenshoot
+brew install --cask sriverogalan/tap/better-screenshoot
 ```
 
-### Direct download
-
-Download the `.dmg` from [Releases](https://github.com/sriverogalan/better-screenshoot/releases).
-
-If macOS shows **"Better Screenshoot is damaged and can't be opened"**, run once in Terminal:
+To uninstall:
 
 ```sh
-xattr -cr "/Applications/Better Screenshoot.app"
+brew uninstall --cask better-screenshoot
 ```
 
-## Requirements
+> **Requirements:** macOS 12.0 (Monterey) or later · Screen Recording permission (the app guides you through it on first launch)
 
-- macOS 12.0 (Monterey) or later
-- Screen Recording permission (prompted on first launch)
+## Use the app
 
-For full install instructions, troubleshooting, and a bilingual guide, see [docs/release-install-notes.md](docs/release-install-notes.md).
-## Get started
+Better Screenshoot opens on launch and lives in the **menu bar**. From there you can capture, open history, or go to settings.
 
-### 1. Download
+After capturing, the **editor** opens so you can annotate: arrows, rectangles, text, highlight, freehand stroke, and blur. The capture is copied to the clipboard and optionally saved to disk.
 
-**[Latest release](https://github.com/sriverogalan/better-screenshoot/releases/latest)**
-
-| Platform | File | Requirements |
-|---|---|---|
-| macOS (Apple Silicon) | `Better Screenshoot_*_aarch64.dmg` | macOS 12 or later |
-| macOS (Intel) | `Better Screenshoot_*_x64.dmg` | macOS 12 or later |
-
-### 2. Install on macOS
-
-See the [Install](#install) section above.
-
-Still blocked? See [Troubleshooting](#troubleshooting).
-### 3. Use the app
-
-Better Screenshoot lives in the **menu bar** (system tray). From there you can capture, open history, or go to settings.
-
-After capturing, the **editor** opens so you can annotate the image: arrows, rectangles, text, highlight, freehand stroke, and blur. When you're done, the capture is copied to the clipboard and you can save it to disk.
-
-#### Default shortcuts
+### Default shortcuts
 
 | Action | Shortcut |
 |---|---|
@@ -59,71 +31,17 @@ After capturing, the **editor** opens so you can annotate the image: arrows, rec
 | Capture window | ⌘⇧⌥W |
 | Open history | ⌘⇧H |
 
-You can change shortcuts in **Settings** inside the app.
+Shortcuts can be changed in **Settings** inside the app.
 
 ## Troubleshooting
 
-### macOS won't open the app
-
-This app is not signed with an Apple Developer certificate — it is built from [public source code](https://github.com/sriverogalan/better-screenshoot).
-
-**Recommended:** Install via Homebrew — it handles quarantine automatically:
-
-```sh
-brew install --cask sriverogalan/better-screenshoot/better-screenshoot
-```
-
-**Already downloaded the DMG?** Run once in Terminal, then open the app:
-
-```sh
-xattr -cr "/Applications/Better Screenshoot.app"
-```
-
-**Still blocked:**
-
-1. System Settings → **Privacy & Security** → scroll down → **Open Anyway**.
-2. Make sure the app is in **Applications**, not running directly from the `.dmg`.
-
-### Capture doesn't work on macOS
+### Capture doesn't work
 
 Go to **System Settings → Privacy & Security → Screen Recording** and enable Better Screenshoot. Restart the app if it was already open.
 
 ### Global shortcuts don't respond
 
-On macOS, add Better Screenshoot under **Settings → Privacy & Security → Accessibility**.
-
-## Publishing a new release
-
-Releases are built **locally on macOS** (faster than CI). GitHub Actions only runs tests and typechecks on PRs.
-
-1. Bump the version in the root `package.json` (CI syncs the rest on your PR).
-2. Merge to `main`, then tag from `main`:
-
-```bash
-git tag v0.2.1
-git push origin v0.2.1   # tag only — does not trigger a remote build
-```
-
-3. From **`main`**, build, sign, and upload the release from your Mac:
-
-```bash
-git checkout main
-git pull origin main
-pnpm release:mac v0.2.1 --all-arch
-```
-
-The release script refuses to run on any other branch.
-
-This creates a **draft** GitHub release with `.dmg` files, signed updater bundles (`.tar.gz`), and `latest.json`. Review it on GitHub and publish when ready — installed apps only pick up updates from **published** releases.
-
-Options:
-
-- `--all-arch` — Apple Silicon + Intel (omit to build only for your current Mac)
-- `--publish` — publish immediately instead of a draft
-
-Signing key: `.tauri/better-screenshoot.key` (gitignored). A backup copy is stored in the repo secret `TAURI_SIGNING_PRIVATE_KEY`. Generate a new pair only if you lose the private key.
-
-See [docs/branching.md](docs/branching.md) for branch flow and `main` protection.
+Add Better Screenshoot under **System Settings → Privacy & Security → Accessibility**.
 
 ---
 
@@ -142,14 +60,6 @@ pnpm install
 pnpm dev
 ```
 
-Build the macOS installer:
-
-```bash
-pnpm build:mac      # .dmg (macOS only)
-```
-
-The `.dmg` is generated in `apps/desktop/src-tauri/target/release/bundle/dmg/`.
-
 ### Structure
 
 ```
@@ -157,7 +67,7 @@ apps/desktop/          # Tauri + Vue app
 packages/capture-core/ # Rust capture engine
 packages/shared-types/ # Shared IPC types
 packages/licensing/    # Open core tiers + license validation
-packages/better-screenshoot/ # Raycast extension (macOS, npm only)
+packages/better-screenshoot/ # Raycast extension
 cli/                   # better-screenshoot CLI
 docs/api.md            # URL scheme and CLI
 ```
@@ -169,13 +79,28 @@ open "betterscreenshoot://capture-area"
 better-screenshoot-cli open capture-area
 ```
 
-Raycast extension: `packages/better-screenshoot/` — local dev: `pnpm raycast:dev` (import once via Raycast → Import Extension). See its README.
+Raycast extension: `packages/better-screenshoot/` — local dev: `pnpm raycast:dev`.
 
 See [docs/api.md](docs/api.md).
 
-### Branches and releases
+### Publishing a new release
 
-Workflow, `main` protection, and versioning: [docs/branching.md](docs/branching.md).
+1. Bump version in root `package.json` and open a PR to `develop`.
+2. Merge `develop` → `main` via PR (CI must pass).
+3. On `main`, build the DMG locally:
+
+```bash
+cd apps/desktop && pnpm tauri build
+```
+
+4. Compute SHA256 and upload to `sriverogalan/better-screenshoot-releases`:
+
+```bash
+shasum -a 256 target/release/bundle/dmg/*.dmg
+gh release create vX.Y.Z target/release/bundle/dmg/*.dmg --repo sriverogalan/better-screenshoot-releases
+```
+
+5. Update `homebrew-tap/Casks/better-screenshoot.rb` with new version + SHA256 and push to `sriverogalan/homebrew-tap`.
 
 ## License
 

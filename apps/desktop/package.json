@@ -1,14 +1,14 @@
 {
   "name": "@better-screenshoot/desktop",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "lint": "vue-tsc --noEmit",
+    "lint": "vue-tsc --noEmit && node scripts/check-locales.mjs",
     "i18n:check": "node scripts/check-locales.mjs",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run"

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
   DEFAULT_HOTKEYS,
   SYSTEM_REPLACEMENT_HOTKEYS,
   type AppLocale,
   type HotkeyConfig,
-  type LicenseTier,
   type SystemCaptureMode,
 } from "@better-screenshoot/shared-types";
 import { useSettingsStore } from "../stores/settings";
@@ -17,16 +17,16 @@ import {
   getSystemCaptureStatus,
   setSystemCaptureMode,
   type SystemCaptureStatus,
-  validateLicenseKey,
 } from "../lib/tauri";
 import { formatHotkey } from "../lib/format-hotkey";
 import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
 import { SUPPORTED_LOCALES, setLocale } from "../i18n";
 import { translateAppError, translateMessageCode } from "../i18n/resolveError";
-import { getLocalizedTiers, translateLicenseMessage } from "../lib/licensing-i18n";
 import { systemShortcutLabelKey } from "../lib/system-shortcut-labels";
 
-const { t, tm } = useI18n();
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const settingsStore = useSettingsStore();
 
 const hotkeyFields = computed(() => [
@@ -47,14 +47,11 @@ const captureHotkeyKeys: Array<keyof HotkeyConfig> = [
 ];
 
 const settings = computed(() => settingsStore.settings);
-const licenseKey = ref("");
-const licenseMessage = ref("");
 const systemMessage = ref<string | null>(null);
 const systemSuccess = ref<string | null>(null);
 const systemBusy = ref(false);
 const showReplaceDialog = ref(false);
 const captureStatus = ref<SystemCaptureStatus | null>(null);
-const localizedTiers = computed(() => getLocalizedTiers(t, tm));
 
 const languageOptions = computed(() =>
   SUPPORTED_LOCALES.map((locale) => ({
@@ -102,24 +99,6 @@ function managedShortcut(key: keyof HotkeyConfig) {
   return "⌘⇧5";
 }
 
-async function applyLicense() {
-  const result = await validateLicenseKey(licenseKey.value);
-  licenseMessage.value = translateLicenseMessage(t, result.messageCode);
-  if (result.valid) {
-    await settingsStore.save({
-      ...settings.value,
-      tier: result.tier as LicenseTier,
-    });
-  }
-}
-
-const tierLabels = computed<Record<LicenseTier, string>>(() => ({
-  community: t("settings.license.tierLabels.community"),
-  pro: t("settings.license.tierLabels.pro"),
-  cloud: t("settings.license.tierLabels.cloud"),
-  team: t("settings.license.tierLabels.team"),
-}));
-
 async function updateField<K extends keyof typeof settings.value>(
   key: K,
   value: (typeof settings.value)[K],
@@ -130,6 +109,13 @@ async function updateField<K extends keyof typeof settings.value>(
 async function updateLocale(locale: AppLocale) {
   await settingsStore.save({ ...settings.value, locale });
   await setLocale(locale);
+}
+
+const isOnOnboardingRoute = computed(() => route.path === "/onboarding");
+
+async function runSetupWizardAgain() {
+  await settingsStore.save({ ...settings.value, onboarding_completed: false });
+  await router.push("/onboarding");
 }
 
 async function updateHotkey(
@@ -498,36 +484,17 @@ onUnmounted(() => {
 
       <section>
         <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.sections.license") }}
+          {{ t("settings.sections.setup") }}
         </h2>
-        <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
-          <p class="text-sm">
-            {{ t("settings.license.currentPlan") }}
-            <span class="font-medium text-accent">{{ tierLabels[settings.tier] }}</span>
-          </p>
-          <label class="block">
-            <span class="mb-1 block text-sm">{{ t("settings.license.licenseKey") }}</span>
-            <input
-              v-model="licenseKey"
-              type="text"
-              :placeholder="t('settings.license.licenseKeyPlaceholder')"
-              class="w-full rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm"
-            />
-          </label>
+        <div class="rounded-xl border border-border bg-surface-raised p-4">
           <button
             type="button"
-            class="rounded-lg bg-accent px-4 py-2 text-sm text-white hover:bg-accent-hover"
-            @click="applyLicense"
+            class="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-border/40 disabled:cursor-not-allowed disabled:opacity-50"
+            :disabled="isOnOnboardingRoute"
+            @click="runSetupWizardAgain"
           >
-            {{ t("settings.license.activate") }}
+            {{ t("settings.runSetupWizard") }}
           </button>
-          <p v-if="licenseMessage" class="text-xs text-text-muted">{{ licenseMessage }}</p>
-          <ul class="space-y-2 text-xs text-text-muted">
-            <li v-for="tier in Object.values(localizedTiers)" :key="tier.id">
-              <strong class="text-text">{{ tier.name }}</strong> — {{ tier.price }}:
-              {{ tier.features.slice(0, 2).join(", ") }}…
-            </li>
-          </ul>
         </div>
       </section>
     </main>
