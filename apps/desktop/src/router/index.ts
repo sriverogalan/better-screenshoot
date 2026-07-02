@@ -5,6 +5,7 @@ import SettingsView from "../views/SettingsView.vue";
 import CaptureWindowView from "../views/CaptureWindowView.vue";
 import OverlayView from "../views/OverlayView.vue";
 import EditorView from "../views/EditorView.vue";
+import OnboardingView from "../views/OnboardingView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,6 +22,7 @@ const router = createRouter({
     },
     { path: "/overlay", component: OverlayView },
     { path: "/editor", component: EditorView },
+    { path: "/onboarding", component: OnboardingView },
   ],
 });
 

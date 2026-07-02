@@ -1,7 +1,7 @@
 {
   "name": "better-screenshoot",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @better-screenshoot/desktop tauri dev",
@@ -11,7 +11,8 @@
     "sync-version": "node scripts/sync-version.mjs",
     "lint": "pnpm -r lint",
     "test": "pnpm -r --filter '!@better-screenshoot/cli' test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "raycast:dev": "bash scripts/raycast-dev.sh"
   },
   "devDependencies": {
     "typescript": "~5.6.2"

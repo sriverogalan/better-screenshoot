@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { IconRefresh } from "@tabler/icons-vue";
 import { useAppUpdater } from "../../composables/useAppUpdater";
+
+const { t } = useI18n();
 
 const {
   phase,
   currentVersion,
   updateSummary,
   errorMessage,
+  statusCode,
   downloadedBytes,
   totalBytes,
   updateAvailable,
@@ -22,7 +26,7 @@ const isBusy = computed(
 
 const statusMessage = computed(() => {
   if (phase.value === "checking") {
-    return "Checking for updates…";
+    return t("settings.updates.status.checking");
   }
 
   if (phase.value === "downloading") {
@@ -31,14 +35,20 @@ const statusMessage = computed(() => {
         100,
         Math.round((downloadedBytes.value / totalBytes.value) * 100),
       );
-      return `Downloading update… ${percent}%`;
+      return t("settings.updates.status.downloadingWithPercent", { percent });
     }
 
-    return "Downloading update…";
+    return t("settings.updates.status.downloading");
+  }
+
+  if (statusCode.value) {
+    return t(`settings.updates.status.${statusCode.value}`);
   }
 
   if (updateAvailable.value && updateSummary.value) {
-    return `Version ${updateSummary.value.version} is available.`;
+    return t("settings.updates.status.available", {
+      version: updateSummary.value.version,
+    });
   }
 
   return errorMessage.value;
@@ -51,14 +61,16 @@ onMounted(() => {
 
 <template>
   <section>
-    <h2 class="mb-4 text-sm font-medium text-text-muted">Updates</h2>
+    <h2 class="mb-4 text-sm font-medium text-text-muted">
+      {{ t("settings.updates.title") }}
+    </h2>
     <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
       <p class="text-sm">
-        Current version:
+        {{ t("settings.updates.currentVersion") }}
         <span class="font-medium text-accent">{{ currentVersion ?? "…" }}</span>
       </p>
       <p class="text-xs text-text-muted">
-        The app checks for signed updates when it starts and from this screen.
+        {{ t("settings.updates.description") }}
       </p>
 
       <div class="flex flex-wrap gap-2">
@@ -69,7 +81,7 @@ onMounted(() => {
           @click="checkForUpdates()"
         >
           <IconRefresh class="size-4" aria-hidden="true" />
-          Check for updates
+          {{ t("settings.updates.checkForUpdates") }}
         </button>
         <button
           v-if="updateAvailable"
@@ -78,7 +90,7 @@ onMounted(() => {
           :disabled="isBusy"
           @click="installAvailableUpdate"
         >
-          Install v{{ updateSummary?.version }}
+          {{ t("settings.updates.installVersion", { version: updateSummary?.version }) }}
         </button>
       </div>
 

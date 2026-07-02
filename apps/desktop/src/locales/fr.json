@@ -52,8 +52,10 @@
       "integrations": "Intégrations",
       "captureMode": "Mode de capture (macOS)",
       "globalShortcuts": "Raccourcis globaux",
-      "license": "Licence"
+      "license": "Licence",
+      "setup": "Configuration"
     },
+    "runSetupWizard": "Relancer l'assistant de configuration",
     "saveFolder": "Dossier d'enregistrement",
     "autoCopy": "Copier automatiquement dans le presse-papiers",
     "autoSave": "Enregistrer les captures sur le disque",
@@ -86,6 +88,28 @@
         "pro": "Pro",
         "cloud": "Cloud",
         "team": "Team"
+      }
+    },
+    "updates": {
+      "title": "Mises à jour",
+      "currentVersion": "Version actuelle :",
+      "description": "L'application recherche les mises à jour signées au démarrage et depuis cet écran.",
+      "checkForUpdates": "Rechercher des mises à jour",
+      "installVersion": "Installer v{version}",
+      "updateNow": "Mettre à jour maintenant",
+      "later": "Plus tard",
+      "downloadingAction": "Téléchargement…",
+      "dismissNotification": "Fermer la notification de mise à jour",
+      "status": {
+        "checking": "Recherche de mises à jour…",
+        "downloading": "Téléchargement de la mise à jour…",
+        "downloadingWithPercent": "Téléchargement de la mise à jour… {percent} %",
+        "available": "La version {version} est disponible.",
+        "unsupported": "Les mises à jour ne sont disponibles que dans les versions de publication.",
+        "latest": "Vous utilisez la dernière version.",
+        "checkFailed": "Impossible de rechercher des mises à jour.",
+        "captureActive": "Terminez la capture en cours avant de mettre à jour.",
+        "installFailed": "Impossible d'installer la mise à jour."
       }
     }
   },
@@ -247,7 +271,43 @@
     "driftIndependentReplace": "macOS a désactivé les captures système mais l'application n'est pas en mode remplacement.",
     "driftNoBackup": "macOS a désactivé les captures système sans sauvegarde. Réparez l'état pour les réactiver.",
     "driftGeneric": "L'état de capture système ne correspond pas aux réglages.",
+    "macosPermissionGrantedNoDisplays": "L'enregistrement d'écran est autorisé, mais aucun écran n'a été détecté. Cela peut se produire dans des machines virtuelles ou des environnements CI.",
     "generic": "Une erreur s'est produite"
+  },
+  "onboarding": {
+    "stepWelcome": {
+      "title": "Bienvenue dans Better Screenshoot",
+      "description": "Configurons tout en quelques étapes.",
+      "next": "Démarrer"
+    },
+    "stepPermission": {
+      "title": "Enregistrement d'écran",
+      "description": "Better Screenshoot a besoin de l'autorisation d'enregistrement d'écran pour capturer votre écran.",
+      "openSettings": "Ouvrir les réglages système",
+      "next": "Continuer",
+      "waiting": "En attente de l'autorisation…",
+      "skip": "Ignorer (aucun écran détecté)"
+    },
+    "stepAutostart": {
+      "title": "Lancer au démarrage",
+      "description": "Démarrez Better Screenshoot automatiquement à la connexion pour qu'il soit toujours prêt.",
+      "toggle": "Lancer Better Screenshoot au démarrage",
+      "next": "Suivant"
+    },
+    "stepQuickSettings": {
+      "title": "Configuration rapide",
+      "description": "Choisissez votre comportement de capture préféré.",
+      "autoCopy": "Copier les captures dans le presse-papiers automatiquement",
+      "autoSave": "Enregistrer les captures sur le disque",
+      "next": "Suivant"
+    },
+    "stepDone": {
+      "title": "Tout est prêt !",
+      "description": "Better Screenshoot est prêt à l'emploi. Appuyez sur un raccourci global ou utilisez l'icône de la barre des menus pour capturer.",
+      "done": "Commencer à utiliser Better Screenshoot"
+    },
+    "language": "Langue",
+    "step": "Étape {current} sur {total}"
   },
   "tray": {
     "tooltip": "Better Screenshoot",
