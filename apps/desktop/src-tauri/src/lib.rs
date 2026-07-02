@@ -81,6 +81,9 @@ pub fn run() {
 
             if let Some(main) = app.get_webview_window("main") {
                 let _ = window_layout::prepare_main_hub_window(&main);
+                window_activation::activate_app_for_window(&handle);
+                let _ = main.show();
+                let _ = main.set_focus();
             }
 
             // Warm up the editor webview (Tauri may defer loading if it was never shown).
