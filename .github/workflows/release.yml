@@ -38,5 +38,5 @@ jobs:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}
           releaseName: 'Better Screenshoot ${{ github.ref_name }}'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
