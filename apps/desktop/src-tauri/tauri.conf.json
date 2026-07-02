@@ -93,7 +93,7 @@
       }
     },
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMxQkNDMzhDRTE3MUIzNwpSV1EzR3hmT09Nd2JET0NCYmVkbUNmbENZL0tjZlBRUUY1SXI3UjF4bWJBQ1l1UlJ3MmE1S2d5Ygo=",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhFMjhCRjY5ODdFNUY5Q0QKUldUTitlV0hhYjhvamxaTUlrU01VNmdYQVZDek5iSlM2QTJmaFVYL3g5bURkNHQ5bVlrcmoydTcK",
       "endpoints": [
         "https://github.com/sriverogalan/better-screenshoot/releases/latest/download/latest.json"
       ]
