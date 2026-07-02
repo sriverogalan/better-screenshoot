@@ -52,8 +52,10 @@
       "integrations": "Integraciones",
       "captureMode": "Modo de captura (macOS)",
       "globalShortcuts": "Atajos globales",
-      "license": "Licencia"
+      "license": "Licencia",
+      "setup": "Configuración"
     },
+    "runSetupWizard": "Volver a ejecutar el asistente de configuración",
     "saveFolder": "Carpeta de guardado",
     "autoCopy": "Copiar al portapapeles automáticamente",
     "autoSave": "Guardar capturas en disco",
@@ -86,6 +88,28 @@
         "pro": "Pro",
         "cloud": "Cloud",
         "team": "Team"
+      }
+    },
+    "updates": {
+      "title": "Actualizaciones",
+      "currentVersion": "Versión actual:",
+      "description": "La aplicación busca actualizaciones firmadas al iniciarse y desde esta pantalla.",
+      "checkForUpdates": "Buscar actualizaciones",
+      "installVersion": "Instalar v{version}",
+      "updateNow": "Actualizar ahora",
+      "later": "Más tarde",
+      "downloadingAction": "Descargando…",
+      "dismissNotification": "Descartar notificación de actualización",
+      "status": {
+        "checking": "Buscando actualizaciones…",
+        "downloading": "Descargando actualización…",
+        "downloadingWithPercent": "Descargando actualización… {percent}%",
+        "available": "La versión {version} está disponible.",
+        "unsupported": "Las actualizaciones solo están disponibles en compilaciones de lanzamiento.",
+        "latest": "Ya tienes la versión más reciente.",
+        "checkFailed": "No se pudieron buscar actualizaciones.",
+        "captureActive": "Finaliza la captura actual antes de actualizar.",
+        "installFailed": "No se pudo instalar la actualización."
       }
     }
   },
@@ -247,7 +271,43 @@
     "driftIndependentReplace": "macOS tiene las capturas del sistema desactivadas pero la app no está en modo de reemplazo.",
     "driftNoBackup": "macOS tiene las capturas del sistema desactivadas sin copia de seguridad. Repara el estado para reactivarlas.",
     "driftGeneric": "El estado de captura del sistema no coincide con los ajustes.",
+    "macosPermissionGrantedNoDisplays": "La Grabación de pantalla está permitida, pero no se detectaron pantallas. Esto puede ocurrir en máquinas virtuales o entornos CI.",
     "generic": "Algo salió mal"
+  },
+  "onboarding": {
+    "stepWelcome": {
+      "title": "Bienvenido a Better Screenshoot",
+      "description": "Vamos a configurarlo todo en unos pocos pasos.",
+      "next": "Comenzar"
+    },
+    "stepPermission": {
+      "title": "Grabación de pantalla",
+      "description": "Better Screenshoot necesita permiso de Grabación de pantalla para capturar tu pantalla.",
+      "openSettings": "Abrir Ajustes del sistema",
+      "next": "Continuar",
+      "waiting": "Esperando permiso…",
+      "skip": "Omitir (sin pantalla detectada)"
+    },
+    "stepAutostart": {
+      "title": "Iniciar al arrancar",
+      "description": "Inicia Better Screenshoot automáticamente al iniciar sesión para tenerlo siempre listo.",
+      "toggle": "Iniciar Better Screenshoot al arrancar",
+      "next": "Siguiente"
+    },
+    "stepQuickSettings": {
+      "title": "Configuración rápida",
+      "description": "Elige tu comportamiento de captura preferido.",
+      "autoCopy": "Copiar capturas al portapapeles automáticamente",
+      "autoSave": "Guardar capturas en disco",
+      "next": "Siguiente"
+    },
+    "stepDone": {
+      "title": "¡Todo listo!",
+      "description": "Better Screenshoot está listo para usar. Pulsa un atajo global o usa el icono de la bandeja para capturar.",
+      "done": "Empezar a usar Better Screenshoot"
+    },
+    "language": "Idioma",
+    "step": "Paso {current} de {total}"
   },
   "tray": {
     "tooltip": "Better Screenshoot",
