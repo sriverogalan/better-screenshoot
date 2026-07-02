@@ -61,11 +61,11 @@ fn permission_message_code(displays_found: usize, granted: bool) -> (String, Opt
     #[cfg(target_os = "macos")]
     {
         let code = if granted {
-            "macosPermissionRequired".into()
+            "macosPermissionGrantedNoDisplays"
         } else {
-            "macosPermissionRequired".into()
+            "macosPermissionRequired"
         };
-        return (code, None);
+        return (code.into(), None);
     }
 
     #[cfg(not(target_os = "macos"))]
@@ -74,19 +74,25 @@ fn permission_message_code(displays_found: usize, granted: bool) -> (String, Opt
     }
 }
 
-#[tauri::command]
-pub async fn get_capture_status(state: State<'_, AppState>) -> Result<CaptureStatus, String> {
-    let displays = state.provider.list_displays().map_err(|_| app_error("captureFailed"))?;
-    let granted = macos_screen_capture_granted();
+/// Computes a [`CaptureStatus`] from raw display list and TCC grant state.
+/// Extracted so unit tests can exercise the full status-building logic without
+/// needing a live Tauri [`State`].
+fn compute_capture_status(displays: Vec<capture_core::types::DisplayInfo>, granted: bool) -> CaptureStatus {
     let (message_code, message_params) = permission_message_code(displays.len(), granted);
-
-    Ok(CaptureStatus {
+    CaptureStatus {
         displays_found: displays.len(),
         screen_capture_granted: granted && !displays.is_empty(),
         message_code,
         message_params,
         dev_binary_path: dev_binary_hint(),
-    })
+    }
+}
+
+#[tauri::command]
+pub async fn get_capture_status(state: State<'_, AppState>) -> Result<CaptureStatus, String> {
+    let displays = state.provider.list_displays().unwrap_or_default();
+    let granted = macos_screen_capture_granted();
+    Ok(compute_capture_status(displays, granted))
 }
 
 #[tauri::command]
@@ -112,5 +118,77 @@ pub fn open_system_screenshot_shortcuts_settings() -> Result<(), String> {
     #[cfg(not(target_os = "macos"))]
     {
         Err(app_error("macosShortcutsOnly"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- 8.1: permission_message_code — all three branches ---
+
+    #[test]
+    fn permission_code_with_displays_returns_displays_detected() {
+        let (code, params) = permission_message_code(3, true);
+        assert_eq!(code, "displaysDetected");
+        assert!(params.is_some());
+        assert_eq!(params.unwrap()["count"], 3);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn permission_code_granted_no_displays_returns_granted_no_displays_code() {
+        let (code, params) = permission_message_code(0, true);
+        assert_eq!(code, "macosPermissionGrantedNoDisplays");
+        assert!(params.is_none());
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn permission_code_not_granted_returns_permission_required() {
+        let (code, params) = permission_message_code(0, false);
+        assert_eq!(code, "macosPermissionRequired");
+        assert!(params.is_none());
+    }
+
+    // --- 8.2: compute_capture_status — simulates list_displays() returning Err via empty vec ---
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn capture_status_err_displays_not_granted_returns_permission_required() {
+        // unwrap_or_default() on Err → empty vec; granted=false
+        let status = compute_capture_status(vec![], false);
+        assert_eq!(status.message_code, "macosPermissionRequired");
+        assert!(!status.screen_capture_granted);
+        assert_eq!(status.displays_found, 0);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn capture_status_err_displays_granted_returns_granted_no_displays() {
+        // unwrap_or_default() on Err → empty vec; TCC granted but no displays (VM/CI)
+        let status = compute_capture_status(vec![], true);
+        assert_eq!(status.message_code, "macosPermissionGrantedNoDisplays");
+        assert!(!status.screen_capture_granted);
+        assert_eq!(status.displays_found, 0);
+    }
+
+    #[test]
+    fn capture_status_with_displays_returns_displays_detected() {
+        use capture_core::types::DisplayInfo;
+        let display = DisplayInfo {
+            id: 1,
+            name: "Test".into(),
+            width: 1920,
+            height: 1080,
+            scale_factor: 1.0,
+            is_primary: true,
+            x: 0,
+            y: 0,
+        };
+        let status = compute_capture_status(vec![display], true);
+        assert_eq!(status.message_code, "displaysDetected");
+        assert!(status.screen_capture_granted);
+        assert_eq!(status.displays_found, 1);
     }
 }

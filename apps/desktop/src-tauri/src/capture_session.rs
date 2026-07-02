@@ -3,8 +3,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use tauri::{AppHandle, Emitter};
 
-use crate::window_layout;
-
 static ACTIVE: AtomicBool = AtomicBool::new(false);
 static HUB_SHOW_EPOCH: AtomicU64 = AtomicU64::new(0);
 static SESSION_STARTED_AT_MS: AtomicU64 = AtomicU64::new(0);
@@ -54,7 +52,6 @@ fn force_clear_session() {
     ACTIVE.store(false, Ordering::SeqCst);
     SESSION_STARTED_AT_MS.store(0, Ordering::SeqCst);
     CURRENT_GEN.store(0, Ordering::SeqCst);
-    window_layout::release_hub_watch();
 }
 
 /// Active session token (0 if none).
@@ -82,7 +79,6 @@ pub fn begin(app: &AppHandle) -> u64 {
     CURRENT_GEN.store(gen, Ordering::SeqCst);
     SESSION_STARTED_AT_MS.store(now_ms(), Ordering::SeqCst);
     HUB_SHOW_EPOCH.fetch_add(1, Ordering::SeqCst);
-    window_layout::suppress_hub_watch();
     crate::app_trace!("capture_session: begin (gen={gen})");
     let _ = app.emit("capture-session-active", ());
     gen
@@ -109,7 +105,6 @@ pub fn end_generation(app: &AppHandle, gen: u64) {
 
     CURRENT_GEN.store(0, Ordering::SeqCst);
     SESSION_STARTED_AT_MS.store(0, Ordering::SeqCst);
-    window_layout::release_hub_watch();
     crate::app_trace!("capture_session: end (gen={gen})");
     let _ = app.emit("capture-session-ended", ());
 }

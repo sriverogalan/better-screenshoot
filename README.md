@@ -2,7 +2,35 @@
 
 Screenshots with a built-in editor, global shortcuts, and history. **macOS only** for now.
 
-## Download
+## Install
+
+This build is **not** signed with an Apple Developer certificate. Install via Homebrew to avoid macOS security warnings automatically.
+
+### Homebrew (recommended — no security warnings)
+
+```sh
+brew install --cask sriverogalan/better-screenshoot/better-screenshoot
+```
+
+### Direct download
+
+Download the `.dmg` from [Releases](https://github.com/sriverogalan/better-screenshoot/releases).
+
+If macOS shows **"Better Screenshoot is damaged and can't be opened"**, run once in Terminal:
+
+```sh
+xattr -cr "/Applications/Better Screenshoot.app"
+```
+
+## Requirements
+
+- macOS 12.0 (Monterey) or later
+- Screen Recording permission (prompted on first launch)
+
+For full install instructions, troubleshooting, and a bilingual guide, see [docs/release-install-notes.md](docs/release-install-notes.md).
+## Get started
+
+### 1. Download
 
 **[Latest release](https://github.com/sriverogalan/better-screenshoot/releases/latest)**
 
@@ -11,21 +39,18 @@ Screenshots with a built-in editor, global shortcuts, and history. **macOS only*
 | macOS (Apple Silicon) | `Better Screenshoot_*_aarch64.dmg` | macOS 12 or later |
 | macOS (Intel) | `Better Screenshoot_*_x64.dmg` | macOS 12 or later |
 
-## Installation
+### 2. Install on macOS
 
-1. Download the `.dmg` that matches your Mac (Apple Silicon or Intel).
-2. Open the `.dmg` and drag **Better Screenshoot** to **Applications**.
-3. Open the app. If macOS shows a security warning, see [Troubleshooting](#troubleshooting).
-4. Grant **Screen Recording** permission when prompted (System Settings → Privacy & Security → Screen Recording).
-5. For reliable global shortcuts, also enable **Accessibility** if the app requests it.
+See the [Install](#install) section above.
 
-## Getting started
+Still blocked? See [Troubleshooting](#troubleshooting).
+### 3. Use the app
 
-Better Screenshoot lives in the **system tray**. From there you can capture, open history, or go to settings.
+Better Screenshoot lives in the **menu bar** (system tray). From there you can capture, open history, or go to settings.
 
 After capturing, the **editor** opens so you can annotate the image: arrows, rectangles, text, highlight, freehand stroke, and blur. When you're done, the capture is copied to the clipboard and you can save it to disk.
 
-### Default shortcuts
+#### Default shortcuts
 
 | Action | Shortcut |
 |---|---|
@@ -40,11 +65,24 @@ You can change shortcuts in **Settings** inside the app.
 
 ### macOS won't open the app
 
-Current builds are not signed with an Apple certificate. It's normal to see *"can't be opened because it is from an unidentified developer"*.
+This app is not signed with an Apple Developer certificate — it is built from [public source code](https://github.com/sriverogalan/better-screenshoot).
 
-**Option A:** right-click the app → **Open** → confirm.
+**Recommended:** Install via Homebrew — it handles quarantine automatically:
 
-**Option B:** System Settings → **Privacy & Security** → **Open Anyway**.
+```sh
+brew install --cask sriverogalan/better-screenshoot/better-screenshoot
+```
+
+**Already downloaded the DMG?** Run once in Terminal, then open the app:
+
+```sh
+xattr -cr "/Applications/Better Screenshoot.app"
+```
+
+**Still blocked:**
+
+1. System Settings → **Privacy & Security** → scroll down → **Open Anyway**.
+2. Make sure the app is in **Applications**, not running directly from the `.dmg`.
 
 ### Capture doesn't work on macOS
 
@@ -119,7 +157,7 @@ apps/desktop/          # Tauri + Vue app
 packages/capture-core/ # Rust capture engine
 packages/shared-types/ # Shared IPC types
 packages/licensing/    # Open core tiers + license validation
-packages/raycast-extension/ # Raycast extension (macOS)
+packages/better-screenshoot/ # Raycast extension (macOS, npm only)
 cli/                   # better-screenshoot CLI
 docs/api.md            # URL scheme and CLI
 ```
@@ -130,6 +168,8 @@ docs/api.md            # URL scheme and CLI
 open "betterscreenshoot://capture-area"
 better-screenshoot-cli open capture-area
 ```
+
+Raycast extension: `packages/better-screenshoot/` — local dev: `pnpm raycast:dev` (import once via Raycast → Import Extension). See its README.
 
 See [docs/api.md](docs/api.md).
 

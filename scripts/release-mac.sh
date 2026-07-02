@@ -138,6 +138,8 @@ cd "$ROOT"
 pnpm install
 
 LATEST_ARGS=()
+SHA256_ARM64=""
+SHA256_X64=""
 
 for target in "${TARGETS[@]}"; do
   echo "→ tauri build --target $target"
@@ -176,9 +178,22 @@ for target in "${TARGETS[@]}"; do
   cp "$sig_file" "$staged_sig"
   cp "$dmg_file" "$staged_dmg"
 
+  _sha256="$(shasum -a 256 "$staged_dmg" | awk '{print $1}')"
+  case "$target" in
+    aarch64-apple-darwin) SHA256_ARM64="$_sha256" ;;
+    x86_64-apple-darwin)  SHA256_X64="$_sha256" ;;
+  esac
+
   tarball_name="$(basename "$staged_tarball")"
   LATEST_ARGS+=("$platform" "$staged_sig" "https://github.com/$REPO/releases/download/$TAG/$tarball_name")
 done
+
+echo ""
+echo "━━━ Cask bump — homebrew-better-screenshoot/Casks/better-screenshoot.rb ━━━"
+echo "  version \"$VERSION\""
+[[ -n "$SHA256_ARM64" ]] && echo "  on_arm   → sha256 \"$SHA256_ARM64\"" || echo "  WARNING: SHA256 not computed for arm64 (arch not built)"
+[[ -n "$SHA256_X64"   ]] && echo "  on_intel → sha256 \"$SHA256_X64\""   || echo "  WARNING: SHA256 not computed for x86_64 (arch not built)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 PUB_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 LATEST_JSON="$STAGING/latest.json"
@@ -189,11 +204,13 @@ if [[ "$DRAFT" == true ]]; then
   RELEASE_ARGS+=(--draft)
 fi
 
-RELEASE_ARGS+=(
-  --notes "macOS release built locally.
+INSTALL_NOTES_FILE="$ROOT/docs/release-install-notes.md"
+if [[ ! -f "$INSTALL_NOTES_FILE" ]]; then
+  echo "Missing release notes template: $INSTALL_NOTES_FILE" >&2
+  exit 1
+fi
 
-Download the \`.dmg\` for your Mac from the assets below. Installed apps pick up signed updates from \`latest.json\` once this release is published."
-)
+RELEASE_ARGS+=(--notes-file "$INSTALL_NOTES_FILE")
 
 if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
   echo "Release $TAG already exists — uploading assets"

@@ -14,10 +14,18 @@ const phase = ref<UpdatePhase>("idle");
 const currentVersion = ref<string | null>(null);
 const updateSummary = ref<UpdateSummary | null>(null);
 const errorMessage = ref<string | null>(null);
+const statusCode = ref<AppUpdaterStatusCode | null>(null);
 const downloadedBytes = ref(0);
 const totalBytes = ref<number | null>(null);
 const promptDismissed = ref(false);
 const captureSessionActive = ref(false);
+
+export type AppUpdaterStatusCode =
+  | "unsupported"
+  | "latest"
+  | "checkFailed"
+  | "captureActive"
+  | "installFailed";
 
 let pendingUpdate: Update | null = null;
 let startupCheckScheduled = false;
@@ -56,7 +64,8 @@ export function useAppUpdater() {
   async function checkForUpdates(options: { silent?: boolean } = {}) {
     if (!isUpdaterSupported()) {
       if (!options.silent) {
-        errorMessage.value = "Updates are only available in release builds.";
+        statusCode.value = "unsupported";
+        errorMessage.value = null;
       }
       return false;
     }
@@ -66,6 +75,7 @@ export function useAppUpdater() {
     }
 
     errorMessage.value = null;
+    statusCode.value = null;
     setPhase("checking");
 
     try {
@@ -76,7 +86,7 @@ export function useAppUpdater() {
         setPhase("idle");
         updateSummary.value = null;
         if (!options.silent) {
-          errorMessage.value = "You're on the latest version.";
+          statusCode.value = "latest";
         }
         return false;
       }
@@ -89,8 +99,8 @@ export function useAppUpdater() {
       pendingUpdate = null;
       updateSummary.value = null;
       setPhase("error");
-      errorMessage.value =
-        error instanceof Error ? error.message : "Could not check for updates.";
+      statusCode.value = error instanceof Error ? null : "checkFailed";
+      errorMessage.value = error instanceof Error ? error.message : null;
       return false;
     }
   }
@@ -101,11 +111,13 @@ export function useAppUpdater() {
     }
 
     if (captureSessionActive.value) {
-      errorMessage.value = "Finish the current capture before updating.";
+      statusCode.value = "captureActive";
+      errorMessage.value = null;
       return;
     }
 
     errorMessage.value = null;
+    statusCode.value = null;
     resetProgress();
     setPhase("downloading");
 
@@ -124,8 +136,8 @@ export function useAppUpdater() {
       setPhase("installing");
     } catch (error) {
       setPhase("error");
-      errorMessage.value =
-        error instanceof Error ? error.message : "Could not install the update.";
+      statusCode.value = error instanceof Error ? null : "installFailed";
+      errorMessage.value = error instanceof Error ? error.message : null;
     }
   }
 
@@ -158,6 +170,7 @@ export function useAppUpdater() {
     currentVersion,
     updateSummary,
     errorMessage,
+    statusCode,
     downloadedBytes,
     totalBytes,
     updateAvailable,

@@ -4,10 +4,6 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useRouter } from "vue-router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18n } from "vue-i18n";
-import {
-  setMainWindowGuardPaused,
-  startMainWindowGuard,
-} from "./lib/main-window-guard";
 import { useSettingsStore } from "./stores/settings";
 import {
   initLocaleFromSettings,
@@ -22,7 +18,6 @@ const settingsStore = useSettingsStore();
 const { t } = useI18n();
 const isOverlay = ref(false);
 const notice = ref<string | null>(null);
-let stopMainWindowGuard: (() => void) | undefined;
 let unlisteners: UnlistenFn[] = [];
 
 function showNotice(payload: string | AppErrorPayload) {
@@ -44,12 +39,12 @@ onMounted(async () => {
     const win = getCurrentWindow();
     isOverlay.value = win.label === "overlay";
 
-    if (win.label === "main") {
-      stopMainWindowGuard = startMainWindowGuard(win);
-    }
-
     await settingsStore.load();
     initLocaleFromSettings(normalizeLocale(settingsStore.settings.locale));
+
+    if (!settingsStore.settings.onboarding_completed && !isOverlay.value) {
+      await router.replace("/onboarding");
+    }
   } catch (error) {
     notice.value =
       error instanceof Error
@@ -69,15 +64,8 @@ onMounted(async () => {
     listen<string | AppErrorPayload>("capture-warning", (event) => {
       showWarning(event.payload);
     }),
-    listen("capture-session-active", () => {
-      setMainWindowGuardPaused(true);
-    }),
     listen("editor-opened", () => {
-      setMainWindowGuardPaused(true);
       notice.value = null;
-    }),
-    listen("editor-closed", () => {
-      setMainWindowGuardPaused(false);
     }),
     listen<string>("system-capture-drift", (event) => {
       if (event.payload) {
@@ -89,7 +77,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  stopMainWindowGuard?.();
   unlisteners.forEach((unlisten) => unlisten());
 });
 </script>

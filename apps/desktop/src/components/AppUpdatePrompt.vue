@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { IconDownload, IconX } from "@tabler/icons-vue";
 import { useAppUpdater } from "../composables/useAppUpdater";
+
+const { t } = useI18n();
 
 const {
   updateSummary,
@@ -24,10 +27,10 @@ const progressLabel = computed(() => {
       100,
       Math.round((downloadedBytes.value / totalBytes.value) * 100),
     );
-    return `Downloading update… ${percent}%`;
+    return t("settings.updates.status.downloadingWithPercent", { percent });
   }
 
-  return "Downloading update…";
+  return t("settings.updates.status.downloading");
 });
 </script>
 
@@ -41,7 +44,7 @@ const progressLabel = computed(() => {
       <IconDownload class="mt-0.5 size-5 shrink-0 text-accent" aria-hidden="true" />
       <div class="min-w-0 flex-1 space-y-2">
         <p class="font-medium">
-          Update available: v{{ updateSummary?.version }}
+          {{ t("settings.updates.status.available", { version: updateSummary?.version }) }}
         </p>
         <p v-if="updateSummary?.notes" class="text-xs text-text-muted">
           {{ updateSummary.notes }}
@@ -56,7 +59,11 @@ const progressLabel = computed(() => {
             :disabled="isDownloading"
             @click="installAvailableUpdate"
           >
-            {{ isDownloading ? "Downloading…" : "Update now" }}
+            {{
+              isDownloading
+                ? t("settings.updates.downloadingAction")
+                : t("settings.updates.updateNow")
+            }}
           </button>
           <button
             type="button"
@@ -64,7 +71,7 @@ const progressLabel = computed(() => {
             :disabled="isDownloading"
             @click="dismissPrompt"
           >
-            Later
+            {{ t("settings.updates.later") }}
           </button>
         </div>
       </div>
@@ -72,7 +79,7 @@ const progressLabel = computed(() => {
         type="button"
         class="rounded-md p-1 text-text-muted hover:bg-border/40 hover:text-text disabled:opacity-50"
         :disabled="isDownloading"
-        aria-label="Dismiss update notification"
+        :aria-label="t('settings.updates.dismissNotification')"
         @click="dismissPrompt"
       >
         <IconX class="size-4" aria-hidden="true" />

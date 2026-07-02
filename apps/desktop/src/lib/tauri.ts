@@ -221,3 +221,7 @@ export async function validateLicenseKey(key: string): Promise<LicenseValidation
 export async function uploadForShare(filePath: string): Promise<{ url: string; expires_at: string }> {
   return invoke("upload_for_share", { filePath });
 }
+
+export async function setLaunchAtLogin(enabled: boolean): Promise<void> {
+  return invoke("set_launch_at_login", { enabled });
+}

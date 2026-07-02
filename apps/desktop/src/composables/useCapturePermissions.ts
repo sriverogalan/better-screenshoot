@@ -3,6 +3,24 @@ import { useI18n } from "vue-i18n";
 import { getCaptureStatus, requestScreenCapturePermission } from "../lib/tauri";
 import { translateAppError, translateMessageCode } from "../i18n/resolveError";
 
+/**
+ * Builds the human-readable permission message for a given messageCode.
+ * The dev-binary hint is appended ONLY when messageCode is 'macosPermissionRequired'
+ * (i.e. TCC has NOT been granted). This satisfies spec PD-3.
+ *
+ * Exported as a pure function so it can be tested independently of Vue/i18n infrastructure.
+ */
+export function buildPermissionMessage(
+  messageCode: string,
+  translate: (key: string) => string,
+): string {
+  let message = translate(messageCode);
+  if (messageCode === "macosPermissionRequired") {
+    message += translate("macosDevBinaryHint");
+  }
+  return message;
+}
+
 export function useCapturePermissions() {
   const { t } = useI18n();
   const permissionMessage = ref<string | null>(null);

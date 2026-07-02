@@ -52,8 +52,10 @@
       "integrations": "Integrazioni",
       "captureMode": "Modalità di cattura (macOS)",
       "globalShortcuts": "Scorciatoie globali",
-      "license": "Licenza"
+      "license": "Licenza",
+      "setup": "Configurazione"
     },
+    "runSetupWizard": "Esegui nuovamente la procedura guidata di configurazione",
     "saveFolder": "Cartella di salvataggio",
     "autoCopy": "Copia automaticamente negli appunti",
     "autoSave": "Salva le catture su disco",
@@ -86,6 +88,28 @@
         "pro": "Pro",
         "cloud": "Cloud",
         "team": "Team"
+      }
+    },
+    "updates": {
+      "title": "Aggiornamenti",
+      "currentVersion": "Versione attuale:",
+      "description": "L'app verifica la presenza di aggiornamenti firmati all'avvio e da questa schermata.",
+      "checkForUpdates": "Controlla aggiornamenti",
+      "installVersion": "Installa v{version}",
+      "updateNow": "Aggiorna ora",
+      "later": "Più tardi",
+      "downloadingAction": "Download…",
+      "dismissNotification": "Ignora notifica di aggiornamento",
+      "status": {
+        "checking": "Controllo aggiornamenti…",
+        "downloading": "Download aggiornamento…",
+        "downloadingWithPercent": "Download aggiornamento… {percent}%",
+        "available": "La versione {version} è disponibile.",
+        "unsupported": "Gli aggiornamenti sono disponibili solo nelle build di rilascio.",
+        "latest": "Stai usando la versione più recente.",
+        "checkFailed": "Impossibile controllare gli aggiornamenti.",
+        "captureActive": "Completa la cattura corrente prima di aggiornare.",
+        "installFailed": "Impossibile installare l'aggiornamento."
       }
     }
   },
@@ -247,7 +271,43 @@
     "driftIndependentReplace": "macOS ha disattivato le catture di sistema ma l'app non è in modalità sostituzione.",
     "driftNoBackup": "macOS ha disattivato le catture di sistema senza backup. Ripara lo stato per riattivarle.",
     "driftGeneric": "Lo stato di cattura di sistema non corrisponde alle impostazioni.",
+    "macosPermissionGrantedNoDisplays": "La Registrazione schermo è consentita, ma non sono stati rilevati schermi. Questo può accadere in macchine virtuali o ambienti CI.",
     "generic": "Qualcosa è andato storto"
+  },
+  "onboarding": {
+    "stepWelcome": {
+      "title": "Benvenuto in Better Screenshoot",
+      "description": "Configuriamo tutto in pochi passaggi.",
+      "next": "Inizia"
+    },
+    "stepPermission": {
+      "title": "Registrazione schermo",
+      "description": "Better Screenshoot ha bisogno dell'autorizzazione per la Registrazione schermo.",
+      "openSettings": "Apri Impostazioni di sistema",
+      "next": "Continua",
+      "waiting": "In attesa del permesso…",
+      "skip": "Salta (nessuno schermo rilevato)"
+    },
+    "stepAutostart": {
+      "title": "Avvia all'accesso",
+      "description": "Avvia Better Screenshoot automaticamente all'accesso così è sempre pronto.",
+      "toggle": "Avvia Better Screenshoot all'accesso",
+      "next": "Avanti"
+    },
+    "stepQuickSettings": {
+      "title": "Configurazione rapida",
+      "description": "Scegli il comportamento di cattura preferito.",
+      "autoCopy": "Copia le catture negli appunti automaticamente",
+      "autoSave": "Salva le catture su disco",
+      "next": "Avanti"
+    },
+    "stepDone": {
+      "title": "Tutto pronto!",
+      "description": "Better Screenshoot è pronto all'uso. Premi una scorciatoia globale o usa l'icona della barra dei menu per catturare.",
+      "done": "Inizia a usare Better Screenshoot"
+    },
+    "language": "Lingua",
+    "step": "Passaggio {current} di {total}"
   },
   "tray": {
     "tooltip": "Better Screenshoot",
