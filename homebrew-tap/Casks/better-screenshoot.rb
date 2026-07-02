@@ -15,7 +15,10 @@ cask "better-screenshoot" do
   desc "Screenshot tool with a built-in editor"
   homepage "https://github.com/sriverogalan/better-screenshoot"
 
-  no_quarantine true
-
   app "Better Screenshoot.app"
+
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-cr", "#{appdir}/Better Screenshoot.app"]
+  end
 end
