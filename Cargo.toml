@@ -19,3 +19,7 @@ serde_json = "1"
 thiserror = "2"
 image = "0.25"
 xcap = "0.9"
+
+[profile.release]
+lto = "thin"
+codegen-units = 8
