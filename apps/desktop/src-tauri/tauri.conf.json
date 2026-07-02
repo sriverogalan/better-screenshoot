@@ -84,7 +84,7 @@
     }
   },
   "plugins": {
-    "autostart": {},
+    "autostart": null,
     "deep-link": {
       "desktop": {
         "schemes": [

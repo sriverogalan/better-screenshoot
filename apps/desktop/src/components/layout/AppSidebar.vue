@@ -14,7 +14,7 @@ const navItems = computed(() => [
 
 <template>
   <nav
-    class="flex w-52 shrink-0 flex-col border-r border-border bg-surface-raised"
+    class="flex min-h-full w-52 shrink-0 self-stretch flex-col border-r border-border bg-surface-raised"
     :aria-label="t('nav.mainNavigation')"
   >
     <div class="flex items-center gap-2 border-b border-border px-4 py-4">
@@ -22,7 +22,7 @@ const navItems = computed(() => [
       <span class="text-sm font-semibold">{{ t("common.appName") }}</span>
     </div>
 
-    <ul class="flex flex-1 flex-col gap-1 p-3">
+    <ul class="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden p-3">
       <li v-for="item in navItems" :key="item.to">
         <RouterLink
           :to="item.to"
