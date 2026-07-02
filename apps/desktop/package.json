@@ -8,7 +8,7 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "lint": "vue-tsc --noEmit",
+    "lint": "vue-tsc --noEmit && node scripts/check-locales.mjs",
     "i18n:check": "node scripts/check-locales.mjs",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run"
