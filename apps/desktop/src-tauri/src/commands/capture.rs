@@ -240,7 +240,6 @@ async fn confirm_editor_presented(app: &AppHandle, surface: &WebviewWindow) -> b
 }
 
 async fn maintain_capture_surface(app: &AppHandle) {
-    let _hub_guard = crate::window_layout::HubWatchSuppressGuard::new();
     let mut tick = 0u32;
 
     loop {

@@ -68,8 +68,13 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libclang-dev libxcb1-dev libxrandr-dev libdbus-1-dev libpipewire-0.3-dev libwayland-dev libegl1-mesa-dev libgbm-dev libdrm-dev
       - run: cargo test -p capture-core
-      - run: cargo check -p better-screenshoot --manifest-path apps/desktop/src-tauri/Cargo.toml
+      - run: cargo build -p better-screenshoot-cli
 
   ci-success:
     name: ci-success

@@ -25,10 +25,6 @@ impl LinuxProvider {
         }
     }
 
-    pub fn session(&self) -> LinuxSession {
-        self.session
-    }
-
     fn find_monitor(id: u32) -> CaptureResult<Monitor> {
         let monitors = Monitor::all().map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
         monitors
