@@ -40,3 +40,17 @@ jobs:
           releaseName: 'Better Screenshoot ${{ github.ref_name }}'
           releaseDraft: false
           prerelease: false
+
+      - name: Update Homebrew tap
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          DMG_URL="https://github.com/sriverogalan/better-screenshoot/releases/download/${{ github.ref_name }}/Better.Screenshoot_${VERSION}_aarch64.dmg"
+          curl -L -o /tmp/release.dmg "$DMG_URL"
+          SHA256_ARM=$(shasum -a 256 /tmp/release.dmg | awk '{print $1}')
+          gh api repos/sriverogalan/homebrew-tap/dispatches \
+            -f event_type=update-cask \
+            -f "client_payload[version]=${VERSION}" \
+            -f "client_payload[sha256_arm]=${SHA256_ARM}"
