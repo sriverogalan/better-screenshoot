@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { IconPhoto, IconSettings } from "@tabler/icons-vue";
+import { IconSettings } from "@tabler/icons-vue";
 import logoUrl from "../../assets/logo.svg";
 
 const { t } = useI18n();
 
 const navItems = computed(() => [
-  { to: "/history", label: t("nav.history"), icon: IconPhoto },
   { to: "/settings", label: t("nav.settings"), icon: IconSettings },
 ]);
 </script>

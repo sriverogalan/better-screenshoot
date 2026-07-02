@@ -14,7 +14,7 @@ const router = createRouter({
       path: "/",
       component: MainLayout,
       children: [
-        { path: "", redirect: "/history" },
+        { path: "", redirect: "/settings" },
         { path: "history", component: HistoryView },
         { path: "settings", component: SettingsView },
         { path: "capture-window", component: CaptureWindowView },

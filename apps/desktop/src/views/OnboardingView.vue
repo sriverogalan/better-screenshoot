@@ -115,7 +115,7 @@ async function nextStep() {
 
 async function completeOnboarding() {
   await settingsStore.save({ ...settings.value, onboarding_completed: true });
-  await router.replace("/history");
+  await router.replace("/settings");
 }
 
 async function skipPermissionStep() {
