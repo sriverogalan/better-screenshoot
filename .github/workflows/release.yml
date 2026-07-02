@@ -25,6 +25,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: '. -> target'
+          cache-on-failure: true
+          shared-key: release-macos
 
       - name: Install dependencies
         run: pnpm install
