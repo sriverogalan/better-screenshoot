@@ -78,10 +78,13 @@ fn permission_message_code(displays_found: usize, granted: bool) -> (String, Opt
 /// Extracted so unit tests can exercise the full status-building logic without
 /// needing a live Tauri [`State`].
 fn compute_capture_status(displays: Vec<capture_core::types::DisplayInfo>, granted: bool) -> CaptureStatus {
+    // If xcap listed at least one display, ScreenCaptureKit already validated the permission —
+    // CGPreflightScreenCaptureAccess is unreliable on macOS Sequoia (returns false despite TCC grant).
+    let screen_capture_granted = !displays.is_empty();
     let (message_code, message_params) = permission_message_code(displays.len(), granted);
     CaptureStatus {
         displays_found: displays.len(),
-        screen_capture_granted: granted && !displays.is_empty(),
+        screen_capture_granted,
         message_code,
         message_params,
         dev_binary_path: dev_binary_hint(),
@@ -155,8 +158,7 @@ mod tests {
 
     #[cfg(target_os = "macos")]
     #[test]
-    fn capture_status_err_displays_not_granted_returns_permission_required() {
-        // unwrap_or_default() on Err → empty vec; granted=false
+    fn capture_status_no_displays_not_granted_returns_permission_required() {
         let status = compute_capture_status(vec![], false);
         assert_eq!(status.message_code, "macosPermissionRequired");
         assert!(!status.screen_capture_granted);
@@ -165,8 +167,8 @@ mod tests {
 
     #[cfg(target_os = "macos")]
     #[test]
-    fn capture_status_err_displays_granted_returns_granted_no_displays() {
-        // unwrap_or_default() on Err → empty vec; TCC granted but no displays (VM/CI)
+    fn capture_status_no_displays_granted_returns_granted_no_displays() {
+        // TCC says granted but xcap returned empty (e.g. needs restart on Sequoia)
         let status = compute_capture_status(vec![], true);
         assert_eq!(status.message_code, "macosPermissionGrantedNoDisplays");
         assert!(!status.screen_capture_granted);
@@ -174,21 +176,13 @@ mod tests {
     }
 
     #[test]
-    fn capture_status_with_displays_returns_displays_detected() {
+    fn capture_status_with_displays_is_granted_regardless_of_preflight() {
         use capture_core::types::DisplayInfo;
-        let display = DisplayInfo {
-            id: 1,
-            name: "Test".into(),
-            width: 1920,
-            height: 1080,
-            scale_factor: 1.0,
-            is_primary: true,
-            x: 0,
-            y: 0,
-        };
-        let status = compute_capture_status(vec![display], true);
+        let display = DisplayInfo { id: 1, name: "Test".into(), width: 1920, height: 1080, scale_factor: 1.0, is_primary: true, x: 0, y: 0 };
+        // granted=false simulates Sequoia CGPreflightScreenCaptureAccess quirk
+        let status = compute_capture_status(vec![display], false);
         assert_eq!(status.message_code, "displaysDetected");
-        assert!(status.screen_capture_granted);
+        assert!(status.screen_capture_granted); // xcap worked → granted
         assert_eq!(status.displays_found, 1);
     }
 }
