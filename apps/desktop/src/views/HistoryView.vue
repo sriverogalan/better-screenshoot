@@ -94,7 +94,7 @@ onUnmounted(() => {
   <div class="flex min-h-full flex-col p-6">
     <header class="mb-6">
       <h1 class="text-lg font-semibold">{{ t("history.title") }}</h1>
-      <p class="mt-1 text-sm text-text-muted">{{ t("history.subtitle") }}</p>
+      <p class="mt-1 text-sm text-fg-muted">{{ t("history.subtitle") }}</p>
     </header>
 
     <PendingCaptureBanner />
@@ -118,13 +118,13 @@ onUnmounted(() => {
     </div>
 
     <section
-      class="mb-6 rounded-xl border border-border bg-surface-raised p-4"
+      class="mb-6 rounded-xl border border-sep bg-elev p-4"
       aria-labelledby="capture-shortcuts-heading"
     >
       <h2 id="capture-shortcuts-heading" class="text-sm font-medium">
         {{ t("history.captureShortcuts") }}
       </h2>
-      <p class="mt-1 text-xs text-text-muted">
+      <p class="mt-1 text-xs text-fg-muted">
         {{ t("history.captureShortcutsHint") }}
       </p>
       <ul class="mt-3 space-y-2">
@@ -133,9 +133,9 @@ onUnmounted(() => {
           :key="item.label"
           class="flex items-center justify-between gap-4 text-sm"
         >
-          <span class="text-text-muted">{{ item.label }}</span>
+          <span class="text-fg-muted">{{ item.label }}</span>
           <kbd
-            class="rounded-md border border-border bg-surface px-2 py-0.5 font-mono text-xs text-text"
+            class="rounded-md border border-sep bg-win px-2 py-0.5 font-mono text-xs text-fg"
           >
             {{ formatHotkey(item.hotkey) }}
           </kbd>
@@ -143,15 +143,15 @@ onUnmounted(() => {
       </ul>
       <RouterLink
         to="/settings"
-        class="mt-3 inline-block text-xs text-accent hover:text-accent-hover"
+        class="mt-3 inline-block text-xs text-accent hover:text-accent/80"
       >
         {{ t("history.customizeShortcuts") }}
       </RouterLink>
     </section>
 
-    <p v-if="loading" class="text-sm text-text-muted">{{ t("history.loadingCaptures") }}</p>
+    <p v-if="loading" class="text-sm text-fg-muted">{{ t("history.loadingCaptures") }}</p>
     <p v-else-if="error" class="text-sm text-red-400">{{ error }}</p>
-    <div v-else-if="items.length === 0" class="space-y-3 text-sm text-text-muted">
+    <div v-else-if="items.length === 0" class="space-y-3 text-sm text-fg-muted">
       <p>{{ t("history.empty") }}</p>
       <p class="text-xs">{{ t("history.emptyHint") }}</p>
     </div>
@@ -159,7 +159,7 @@ onUnmounted(() => {
       <li
         v-for="item in items"
         :key="item.id"
-        class="group overflow-hidden rounded-xl border border-border bg-surface-raised"
+        class="group overflow-hidden rounded-xl border border-sep bg-elev"
       >
         <button
           type="button"
@@ -180,12 +180,12 @@ onUnmounted(() => {
           />
         </button>
         <div
-          class="flex items-center justify-between px-3 py-2 text-xs text-text-muted"
+          class="flex items-center justify-between px-3 py-2 text-xs text-fg-muted"
         >
           <span>{{ item.width }}×{{ item.height }}</span>
           <button
             type="button"
-            class="rounded p-1 opacity-0 transition group-hover:opacity-100 hover:bg-border hover:text-red-400"
+            class="rounded p-1 opacity-0 transition group-hover:opacity-100 hover:bg-sep hover:text-red-400"
             :aria-label="t('history.deleteCapture')"
             @click.stop="remove(item.id)"
           >

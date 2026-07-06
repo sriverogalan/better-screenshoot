@@ -85,19 +85,19 @@ onUnmounted(() => {
         aria-modal="true"
         aria-labelledby="system-screenshot-permission-title"
         aria-describedby="system-screenshot-permission-description"
-        class="w-full max-w-lg rounded-xl border border-border bg-[#1a1d24] p-5 shadow-2xl"
+        class="w-full max-w-lg rounded-xl border border-sep bg-[#1a1d24] p-5 shadow-2xl"
       >
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
             <h2
               id="system-screenshot-permission-title"
-              class="text-base font-semibold text-text"
+              class="text-base font-semibold text-fg"
             >
               {{ t("systemScreenshotDialog.title") }}
             </h2>
             <p
               id="system-screenshot-permission-description"
-              class="mt-1 text-sm text-text-muted"
+              class="mt-1 text-sm text-fg-muted"
             >
               {{ t("systemScreenshotDialog.description") }}
             </p>
@@ -105,7 +105,7 @@ onUnmounted(() => {
           <button
             ref="closeButtonRef"
             type="button"
-            class="rounded-lg p-1 text-text-muted hover:bg-border hover:text-text disabled:opacity-50"
+            class="rounded-lg p-1 text-fg-muted hover:bg-sep hover:text-fg disabled:opacity-50"
             :aria-label="t('common.close')"
             :disabled="busy"
             @click="emit('close')"
@@ -114,14 +114,14 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <ul class="space-y-2 rounded-lg border border-border bg-surface px-3 py-3 text-sm">
+        <ul class="space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm">
           <li
             v-for="item in replacements"
             :key="item.hotkey"
             class="flex items-center justify-between gap-3"
           >
-            <span class="text-text-muted">{{ item.action }}</span>
-            <kbd class="rounded-md border border-border bg-surface-raised px-2 py-0.5 font-mono text-xs">
+            <span class="text-fg-muted">{{ item.action }}</span>
+            <kbd class="rounded-md border border-sep bg-elev px-2 py-0.5 font-mono text-xs">
               {{ item.hotkey }}
             </kbd>
           </li>
@@ -129,14 +129,14 @@ onUnmounted(() => {
 
         <ul
           v-if="shortcuts.length > 0"
-          class="mt-3 space-y-2 rounded-lg border border-border bg-surface px-3 py-3 text-sm"
+          class="mt-3 space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm"
         >
           <li
             v-for="shortcut in shortcuts"
             :key="shortcut.id"
             class="flex items-center justify-between gap-3"
           >
-            <span class="text-text-muted">{{ shortcutLabel(shortcut) }}</span>
+            <span class="text-fg-muted">{{ shortcutLabel(shortcut) }}</span>
             <span
               class="rounded-md px-2 py-0.5 text-xs"
               :class="
@@ -157,7 +157,7 @@ onUnmounted(() => {
         <div class="mt-5 flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            class="rounded-lg border border-border px-4 py-2 text-sm hover:bg-border disabled:opacity-50"
+            class="rounded-lg border border-sep px-4 py-2 text-sm hover:bg-sep disabled:opacity-50"
             :disabled="busy"
             @click="emit('close')"
           >
@@ -165,7 +165,7 @@ onUnmounted(() => {
           </button>
           <button
             type="button"
-            class="rounded-lg bg-accent px-4 py-2 text-sm text-white hover:bg-accent-hover disabled:opacity-50"
+            class="rounded-lg bg-accent px-4 py-2 text-sm text-white hover:bg-accent/80 disabled:opacity-50"
             :disabled="busy"
             @click="emit('confirm')"
           >

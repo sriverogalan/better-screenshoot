@@ -23,6 +23,7 @@ const router = createRouter({
     { path: "/overlay", component: OverlayView },
     { path: "/editor", component: EditorView },
     { path: "/onboarding", component: OnboardingView },
+    { path: "/menubar", component: () => import("../views/MenubarView.vue") },
   ],
 });
 

@@ -21,18 +21,18 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-2 border-t border-border/60 px-4 py-2">
-    <span class="text-xs text-text-muted">{{ t("editor.style.color") }}</span>
+  <div class="flex flex-wrap items-center gap-2 border-t border-sep/60 px-4 py-2">
+    <span class="text-xs text-fg-muted">{{ t("editor.style.color") }}</span>
     <div class="flex items-center gap-1">
       <button
         v-for="color in COLOR_PRESETS"
         :key="color"
         type="button"
-        class="size-6 rounded-full border-2 transition hover:scale-110"
+        class="size-5 rounded-full transition hover:scale-110"
         :class="
           props.style.stroke === color
-            ? 'border-white'
-            : 'border-transparent'
+            ? 'ring-2 ring-white ring-offset-1 ring-offset-win'
+            : ''
         "
         :style="{ backgroundColor: color }"
         :aria-label="t('editor.style.colorAria', { color })"
@@ -41,37 +41,41 @@ const { t } = useI18n();
       />
     </div>
 
-    <span class="mx-1 h-5 w-px bg-border" />
+    <span class="mx-1 h-5 w-px bg-sep" />
 
-    <span class="text-xs text-text-muted">{{ t("editor.style.thickness") }}</span>
+    <span class="text-xs text-fg-muted">{{ t("editor.style.thickness") }}</span>
     <div class="flex items-center gap-1">
       <button
         v-for="width in STROKE_WIDTHS"
         :key="width"
         type="button"
-        class="rounded-lg px-2 py-1 text-xs hover:bg-surface-raised"
-        :class="{
-          'bg-surface-raised text-accent': props.style.strokeWidth === width,
-        }"
+        class="rounded-lg px-2 py-0.5 text-xs transition"
+        :class="
+          props.style.strokeWidth === width
+            ? 'bg-accent text-white'
+            : 'text-fg-muted hover:bg-elev hover:text-fg'
+        "
         :aria-pressed="props.style.strokeWidth === width"
         @click="emit('update:strokeWidth', width)"
       >
-        {{ width }}px
+        {{ width }}
       </button>
     </div>
 
-    <span class="mx-1 h-5 w-px bg-border" />
+    <span class="mx-1 h-5 w-px bg-sep" />
 
-    <span class="text-xs text-text-muted">{{ t("editor.style.font") }}</span>
+    <span class="text-xs text-fg-muted">{{ t("editor.style.font") }}</span>
     <div class="flex items-center gap-1">
       <button
         v-for="size in FONT_SIZES"
         :key="size"
         type="button"
-        class="rounded-lg px-2 py-1 text-xs hover:bg-surface-raised"
-        :class="{
-          'bg-surface-raised text-accent': props.style.fontSize === size,
-        }"
+        class="rounded-lg px-2 py-0.5 text-xs transition"
+        :class="
+          props.style.fontSize === size
+            ? 'bg-accent text-white'
+            : 'text-fg-muted hover:bg-elev hover:text-fg'
+        "
         :aria-pressed="props.style.fontSize === size"
         @click="emit('update:fontSize', size)"
       >

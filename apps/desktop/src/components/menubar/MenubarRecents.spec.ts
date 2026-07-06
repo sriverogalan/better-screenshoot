@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { mount } from "@vue/test-utils"
 import { createPinia } from "pinia"
 import { i18n } from "../../i18n/index"
@@ -26,7 +26,12 @@ const makeRecord = (id: string): CaptureRecord => ({
 
 describe("MenubarRecents", () => {
   beforeEach(() => {
+    vi.useFakeTimers()
     vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it("renders a grid of images when history returns records", async () => {
@@ -39,7 +44,7 @@ describe("MenubarRecents", () => {
     })
 
     // Wait for onMounted async fetch
-    await new Promise((r) => setTimeout(r, 0))
+    await vi.runAllTimersAsync()
     await wrapper.vm.$nextTick()
 
     const imgs = wrapper.findAll("img")
@@ -55,7 +60,7 @@ describe("MenubarRecents", () => {
       },
     })
 
-    await new Promise((r) => setTimeout(r, 0))
+    await vi.runAllTimersAsync()
     await wrapper.vm.$nextTick()
 
     expect(wrapper.findAll("img")).toHaveLength(0)
@@ -73,7 +78,7 @@ describe("MenubarRecents", () => {
       },
     })
 
-    await new Promise((r) => setTimeout(r, 0))
+    await vi.runAllTimersAsync()
     await wrapper.vm.$nextTick()
 
     expect(wrapper.findAll("img")).toHaveLength(0)

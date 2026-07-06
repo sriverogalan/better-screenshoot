@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "./stores/settings";
+import { useAppearance } from "./composables/useAppearance";
 import {
   initLocaleFromSettings,
   normalizeLocale,
@@ -16,6 +17,7 @@ import type { AppErrorPayload } from "./i18n/resolveError";
 const router = useRouter();
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
+useAppearance();
 const isOverlay = ref(false);
 const notice = ref<string | null>(null);
 let unlisteners: UnlistenFn[] = [];
@@ -86,7 +88,7 @@ onUnmounted(() => {
     :class="
       isOverlay
         ? 'min-h-full bg-transparent'
-        : 'h-full bg-[#111318] text-[#e8eaed]'
+        : 'h-full bg-win text-fg'
     "
   >
     <div

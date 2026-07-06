@@ -36,6 +36,10 @@ fn default_locale() -> String {
     "en".into()
 }
 
+fn default_appearance() -> String {
+    "auto".into()
+}
+
 fn normalize_locale(locale: String) -> String {
     match locale.as_str() {
         "en" | "es" | "fr" | "de" | "pt" | "it" => locale,
@@ -54,6 +58,7 @@ pub struct AppSettings {
     pub tier: String,
     pub locale: String,
     pub onboarding_completed: bool,
+    pub appearance: String,
 }
 
 impl Default for AppSettings {
@@ -73,6 +78,7 @@ impl Default for AppSettings {
             tier: "community".into(),
             locale: default_locale(),
             onboarding_completed: false,
+            appearance: default_appearance(),
         }
     }
 }
@@ -103,6 +109,8 @@ impl<'de> Deserialize<'de> for AppSettings {
             locale: String,
             #[serde(default)]
             onboarding_completed: bool,
+            #[serde(default = "default_appearance")]
+            appearance: String,
         }
 
         fn default_true() -> bool {
@@ -130,6 +138,7 @@ impl<'de> Deserialize<'de> for AppSettings {
             tier: raw.tier,
             locale: normalize_locale(raw.locale),
             onboarding_completed: raw.onboarding_completed,
+            appearance: raw.appearance,
         })
     }
 }
@@ -183,6 +192,47 @@ mod tests {
     use super::*;
 
     // --- 8.3: onboarding_completed deserializes to false when absent ---
+
+    #[test]
+    fn appearance_defaults_to_auto_when_key_absent() {
+        let json = r#"{
+            "save_directory": "/tmp",
+            "auto_copy": true,
+            "auto_save": true,
+            "allow_external_control": true,
+            "hotkeys": {
+                "capture_area": "CommandOrControl+Shift+X",
+                "capture_screen": "CommandOrControl+Shift+Option+S",
+                "capture_window": "CommandOrControl+Shift+Option+W",
+                "open_history": "CommandOrControl+Shift+H"
+            },
+            "tier": "community"
+        }"#;
+
+        let settings: AppSettings = serde_json::from_str(json).expect("parse settings");
+        assert_eq!(settings.appearance, "auto");
+    }
+
+    #[test]
+    fn appearance_reads_persisted_value() {
+        let json = r#"{
+            "save_directory": "/tmp",
+            "auto_copy": true,
+            "auto_save": true,
+            "allow_external_control": true,
+            "appearance": "dark",
+            "hotkeys": {
+                "capture_area": "CommandOrControl+Shift+X",
+                "capture_screen": "CommandOrControl+Shift+Option+S",
+                "capture_window": "CommandOrControl+Shift+Option+W",
+                "open_history": "CommandOrControl+Shift+H"
+            },
+            "tier": "community"
+        }"#;
+
+        let settings: AppSettings = serde_json::from_str(json).expect("parse settings");
+        assert_eq!(settings.appearance, "dark");
+    }
 
     #[test]
     fn onboarding_completed_defaults_to_false_when_key_absent() {

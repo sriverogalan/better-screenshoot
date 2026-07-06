@@ -48,13 +48,13 @@ const tools = computed(() => [
 </script>
 
 <template>
-  <header class="shrink-0 border-b border-border">
+  <header class="shrink-0 border-b border-sep">
     <div class="flex items-center justify-between gap-4 px-4 py-3">
       <div class="min-w-0">
-        <h1 class="text-sm font-medium">{{ t("editor.title") }}</h1>
+        <h1 class="text-sm font-medium text-fg">{{ t("editor.title") }}</h1>
         <p
           v-if="hasCapture"
-          class="truncate text-xs text-text-muted"
+          class="truncate text-xs text-fg-muted"
         >
           {{
             t("editor.dimensions", {
@@ -69,7 +69,7 @@ const tools = computed(() => [
       <div class="flex shrink-0 items-center gap-2">
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm hover:bg-border disabled:opacity-50"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-sep bg-elev px-3 py-2 text-sm hover:bg-win disabled:opacity-50"
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndDiscard')"
         >
@@ -78,7 +78,7 @@ const tools = computed(() => [
         </button>
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm text-white hover:bg-accent-hover disabled:opacity-50"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm text-white hover:bg-accent/80 disabled:opacity-50"
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndSave')"
         >
@@ -96,13 +96,17 @@ const tools = computed(() => [
       {{ actionError }}
     </p>
 
-    <div class="flex items-center gap-1 overflow-x-auto border-t border-border/60 px-4 py-2">
+    <div class="flex items-center gap-1 overflow-x-auto border-t border-sep/60 px-4 py-2">
       <button
         v-for="tool in tools"
         :key="tool.id"
         type="button"
-        class="shrink-0 rounded-lg p-2 hover:bg-surface-raised"
-        :class="{ 'bg-surface-raised text-accent': activeTool === tool.id }"
+        class="shrink-0 rounded-lg p-2 hover:bg-elev"
+        :class="
+          activeTool === tool.id
+            ? 'bg-accent/15 text-accent'
+            : 'text-fg-muted hover:text-fg'
+        "
         :aria-label="`${tool.label} (${tool.shortcut})`"
         :title="`${tool.label} (${tool.shortcut})`"
         @click="emit('update:activeTool', tool.id)"
@@ -110,24 +114,24 @@ const tools = computed(() => [
         <component :is="tool.icon" class="size-4" />
       </button>
 
-      <span class="mx-1 h-5 w-px shrink-0 bg-border" />
+      <span class="mx-1 h-5 w-px shrink-0 bg-sep" />
 
       <button
         type="button"
-        class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
+        class="shrink-0 rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-elev hover:text-fg"
         @click="emit('undo')"
       >
         {{ t("editor.undo") }}
       </button>
       <button
         type="button"
-        class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
+        class="shrink-0 rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-elev hover:text-fg"
         @click="emit('redo')"
       >
         {{ t("editor.redo") }}
       </button>
 
-      <p class="ml-auto hidden shrink-0 text-xs text-text-muted lg:block">
+      <p class="ml-auto hidden shrink-0 text-xs text-fg-muted lg:block">
         <IconClipboardCopy class="mr-1 inline size-3.5" />
         {{ t("editor.shortcutHint") }}
       </p>

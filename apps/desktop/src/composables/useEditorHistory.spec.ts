@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { describe, it, expect } from "vitest"
 import { useEditorHistory } from "./useEditorHistory"
 
 describe("useEditorHistory", () => {
@@ -20,7 +20,7 @@ describe("useEditorHistory", () => {
   })
 
   it("undo returns true and restores the previous snapshot", () => {
-    const { annotations, history, historyIndex, pushHistory, undo } = useEditorHistory()
+    const { annotations, historyIndex, pushHistory, undo } = useEditorHistory()
 
     annotations.value = [{ id: "a1", tool: "arrow" } as any]
     pushHistory()

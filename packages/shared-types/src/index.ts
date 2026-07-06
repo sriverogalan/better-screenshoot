@@ -55,6 +55,7 @@ export interface AppSettings {
   tier: LicenseTier;
   locale: AppLocale;
   onboarding_completed: boolean;
+  appearance: AppAppearance;
 }
 
 export interface HotkeyConfig {
@@ -65,6 +66,8 @@ export interface HotkeyConfig {
 }
 
 export type LicenseTier = "community" | "pro" | "cloud" | "team";
+
+export type AppAppearance = "auto" | "light" | "dark";
 
 export type AppLocale = "en" | "es" | "fr" | "de" | "pt" | "it";
 
@@ -99,4 +102,5 @@ export const DEFAULT_SETTINGS: AppSettings = {
   tier: "community",
   locale: "en",
   onboarding_completed: false,
+  appearance: "auto",
 };

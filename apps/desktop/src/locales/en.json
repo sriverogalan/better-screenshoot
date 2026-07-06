@@ -53,7 +53,8 @@
       "captureMode": "Capture mode (macOS)",
       "globalShortcuts": "Global shortcuts",
       "license": "License",
-      "setup": "Setup"
+      "setup": "Setup",
+      "appearance": "Appearance"
     },
     "runSetupWizard": "Run setup wizard again",
     "saveFolder": "Save folder",
