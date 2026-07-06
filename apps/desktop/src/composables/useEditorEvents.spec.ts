@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { ref } from "vue"
 
 vi.mock("@tauri-apps/api/event", () => ({
@@ -14,6 +14,17 @@ const mockListen = vi.mocked(listen)
 describe("useEditorEvents", () => {
   beforeEach(() => {
     mockListen.mockReset()
+    vi.stubGlobal(
+      "ResizeObserver",
+      vi.fn().mockImplementation(() => ({
+        observe: vi.fn(),
+        disconnect: vi.fn(),
+      })),
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it("setup registers window resize listener and two tauri event listeners", async () => {
