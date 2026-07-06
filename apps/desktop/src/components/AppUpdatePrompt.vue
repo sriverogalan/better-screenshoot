@@ -46,7 +46,7 @@ const progressLabel = computed(() => {
         <p class="font-medium">
           {{ t("settings.updates.status.available", { version: updateSummary?.version }) }}
         </p>
-        <p v-if="updateSummary?.notes" class="text-xs text-text-muted">
+        <p v-if="updateSummary?.notes" class="text-xs text-fg-muted">
           {{ updateSummary.notes }}
         </p>
         <p v-if="progressLabel" class="text-xs text-accent">
@@ -55,7 +55,7 @@ const progressLabel = computed(() => {
         <div class="flex flex-wrap gap-2">
           <button
             type="button"
-            class="rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-50"
+            class="rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/80 disabled:opacity-50"
             :disabled="isDownloading"
             @click="installAvailableUpdate"
           >
@@ -67,7 +67,7 @@ const progressLabel = computed(() => {
           </button>
           <button
             type="button"
-            class="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-border/40 disabled:opacity-50"
+            class="rounded-lg border border-sep px-3 py-1.5 text-xs hover:bg-sep/40 disabled:opacity-50"
             :disabled="isDownloading"
             @click="dismissPrompt"
           >
@@ -77,7 +77,7 @@ const progressLabel = computed(() => {
       </div>
       <button
         type="button"
-        class="rounded-md p-1 text-text-muted hover:bg-border/40 hover:text-text disabled:opacity-50"
+        class="rounded-md p-1 text-fg-muted hover:bg-sep/40 hover:text-fg disabled:opacity-50"
         :disabled="isDownloading"
         :aria-label="t('settings.updates.dismissNotification')"
         @click="dismissPrompt"

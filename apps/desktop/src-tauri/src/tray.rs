@@ -1,11 +1,11 @@
 use serde::Deserialize;
 use tauri::{
-    menu::{Menu, MenuItem},
+    menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Manager,
+    AppHandle, LogicalPosition, Manager,
 };
 
-use crate::shortcuts::{handle_hotkey_action, show_main_window};
+use crate::shortcuts::handle_hotkey_action;
 use crate::state::{AppState, AppSettings};
 
 #[derive(Debug, Deserialize)]
@@ -22,8 +22,6 @@ struct TrayLabels {
     capture_screen: String,
     #[serde(rename = "captureWindow")]
     capture_window: String,
-    history: String,
-    settings: String,
     quit: String,
 }
 
@@ -49,8 +47,6 @@ fn load_tray_labels(locale: &str) -> TrayLabels {
             capture_area: "Capture Area".into(),
             capture_screen: "Capture Screen".into(),
             capture_window: "Capture Window".into(),
-            history: "History".into(),
-            settings: "Settings".into(),
             quit: "Quit".into(),
         })
 }
@@ -68,8 +64,7 @@ fn build_menu(app: &AppHandle, labels: &TrayLabels) -> Result<Menu<tauri::Wry>, 
         MenuItem::with_id(app, "capture-screen", &labels.capture_screen, true, None::<&str>)?;
     let capture_window =
         MenuItem::with_id(app, "capture-window", &labels.capture_window, true, None::<&str>)?;
-    let history = MenuItem::with_id(app, "history", &labels.history, true, None::<&str>)?;
-    let settings = MenuItem::with_id(app, "settings", &labels.settings, true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
     let quit = MenuItem::with_id(app, "quit", &labels.quit, true, None::<&str>)?;
 
     let menu = Menu::with_items(
@@ -78,8 +73,7 @@ fn build_menu(app: &AppHandle, labels: &TrayLabels) -> Result<Menu<tauri::Wry>, 
             &capture_area,
             &capture_screen,
             &capture_window,
-            &history,
-            &settings,
+            &separator,
             &quit,
         ],
     )?;
@@ -104,8 +98,6 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
             "capture-area" => handle_hotkey_action(app, "capture-area"),
             "capture-screen" => handle_hotkey_action(app, "capture-screen"),
             "capture-window" => handle_hotkey_action(app, "capture-window"),
-            "history" => show_main_window(app, "/history"),
-            "settings" => show_main_window(app, "/settings"),
             "quit" => app.exit(0),
             _ => {}
         })
@@ -113,11 +105,26 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,
                 button_state: MouseButtonState::Up,
+                position,
                 ..
             } = event
             {
                 let app = tray.app_handle();
-                show_main_window(&app, "/history");
+                if let Some(menubar) = app.get_webview_window("menubar") {
+                    let scale = menubar
+                        .current_monitor()
+                        .ok()
+                        .flatten()
+                        .map(|m| m.scale_factor())
+                        .unwrap_or(1.0);
+
+                    let (logical_x, logical_y) =
+                        calculate_tray_popup_position(position.x, position.y, scale, 300.0, 408.0);
+
+                    let _ = menubar.set_position(LogicalPosition::new(logical_x, logical_y));
+                    let _ = menubar.show();
+                    let _ = menubar.set_focus();
+                }
             }
         })
         .build(app)?;
@@ -142,6 +149,18 @@ pub fn rebuild_tray_menu(app: AppHandle) -> Result<(), String> {
     update_tray(&tray, &menu, &labels.tooltip)
 }
 
+fn calculate_tray_popup_position(
+    physical_x: f64,
+    physical_y: f64,
+    scale: f64,
+    window_width: f64,
+    window_height: f64,
+) -> (f64, f64) {
+    let logical_x = physical_x / scale - window_width / 2.0;
+    let logical_y = (physical_y / scale - window_height).max(0.0);
+    (logical_x, logical_y)
+}
+
 fn update_tray(
     tray: &TrayIcon<tauri::Wry>,
     menu: &Menu<tauri::Wry>,
@@ -152,4 +171,33 @@ fn update_tray(
     tray.set_tooltip(Some(tooltip))
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn position_centers_window_on_tray_icon() {
+        let (x, y) = calculate_tray_popup_position(800.0, 50.0, 2.0, 300.0, 408.0);
+        // 800.0 / 2.0 - 300.0 / 2.0 = 400.0 - 150.0 = 250.0
+        assert_eq!(x, 250.0);
+        // (50.0 / 2.0 - 408.0).max(0.0) = (25.0 - 408.0).max(0.0) = 0.0
+        assert_eq!(y, 0.0);
+    }
+
+    #[test]
+    fn y_coordinate_clamps_to_zero() {
+        let (_, y) = calculate_tray_popup_position(400.0, 10.0, 1.0, 300.0, 408.0);
+        assert_eq!(y, 0.0);
+    }
+
+    #[test]
+    fn normal_position_below_tray_icon() {
+        let (x, y) = calculate_tray_popup_position(1000.0, 1080.0, 1.0, 300.0, 408.0);
+        // 1000.0 / 1.0 - 300.0 / 2.0 = 850.0
+        assert_eq!(x, 850.0);
+        // (1080.0 / 1.0 - 408.0).max(0.0) = 672.0
+        assert_eq!(y, 672.0);
+    }
 }

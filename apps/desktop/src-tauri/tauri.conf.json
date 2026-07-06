@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Better Screenshoot",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "identifier": "com.betterscreenshoot.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -23,7 +23,7 @@
         "resizable": true,
         "maximizable": true,
         "center": true,
-        "backgroundColor": "#111318"
+        "backgroundColor": "#1E1E20"
       },
       {
         "label": "overlay",
@@ -50,7 +50,20 @@
         "center": true,
         "resizable": true,
         "preventOverflow": true,
-        "backgroundColor": "#111318"
+        "backgroundColor": "#1E1E20"
+      },
+      {
+        "label": "menubar",
+        "url": "/menubar",
+        "width": 300,
+        "height": 400,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "visible": false,
+        "shadow": true
       }
     ],
     "security": {

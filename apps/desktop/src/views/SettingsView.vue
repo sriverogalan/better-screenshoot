@@ -6,11 +6,15 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
   DEFAULT_HOTKEYS,
   SYSTEM_REPLACEMENT_HOTKEYS,
+  type AppAppearance,
   type AppLocale,
   type HotkeyConfig,
   type SystemCaptureMode,
 } from "@better-screenshoot/shared-types";
 import { useSettingsStore } from "../stores/settings";
+import { useAppearance } from "../composables/useAppearance";
+import AppToggle from "../components/ui/AppToggle.vue";
+import AppSegmentedControl from "../components/ui/AppSegmentedControl.vue";
 import SystemScreenshotPermissionDialog from "../components/settings/SystemScreenshotPermissionDialog.vue";
 import AppUpdateSection from "../components/settings/AppUpdateSection.vue";
 import {
@@ -28,6 +32,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const settingsStore = useSettingsStore();
+const { applyAppearance } = useAppearance();
 
 const hotkeyFields = computed(() => [
   {
@@ -59,6 +64,12 @@ const languageOptions = computed(() =>
     label: t(`settings.languageOptions.${locale}`),
   })),
 );
+
+const appearanceOptions = computed(() => [
+  { value: "auto", label: t("ui.appearance.auto") },
+  { value: "light", label: t("ui.appearance.light") },
+  { value: "dark", label: t("ui.appearance.dark") },
+]);
 
 const independentHotkeyPreview = computed(() =>
   [
@@ -109,6 +120,12 @@ async function updateField<K extends keyof typeof settings.value>(
 async function updateLocale(locale: AppLocale) {
   await settingsStore.save({ ...settings.value, locale });
   await setLocale(locale);
+}
+
+async function onAppearanceChange(value: string) {
+  const appearance = value as AppAppearance;
+  await settingsStore.save({ ...settings.value, appearance });
+  applyAppearance(appearance);
 }
 
 const isOnOnboardingRoute = computed(() => route.path === "/onboarding");
@@ -204,24 +221,27 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-full flex-col">
-    <header class="border-b border-border px-6 py-4">
-      <h1 class="text-lg font-semibold">{{ t("settings.title") }}</h1>
-    </header>
+  <div class="flex min-h-full flex-col bg-win">
+    <div data-tauri-drag-region class="h-8 shrink-0" />
 
-    <main class="mx-auto w-full max-w-2xl flex-1 space-y-8 p-6">
-      <PendingCaptureBanner />
+    <h1 class="px-6 pb-2 pt-4 text-2xl font-bold text-fg">
+      {{ t("settings.title") }}
+    </h1>
 
-      <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.language") }}
-        </h2>
-        <div class="rounded-xl border border-border bg-surface-raised p-4">
-          <label class="block">
-            <span class="mb-1 block text-sm">{{ t("settings.language") }}</span>
+    <main class="flex-1 overflow-y-auto pb-8">
+      <div class="mx-auto w-full max-w-2xl">
+        <PendingCaptureBanner />
+
+        <!-- Idioma -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.language") }}
+          </p>
+          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+            <span class="text-sm">{{ t("settings.language") }}</span>
             <select
               :value="settings.locale"
-              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+              class="rounded-lg border border-sep bg-elev px-3 py-1.5 text-sm text-fg"
               @change="updateLocale(($event.target as HTMLSelectElement).value as AppLocale)"
             >
               <option
@@ -232,271 +252,284 @@ onUnmounted(() => {
                 {{ option.label }}
               </option>
             </select>
-          </label>
+          </div>
         </div>
-      </section>
 
-      <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.sections.capture") }}
-        </h2>
-        <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
-          <label class="block">
-            <span class="mb-1 block text-sm">{{ t("settings.saveFolder") }}</span>
+        <!-- Captura -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.sections.capture") }}
+          </p>
+          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+            <span class="min-w-0 flex-1 truncate text-sm text-fg-muted">
+              {{ settings.save_directory || t("settings.saveFolder") }}
+            </span>
             <input
               :value="settings.save_directory"
               type="text"
-              class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+              class="ml-4 w-48 shrink-0 rounded-lg border border-sep bg-field px-3 py-1.5 text-sm text-fg"
+              :placeholder="t('settings.saveFolder')"
               @change="updateField('save_directory', ($event.target as HTMLInputElement).value)"
             />
-          </label>
-          <label class="flex items-center gap-3">
-            <input
-              :checked="settings.auto_copy"
-              type="checkbox"
-              class="size-4 rounded border-border"
-              @change="updateField('auto_copy', ($event.target as HTMLInputElement).checked)"
-            />
-            <span class="text-sm">{{ t("settings.autoCopy") }}</span>
-          </label>
-          <label class="flex items-center gap-3">
-            <input
-              :checked="settings.auto_save"
-              type="checkbox"
-              class="size-4 rounded border-border"
-              @change="updateField('auto_save', ($event.target as HTMLInputElement).checked)"
-            />
-            <span class="text-sm">{{ t("settings.autoSave") }}</span>
-          </label>
-        </div>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.sections.integrations") }}
-        </h2>
-        <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
-          <label class="flex items-center gap-3">
-            <input
-              :checked="settings.allow_external_control"
-              type="checkbox"
-              class="size-4 rounded border-border"
-              @change="
-                updateField(
-                  'allow_external_control',
-                  ($event.target as HTMLInputElement).checked,
-                )
-              "
-            />
-            <span class="text-sm">{{ t("settings.allowExternalControl") }}</span>
-          </label>
-          <p class="text-xs text-text-muted">
-            {{
-              t("settings.urlSchemeHint", {
-                scheme: "betterscreenshoot://capture-area",
-              })
-            }}
-          </p>
-        </div>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.sections.captureMode") }}
-        </h2>
-        <div class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
-          <div
-            v-if="driftDetected"
-            class="rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
-            role="alert"
-          >
-            <p>{{ driftMessage }}</p>
-            <button
-              type="button"
-              class="mt-2 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
-              :disabled="systemBusy"
-              @click="repairDrift"
-            >
-              {{ t("settings.repairState") }}
-            </button>
           </div>
-
-          <fieldset
-            class="space-y-3"
-            :disabled="systemBusy || captureStatus?.platform_supported === false"
-          >
-            <legend class="sr-only">{{ t("settings.systemCaptureModeLegend") }}</legend>
-
-            <label
-              class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
-              :class="
-                currentMode === 'independent'
-                  ? 'border-accent bg-accent/5'
-                  : 'border-border bg-surface hover:bg-border/40'
-              "
-            >
-              <input
-                type="radio"
-                name="system-capture-mode"
-                value="independent"
-                class="mt-0.5"
-                :checked="currentMode === 'independent'"
-                @change="onModeChange('independent')"
-              />
-              <span class="space-y-1">
-                <span class="block text-sm font-medium">
-                  {{ t("settings.independentModeTitle") }}
-                </span>
-                <span class="block text-xs text-text-muted">
-                  {{ independentHotkeyPreview }}
-                </span>
-                <span class="block text-xs text-text-muted">
-                  {{
-                    t("settings.independentModeHint", {
-                      cmd3: "⌘⇧3",
-                      cmd4: "⌘⇧4",
-                      cmd5: "⌘⇧5",
-                    })
-                  }}
-                </span>
-              </span>
-            </label>
-
-            <label
-              class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
-              :class="
-                currentMode === 'replace_system'
-                  ? 'border-accent bg-accent/5'
-                  : 'border-border bg-surface hover:bg-border/40'
-              "
-            >
-              <input
-                type="radio"
-                name="system-capture-mode"
-                value="replace_system"
-                class="mt-0.5"
-                :checked="currentMode === 'replace_system'"
-                @change="onModeChange('replace_system')"
-              />
-              <span class="space-y-1">
-                <span class="block text-sm font-medium">
-                  {{ t("settings.replaceModeTitle") }}
-                </span>
-                <span class="block text-xs text-text-muted">
-                  {{ replacementHotkeyPreview }}
-                </span>
-                <span class="block text-xs text-text-muted">
-                  {{ t("settings.replaceModeHint") }}
-                </span>
-              </span>
-            </label>
-          </fieldset>
-
-          <ul
-            v-if="captureStatus?.platform_supported && captureStatus.system_shortcuts.length > 0"
-            class="space-y-2 rounded-lg border border-border bg-surface px-3 py-3 text-sm"
-          >
-            <li
-              v-for="shortcut in captureStatus.system_shortcuts"
-              :key="shortcut.id"
-              class="flex items-center justify-between gap-3"
-            >
-              <span class="text-text-muted">
-                {{ shortcutLabel(shortcut.id, shortcut.label) }}
-              </span>
-              <span
-                class="rounded-md px-2 py-0.5 text-xs"
-                :class="
-                  shortcut.enabled
-                    ? 'bg-amber-950/50 text-amber-100'
-                    : 'bg-emerald-950/50 text-emerald-100'
-                "
-              >
-                {{
-                  shortcut.enabled
-                    ? t("settings.activeOnMacos")
-                    : t("common.disabled")
-                }}
-              </span>
-            </li>
-          </ul>
-
-          <button
-            v-if="isReplaceMode"
-            type="button"
-            class="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-border disabled:opacity-50"
-            :disabled="systemBusy"
-            @click="restoreSystemCaptures"
-          >
-            {{ t("settings.restoreSystemCaptures") }}
-          </button>
-          <p v-if="isReplaceMode" class="text-xs text-text-muted">
-            {{
-              t("settings.restoreSystemCapturesHint", {
-                cmd3: "⌘⇧3",
-                cmd4: "⌘⇧4",
-                cmd5: "⌘⇧5",
-              })
-            }}
-          </p>
-
-          <p v-if="systemSuccess" class="text-xs text-emerald-400" role="status">
-            {{ systemSuccess }}
-          </p>
-          <p v-if="systemMessage" class="text-xs text-red-400" role="alert">
-            {{ systemMessage }}
-          </p>
-        </div>
-      </section>
-
-      <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.sections.globalShortcuts") }}
-        </h2>
-        <div class="space-y-3 rounded-xl border border-border bg-surface-raised p-4">
-          <label v-for="field in hotkeyFields" :key="field.key" class="block">
-            <span class="mb-1 block text-sm">
-              {{ field.label }}
-              <span v-if="field.hint" class="text-text-muted"> — {{ field.hint }}</span>
-            </span>
-            <input
-              :value="settings.hotkeys[field.key]"
-              type="text"
-              class="w-full rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm disabled:cursor-not-allowed disabled:opacity-60"
-              :disabled="isCaptureHotkeyLocked(field.key)"
-              @change="updateHotkey(field.key, ($event.target as HTMLInputElement).value)"
+          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+            <span class="text-sm">{{ t("settings.autoCopy") }}</span>
+            <AppToggle
+              :model-value="settings.auto_copy"
+              @update:model-value="updateField('auto_copy', $event)"
             />
-            <p
-              v-if="isCaptureHotkeyLocked(field.key)"
-              class="mt-1 text-xs text-text-muted"
-            >
+          </div>
+          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+            <span class="text-sm">{{ t("settings.autoSave") }}</span>
+            <AppToggle
+              :model-value="settings.auto_save"
+              @update:model-value="updateField('auto_save', $event)"
+            />
+          </div>
+        </div>
+
+        <!-- Aspecto -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.sections.appearance") }}
+          </p>
+          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+            <span class="text-sm">{{ t("settings.sections.appearance") }}</span>
+            <AppSegmentedControl
+              :model-value="settings.appearance"
+              :options="appearanceOptions"
+              @update:model-value="onAppearanceChange"
+            />
+          </div>
+        </div>
+
+        <!-- Integraciones -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.sections.integrations") }}
+          </p>
+          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+            <span class="text-sm">{{ t("settings.allowExternalControl") }}</span>
+            <AppToggle
+              :model-value="settings.allow_external_control"
+              @update:model-value="updateField('allow_external_control', $event)"
+            />
+          </div>
+          <div class="border-b border-sep px-6 py-3">
+            <p class="text-xs text-fg-muted">
               {{
-                t("settings.hotkeys.managedByReplace", {
-                  shortcut: managedShortcut(field.key),
+                t("settings.urlSchemeHint", {
+                  scheme: "betterscreenshoot://capture-area",
                 })
               }}
             </p>
-          </label>
+          </div>
         </div>
-      </section>
 
-      <AppUpdateSection />
+        <!-- Modo de captura -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.sections.captureMode") }}
+          </p>
+          <div class="px-6 py-3">
+            <div
+              v-if="driftDetected"
+              class="mb-4 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
+              role="alert"
+            >
+              <p>{{ driftMessage }}</p>
+              <button
+                type="button"
+                class="mt-2 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+                :disabled="systemBusy"
+                @click="repairDrift"
+              >
+                {{ t("settings.repairState") }}
+              </button>
+            </div>
 
-      <section>
-        <h2 class="mb-4 text-sm font-medium text-text-muted">
-          {{ t("settings.sections.setup") }}
-        </h2>
-        <div class="rounded-xl border border-border bg-surface-raised p-4">
-          <button
-            type="button"
-            class="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:bg-border/40 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="isOnOnboardingRoute"
-            @click="runSetupWizardAgain"
-          >
-            {{ t("settings.runSetupWizard") }}
-          </button>
+            <fieldset
+              class="space-y-3"
+              :disabled="systemBusy || captureStatus?.platform_supported === false"
+            >
+              <legend class="sr-only">{{ t("settings.systemCaptureModeLegend") }}</legend>
+
+              <label
+                class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
+                :class="
+                  currentMode === 'independent'
+                    ? 'border-accent bg-accent/5'
+                    : 'border-sep bg-elev hover:bg-elev/80'
+                "
+              >
+                <input
+                  type="radio"
+                  name="system-capture-mode"
+                  value="independent"
+                  class="mt-0.5"
+                  :checked="currentMode === 'independent'"
+                  @change="onModeChange('independent')"
+                />
+                <span class="space-y-1">
+                  <span class="block text-sm font-medium">
+                    {{ t("settings.independentModeTitle") }}
+                  </span>
+                  <span class="block text-xs text-fg-muted">
+                    {{ independentHotkeyPreview }}
+                  </span>
+                  <span class="block text-xs text-fg-muted">
+                    {{
+                      t("settings.independentModeHint", {
+                        cmd3: "⌘⇧3",
+                        cmd4: "⌘⇧4",
+                        cmd5: "⌘⇧5",
+                      })
+                    }}
+                  </span>
+                </span>
+              </label>
+
+              <label
+                class="flex cursor-pointer gap-3 rounded-lg border p-3 transition"
+                :class="
+                  currentMode === 'replace_system'
+                    ? 'border-accent bg-accent/5'
+                    : 'border-sep bg-elev hover:bg-elev/80'
+                "
+              >
+                <input
+                  type="radio"
+                  name="system-capture-mode"
+                  value="replace_system"
+                  class="mt-0.5"
+                  :checked="currentMode === 'replace_system'"
+                  @change="onModeChange('replace_system')"
+                />
+                <span class="space-y-1">
+                  <span class="block text-sm font-medium">
+                    {{ t("settings.replaceModeTitle") }}
+                  </span>
+                  <span class="block text-xs text-fg-muted">
+                    {{ replacementHotkeyPreview }}
+                  </span>
+                  <span class="block text-xs text-fg-muted">
+                    {{ t("settings.replaceModeHint") }}
+                  </span>
+                </span>
+              </label>
+            </fieldset>
+
+            <ul
+              v-if="captureStatus?.platform_supported && captureStatus.system_shortcuts.length > 0"
+              class="mt-3 space-y-2 rounded-lg border border-sep bg-elev px-3 py-3 text-sm"
+            >
+              <li
+                v-for="shortcut in captureStatus.system_shortcuts"
+                :key="shortcut.id"
+                class="flex items-center justify-between gap-3"
+              >
+                <span class="text-fg-muted">
+                  {{ shortcutLabel(shortcut.id, shortcut.label) }}
+                </span>
+                <span
+                  class="rounded-md px-2 py-0.5 text-xs"
+                  :class="
+                    shortcut.enabled
+                      ? 'bg-amber-950/50 text-amber-100'
+                      : 'bg-emerald-950/50 text-emerald-100'
+                  "
+                >
+                  {{
+                    shortcut.enabled
+                      ? t("settings.activeOnMacos")
+                      : t("common.disabled")
+                  }}
+                </span>
+              </li>
+            </ul>
+
+            <button
+              v-if="isReplaceMode"
+              type="button"
+              class="mt-3 rounded-lg border border-sep bg-elev px-3 py-2 text-sm hover:bg-win disabled:opacity-50"
+              :disabled="systemBusy"
+              @click="restoreSystemCaptures"
+            >
+              {{ t("settings.restoreSystemCaptures") }}
+            </button>
+            <p v-if="isReplaceMode" class="mt-2 text-xs text-fg-muted">
+              {{
+                t("settings.restoreSystemCapturesHint", {
+                  cmd3: "⌘⇧3",
+                  cmd4: "⌘⇧4",
+                  cmd5: "⌘⇧5",
+                })
+              }}
+            </p>
+
+            <p v-if="systemSuccess" class="mt-2 text-xs text-emerald-400" role="status">
+              {{ systemSuccess }}
+            </p>
+            <p v-if="systemMessage" class="mt-2 text-xs text-red-400" role="alert">
+              {{ systemMessage }}
+            </p>
+          </div>
         </div>
-      </section>
+
+        <!-- Atajos globales -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.sections.globalShortcuts") }}
+          </p>
+          <div class="px-6 py-3 space-y-3">
+            <label v-for="field in hotkeyFields" :key="field.key" class="block">
+              <span class="mb-1 block text-sm">
+                {{ field.label }}
+                <span v-if="field.hint" class="text-fg-muted"> — {{ field.hint }}</span>
+              </span>
+              <input
+                :value="settings.hotkeys[field.key]"
+                type="text"
+                class="w-full rounded-lg border border-sep bg-field px-3 py-2 font-mono text-sm text-fg disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="isCaptureHotkeyLocked(field.key)"
+                @change="updateHotkey(field.key, ($event.target as HTMLInputElement).value)"
+              />
+              <p
+                v-if="isCaptureHotkeyLocked(field.key)"
+                class="mt-1 text-xs text-fg-muted"
+              >
+                {{
+                  t("settings.hotkeys.managedByReplace", {
+                    shortcut: managedShortcut(field.key),
+                  })
+                }}
+              </p>
+            </label>
+          </div>
+        </div>
+
+        <!-- Actualizaciones -->
+        <div class="mt-4 px-6">
+          <AppUpdateSection />
+        </div>
+
+        <!-- Configuración -->
+        <div class="mt-4">
+          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+            {{ t("settings.sections.setup") }}
+          </p>
+          <div class="border-b border-sep px-6 py-3">
+            <button
+              type="button"
+              class="rounded-lg border border-sep bg-elev px-3 py-2 text-sm hover:bg-win disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="isOnOnboardingRoute"
+              @click="runSetupWizardAgain"
+            >
+              {{ t("settings.runSetupWizard") }}
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <SystemScreenshotPermissionDialog
