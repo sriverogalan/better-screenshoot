@@ -71,6 +71,10 @@
     "restoreSystemCaptures": "Restaurar capturas do sistema",
     "restoreSystemCapturesHint": "Reativa {cmd3}, {cmd4} e {cmd5} no macOS e volta aos atalhos do app.",
     "repairState": "Reparar estado",
+    "repairScreenRecordingDescription": "O macOS pode estar mantendo uma permissão antiga de Gravação de Tela após uma atualização.",
+    "repairScreenRecordingPermission": "Reparar permissão",
+    "repairScreenRecordingConfirm": "Isso redefinirá a permissão de Gravação de Tela do Better Screenshoot e abrirá os Ajustes do Sistema do macOS. Você precisará ativar a permissão novamente.",
+    "repairScreenRecordingStarted": "A permissão de Gravação de Tela foi redefinida. Ative o Better Screenshoot novamente nos Ajustes do Sistema do macOS e tente capturar de novo.",
     "hotkeys": {
       "captureArea": "Capturar região",
       "captureAreaHint": "No macOS abre o seletor nativo do sistema",
@@ -256,6 +260,7 @@
     "systemShortcutsModifyFailed": "Não foi possível modificar os atalhos do sistema",
     "systemChangesFailed": "Não foi possível aplicar as alterações do sistema",
     "openSystemSettingsFailed": "Não foi possível abrir as Configurações do Sistema",
+    "repairScreenRecordingPermissionFailed": "Não foi possível redefinir a permissão de Gravação de Tela",
     "macosOnly": "Esta ação só está disponível no macOS",
     "macosShortcutsOnly": "Os atalhos de captura do sistema só podem ser configurados no macOS",
     "displaysDetected": "{count} tela(s) detectada(s).",

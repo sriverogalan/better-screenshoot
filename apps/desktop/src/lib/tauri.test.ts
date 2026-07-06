@@ -67,6 +67,15 @@ describe("tauri integration contracts", () => {
     expect(invokeMock).toHaveBeenCalledWith("get_system_capture_status");
   });
 
+  it("resetScreenCapturePermission invokes backend command", async () => {
+    invokeMock.mockResolvedValue(undefined);
+    const { resetScreenCapturePermission } = await import("./tauri");
+
+    await resetScreenCapturePermission();
+
+    expect(invokeMock).toHaveBeenCalledWith("reset_screen_capture_permission");
+  });
+
   it("setSystemCaptureMode invokes backend command", async () => {
     invokeMock.mockResolvedValue({
       message: "ok",

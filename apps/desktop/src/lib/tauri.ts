@@ -44,6 +44,10 @@ export async function requestScreenCapturePermission(): Promise<boolean> {
   return invoke("request_screen_capture_permission");
 }
 
+export async function resetScreenCapturePermission(): Promise<void> {
+  return invoke("reset_screen_capture_permission");
+}
+
 export async function openScreenRecordingSettings(): Promise<void> {
   return invoke("open_screen_recording_settings");
 }

@@ -71,6 +71,10 @@
     "restoreSystemCaptures": "Restaurer les captures système",
     "restoreSystemCapturesHint": "Réactive {cmd3}, {cmd4} et {cmd5} sur macOS et revient aux raccourcis de l'application.",
     "repairState": "Réparer l'état",
+    "repairScreenRecordingDescription": "macOS peut conserver une ancienne autorisation d'enregistrement de l'écran après une mise à jour.",
+    "repairScreenRecordingPermission": "Réparer l'autorisation",
+    "repairScreenRecordingConfirm": "Cette action réinitialisera l'autorisation d'enregistrement de l'écran de Better Screenshoot et ouvrira Réglages Système de macOS. Vous devrez réactiver l'autorisation.",
+    "repairScreenRecordingStarted": "L'autorisation d'enregistrement de l'écran a été réinitialisée. Réactivez Better Screenshoot dans Réglages Système de macOS, puis réessayez la capture.",
     "hotkeys": {
       "captureArea": "Capturer une région",
       "captureAreaHint": "Sur macOS, ouvre le sélecteur système natif",
@@ -256,6 +260,7 @@
     "systemShortcutsModifyFailed": "Impossible de modifier les raccourcis système",
     "systemChangesFailed": "Impossible d'appliquer les modifications système",
     "openSystemSettingsFailed": "Impossible d'ouvrir les réglages système",
+    "repairScreenRecordingPermissionFailed": "Impossible de réinitialiser l'autorisation d'enregistrement de l'écran",
     "macosOnly": "Cette action n'est disponible que sur macOS",
     "macosShortcutsOnly": "Les raccourcis de capture système ne peuvent être configurés que sur macOS",
     "displaysDetected": "{count} écran(s) détecté(s).",

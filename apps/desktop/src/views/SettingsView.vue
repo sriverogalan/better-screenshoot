@@ -18,8 +18,12 @@ import AppSegmentedControl from "../components/ui/AppSegmentedControl.vue";
 import SystemScreenshotPermissionDialog from "../components/settings/SystemScreenshotPermissionDialog.vue";
 import AppUpdateSection from "../components/settings/AppUpdateSection.vue";
 import {
+  getCaptureStatus,
   getSystemCaptureStatus,
+  openScreenRecordingSettings,
+  resetScreenCapturePermission,
   setSystemCaptureMode,
+  type CaptureStatus,
   type SystemCaptureStatus,
 } from "../lib/tauri";
 import { formatHotkey } from "../lib/format-hotkey";
@@ -57,6 +61,8 @@ const systemSuccess = ref<string | null>(null);
 const systemBusy = ref(false);
 const showReplaceDialog = ref(false);
 const captureStatus = ref<SystemCaptureStatus | null>(null);
+const capturePermissionStatus = ref<CaptureStatus | null>(null);
+const permissionRepairBusy = ref(false);
 
 const languageOptions = computed(() =>
   SUPPORTED_LOCALES.map((locale) => ({
@@ -94,6 +100,9 @@ const driftMessage = computed(() => {
   const code = captureStatus.value?.messageCode;
   return code ? translateMessageCode(t, code) : null;
 });
+const brokenScreenRecordingPermissionDetected = computed(
+  () => capturePermissionStatus.value?.messageCode === "macosPermissionGrantedNoDisplays",
+);
 
 function isCaptureHotkeyLocked(key: keyof HotkeyConfig) {
   return isReplaceMode.value && captureHotkeyKeys.includes(key);
@@ -156,6 +165,17 @@ async function loadCaptureStatus() {
   }
 }
 
+async function loadCapturePermissionStatus() {
+  try {
+    capturePermissionStatus.value = await getCaptureStatus();
+  } catch (err) {
+    systemMessage.value =
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.checkPermissionsFailed");
+  }
+}
+
 async function applyCaptureMode(mode: SystemCaptureMode) {
   systemBusy.value = true;
   systemMessage.value = null;
@@ -201,10 +221,39 @@ async function repairDrift() {
   await applyCaptureMode("independent");
 }
 
+async function repairScreenRecordingPermission() {
+  if (permissionRepairBusy.value) return;
+
+  const confirmed = window.confirm(t("settings.repairScreenRecordingConfirm"));
+  if (!confirmed) return;
+
+  permissionRepairBusy.value = true;
+  systemMessage.value = null;
+  systemSuccess.value = null;
+  try {
+    await resetScreenCapturePermission();
+    try {
+      await openScreenRecordingSettings();
+    } catch {
+      systemMessage.value = t("errors.openSystemSettingsFailed");
+    }
+    systemSuccess.value = t("settings.repairScreenRecordingStarted");
+    await loadCapturePermissionStatus();
+    await loadCaptureStatus();
+  } catch (err) {
+    systemMessage.value =
+      err instanceof Error
+        ? translateAppError(t, err.message)
+        : t("errors.repairScreenRecordingPermissionFailed");
+  } finally {
+    permissionRepairBusy.value = false;
+  }
+}
+
 let unlisteners: UnlistenFn[] = [];
 
 onMounted(async () => {
-  await loadCaptureStatus();
+  await Promise.all([loadCaptureStatus(), loadCapturePermissionStatus()]);
   unlisteners = await Promise.all([
     listen<string>("system-capture-drift", (event) => {
       if (event.payload) {
@@ -332,6 +381,22 @@ onUnmounted(() => {
             {{ t("settings.sections.captureMode") }}
           </p>
           <div class="px-6 py-3">
+            <div
+              v-if="brokenScreenRecordingPermissionDetected"
+              class="mb-4 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
+              role="alert"
+            >
+              <p>{{ t("settings.repairScreenRecordingDescription") }}</p>
+              <button
+                type="button"
+                class="mt-2 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
+                :disabled="permissionRepairBusy"
+                @click="repairScreenRecordingPermission"
+              >
+                {{ t("settings.repairScreenRecordingPermission") }}
+              </button>
+            </div>
+
             <div
               v-if="driftDetected"
               class="mb-4 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
