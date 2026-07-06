@@ -55,10 +55,7 @@ fn monitor_under_cursor(window: &WebviewWindow) -> Option<Monitor> {
         let size = monitor.size();
         let x = cursor.x as i32;
         let y = cursor.y as i32;
-        x >= pos.x
-            && x < pos.x + size.width as i32
-            && y >= pos.y
-            && y < pos.y + size.height as i32
+        x >= pos.x && x < pos.x + size.width as i32 && y >= pos.y && y < pos.y + size.height as i32
     })
 }
 
@@ -72,13 +69,11 @@ pub fn move_editor_to_active_monitor(window: &WebviewWindow) -> Result<(), Strin
     let pos = monitor.position();
     crate::app_trace!(
         "move_editor_to_active_monitor: monitor en ({}, {})",
-        pos.x, pos.y
+        pos.x,
+        pos.y
     );
     window
-        .set_position(Position::Physical(PhysicalPosition {
-            x: pos.x,
-            y: pos.y,
-        }))
+        .set_position(Position::Physical(PhysicalPosition { x: pos.x, y: pos.y }))
         .map_err(|e| e.to_string())?;
     Ok(())
 }
@@ -186,4 +181,3 @@ pub fn exit_main_editor_mode(app: AppHandle) -> Result<(), String> {
     reset_editor_fullscreen_state(&main)?;
     prepare_main_hub_window(&main)
 }
-

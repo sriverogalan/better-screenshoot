@@ -25,7 +25,10 @@ pub async fn update_settings(
 }
 
 #[tauri::command]
-pub async fn reload_settings(app: AppHandle, state: State<'_, AppState>) -> Result<AppSettings, String> {
+pub async fn reload_settings(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<AppSettings, String> {
     load_settings(&app, &state)?;
     register_hotkeys(&app)?;
     Ok(state.settings.lock().map_err(|e| e.to_string())?.clone())

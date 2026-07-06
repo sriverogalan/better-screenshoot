@@ -71,6 +71,10 @@
     "restoreSystemCaptures": "Restore system captures",
     "restoreSystemCapturesHint": "Re-enables macOS {cmd3}, {cmd4}, and {cmd5} and returns to the app's own shortcuts.",
     "repairState": "Repair state",
+    "repairScreenRecordingDescription": "macOS may be keeping an old Screen Recording permission after an update.",
+    "repairScreenRecordingPermission": "Repair permission",
+    "repairScreenRecordingConfirm": "This will reset Better Screenshoot's Screen Recording permission and open macOS System Settings. You will need to enable the permission again.",
+    "repairScreenRecordingStarted": "Screen Recording permission was reset. Re-enable Better Screenshoot in macOS System Settings, then try capturing again.",
     "hotkeys": {
       "captureArea": "Capture region",
       "captureAreaHint": "On macOS opens the native system selector",
@@ -256,6 +260,7 @@
     "systemShortcutsModifyFailed": "Could not modify system shortcuts",
     "systemChangesFailed": "Could not apply system changes",
     "openSystemSettingsFailed": "Could not open system settings",
+    "repairScreenRecordingPermissionFailed": "Could not reset Screen Recording permission",
     "macosOnly": "This action is only available on macOS",
     "macosShortcutsOnly": "System capture shortcuts can only be configured on macOS",
     "displaysDetected": "{count} display(s) detected.",

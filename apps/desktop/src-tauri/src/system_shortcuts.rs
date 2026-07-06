@@ -153,8 +153,7 @@ fn run_plist_buddy(plist: &Path, command: &str) -> Result<String, String> {
 }
 
 fn hotkey_exists(plist: &Path, id: u32) -> bool {
-    run_plist_buddy(plist, &format!("Print :AppleSymbolicHotKeys:{id}"))
-        .is_ok()
+    run_plist_buddy(plist, &format!("Print :AppleSymbolicHotKeys:{id}")).is_ok()
 }
 
 fn read_hotkey_enabled(plist: &Path, id: u32) -> Result<bool, String> {
@@ -352,7 +351,10 @@ pub fn build_status(
 }
 
 #[cfg(not(target_os = "macos"))]
-pub fn build_status(_app_data_dir: &Path, settings: &AppSettings) -> Result<SystemCaptureStatus, String> {
+pub fn build_status(
+    _app_data_dir: &Path,
+    settings: &AppSettings,
+) -> Result<SystemCaptureStatus, String> {
     Ok(SystemCaptureStatus {
         platform_supported: false,
         mode: settings.system_capture_mode,
@@ -448,10 +450,7 @@ fn uses_system_replacement_hotkeys(settings: &AppSettings) -> bool {
 }
 
 #[cfg(target_os = "macos")]
-fn restore_to_independent(
-    app_data_dir: &Path,
-    settings: &mut AppSettings,
-) -> Result<(), String> {
+fn restore_to_independent(app_data_dir: &Path, settings: &mut AppSettings) -> Result<(), String> {
     let backup = read_backup_file(app_data_dir)?;
     let plist = symbolic_hotkeys_plist()?;
     let shortcuts_disabled = system_shortcuts_need_restore(&plist)?;
@@ -521,11 +520,7 @@ pub fn apply_mode(
                 capture_screen: settings.hotkeys.capture_screen.clone(),
                 capture_window: settings.hotkeys.capture_window.clone(),
             };
-            disable_system_shortcuts(
-                app_data_dir,
-                app_hotkeys,
-                settings.system_capture_mode,
-            )?;
+            disable_system_shortcuts(app_data_dir, app_hotkeys, settings.system_capture_mode)?;
 
             let replacement = system_replacement_hotkeys();
             settings.system_capture_mode = SystemCaptureMode::ReplaceSystem;

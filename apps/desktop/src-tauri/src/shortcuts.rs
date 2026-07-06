@@ -1,6 +1,6 @@
-use tauri::{AppHandle, Emitter, Manager};
 #[cfg(target_os = "windows")]
 use tauri::WebviewWindow;
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 use crate::capture_session;

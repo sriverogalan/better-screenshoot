@@ -71,6 +71,10 @@
     "restoreSystemCaptures": "Systemaufnahmen wiederherstellen",
     "restoreSystemCapturesHint": "Aktiviert macOS {cmd3}, {cmd4} und {cmd5} wieder und kehrt zu den eigenen Tastenkürzeln der App zurück.",
     "repairState": "Zustand reparieren",
+    "repairScreenRecordingDescription": "macOS behält nach einem Update möglicherweise eine alte Berechtigung für Bildschirmaufnahme bei.",
+    "repairScreenRecordingPermission": "Berechtigung reparieren",
+    "repairScreenRecordingConfirm": "Dadurch wird die Bildschirmaufnahme-Berechtigung von Better Screenshoot zurückgesetzt und die macOS-Systemeinstellungen werden geöffnet. Sie müssen die Berechtigung erneut aktivieren.",
+    "repairScreenRecordingStarted": "Die Bildschirmaufnahme-Berechtigung wurde zurückgesetzt. Aktivieren Sie Better Screenshoot in den macOS-Systemeinstellungen erneut und versuchen Sie die Aufnahme noch einmal.",
     "hotkeys": {
       "captureArea": "Bereich aufnehmen",
       "captureAreaHint": "Öffnet auf macOS den nativen Systemselektor",
@@ -256,6 +260,7 @@
     "systemShortcutsModifyFailed": "System-Tastenkürzel konnten nicht geändert werden",
     "systemChangesFailed": "Systemänderungen konnten nicht angewendet werden",
     "openSystemSettingsFailed": "Systemeinstellungen konnten nicht geöffnet werden",
+    "repairScreenRecordingPermissionFailed": "Bildschirmaufnahme-Berechtigung konnte nicht zurückgesetzt werden",
     "macosOnly": "Diese Aktion ist nur auf macOS verfügbar",
     "macosShortcutsOnly": "System-Aufnahme-Tastenkürzel können nur auf macOS konfiguriert werden",
     "displaysDetected": "{count} Bildschirm(e) erkannt.",

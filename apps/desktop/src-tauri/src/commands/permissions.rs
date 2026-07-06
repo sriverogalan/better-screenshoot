@@ -4,6 +4,9 @@ use tauri::State;
 use crate::errors::app_error;
 use crate::state::AppState;
 
+#[cfg(target_os = "macos")]
+const APP_BUNDLE_IDENTIFIER: &str = "com.betterscreenshoot.app";
+
 #[derive(Debug, Serialize)]
 pub struct CaptureStatus {
     pub displays_found: usize,
@@ -50,7 +53,10 @@ fn dev_binary_hint() -> Option<String> {
         .map(|path| path.display().to_string())
 }
 
-fn permission_message_code(displays_found: usize, granted: bool) -> (String, Option<serde_json::Value>) {
+fn permission_message_code(
+    displays_found: usize,
+    granted: bool,
+) -> (String, Option<serde_json::Value>) {
     if displays_found > 0 {
         return (
             "displaysDetected".into(),
@@ -77,7 +83,10 @@ fn permission_message_code(displays_found: usize, granted: bool) -> (String, Opt
 /// Computes a [`CaptureStatus`] from raw display list and TCC grant state.
 /// Extracted so unit tests can exercise the full status-building logic without
 /// needing a live Tauri [`State`].
-fn compute_capture_status(displays: Vec<capture_core::types::DisplayInfo>, granted: bool) -> CaptureStatus {
+fn compute_capture_status(
+    displays: Vec<capture_core::types::DisplayInfo>,
+    granted: bool,
+) -> CaptureStatus {
     // If xcap listed at least one display, ScreenCaptureKit already validated the permission —
     // CGPreflightScreenCaptureAccess is unreliable on macOS Sequoia (returns false despite TCC grant).
     let screen_capture_granted = !displays.is_empty();
@@ -101,6 +110,28 @@ pub async fn get_capture_status(state: State<'_, AppState>) -> Result<CaptureSta
 #[tauri::command]
 pub fn request_screen_capture_permission() -> bool {
     macos_request_screen_capture()
+}
+
+#[tauri::command]
+pub fn reset_screen_capture_permission() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let status = std::process::Command::new("tccutil")
+            .args(["reset", "ScreenCapture", APP_BUNDLE_IDENTIFIER])
+            .status()
+            .map_err(|_| app_error("repairScreenRecordingPermissionFailed"))?;
+
+        if status.success() {
+            Ok(())
+        } else {
+            Err(app_error("repairScreenRecordingPermissionFailed"))
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok(())
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -199,7 +230,16 @@ mod tests {
     #[test]
     fn capture_status_with_displays_is_granted_regardless_of_preflight() {
         use capture_core::types::DisplayInfo;
-        let display = DisplayInfo { id: 1, name: "Test".into(), width: 1920, height: 1080, scale_factor: 1.0, is_primary: true, x: 0, y: 0 };
+        let display = DisplayInfo {
+            id: 1,
+            name: "Test".into(),
+            width: 1920,
+            height: 1080,
+            scale_factor: 1.0,
+            is_primary: true,
+            x: 0,
+            y: 0,
+        };
         // granted=false simulates Sequoia CGPreflightScreenCaptureAccess quirk
         let status = compute_capture_status(vec![display], false);
         assert_eq!(status.message_code, "displaysDetected");

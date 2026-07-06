@@ -125,4 +125,18 @@ describe("useEditorLifecycle", () => {
     lifecycle.cleanup()
     expect(mockDisposeCaptureImage).toHaveBeenCalledOnce()
   })
+
+  it("cleanup cancels pending load timeout so imageLoadError stays null", async () => {
+    mockLoadCaptureImage.mockReturnValue(new Promise(() => {}))
+
+    const lifecycle = useEditorLifecycle({ onLoaded: vi.fn() })
+
+    void lifecycle.loadCapture(makeCapture())
+    lifecycle.cleanup()
+
+    vi.advanceTimersByTime(9000)
+    await nextTick()
+
+    expect(lifecycle.imageLoadError.value).toBeNull()
+  })
 })
