@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useRoute, useRouter } from "vue-router";
 import EditorCanvas from "../components/editor/EditorCanvas.vue";
@@ -10,6 +10,7 @@ import EditorToolbar from "../components/editor/EditorToolbar.vue";
 import TextAnnotationEditor from "../components/editor/TextAnnotationEditor.vue";
 import { useEditorHistory } from "../composables/useEditorHistory";
 import { useEditorLayout } from "../composables/useEditorLayout";
+import { useEditorEvents } from "../composables/useEditorEvents";
 import { useEditorLifecycle } from "../composables/useEditorLifecycle";
 import { useEditorShortcuts } from "../composables/useEditorShortcuts";
 import { createBlurredRegionDataUrl } from "../lib/editor/blur";
@@ -105,6 +106,14 @@ function scheduleMeasureHost() {
   });
   window.setTimeout(measureHost, FULLSCREEN_LAYOUT_DELAY_MS);
 }
+
+// 3. Events third — consumes measureHost from layout
+const events = useEditorEvents({
+  canvasHost,
+  measureHost,
+  onCaptureComplete: (capture) => void applyIncomingCapture(capture),
+  onEditorPresented: () => scheduleMeasureHost(),
+});
 
 const editingAnnotation = computed(() =>
   textEditor.value
@@ -645,9 +654,6 @@ useEditorShortcuts({
   isTextEditing: () => textEditor.value !== null,
 });
 
-let unlisten: UnlistenFn | undefined;
-let resizeObserver: ResizeObserver | undefined;
-
 onMounted(async () => {
   const win = getCurrentWindow();
   if (isCaptureSurfaceWindow(win.label)) {
@@ -666,22 +672,7 @@ onMounted(async () => {
   }
 
   measureHost();
-  window.addEventListener("resize", measureHost);
-
-  if (canvasHost.value) {
-    resizeObserver = new ResizeObserver(() => {
-      measureHost();
-    });
-    resizeObserver.observe(canvasHost.value);
-  }
-
-  unlisten = await listen<SavedCapture>("capture-complete", (event) => {
-    void applyIncomingCapture(event.payload);
-  });
-
-  await listen("editor-presented", () => {
-    scheduleMeasureHost();
-  });
+  await events.setup();
 
   if (captureStore.current && history.value.length === 0) {
     initHistory();
@@ -689,10 +680,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  events.cleanup();
   lifecycle.cleanup();
-  window.removeEventListener("resize", measureHost);
-  resizeObserver?.disconnect();
-  unlisten?.();
 });
 </script>
 
