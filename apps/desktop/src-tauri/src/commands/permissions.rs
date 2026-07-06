@@ -107,6 +107,27 @@ pub fn request_screen_capture_permission() -> bool {
 const SYSTEM_SCREENSHOT_SHORTCUTS_URL: &str =
     "x-apple.systempreferences:com.apple.Keyboard-Settings.extension?Screenshots";
 
+#[cfg(target_os = "macos")]
+const SCREEN_RECORDING_PRIVACY_URL: &str =
+    "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture";
+
+#[tauri::command]
+pub fn open_screen_recording_settings() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(SCREEN_RECORDING_PRIVACY_URL)
+            .spawn()
+            .map_err(|_| app_error("openSystemSettingsFailed"))?;
+        Ok(())
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err(app_error("macosOnly"))
+    }
+}
+
 #[tauri::command]
 pub fn open_system_screenshot_shortcuts_settings() -> Result<(), String> {
     #[cfg(target_os = "macos")]
