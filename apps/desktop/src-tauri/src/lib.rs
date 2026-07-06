@@ -133,6 +133,7 @@ pub fn run() {
             commands::set_launch_at_login,
             commands::get_capture_status,
             commands::request_screen_capture_permission,
+            commands::open_screen_recording_settings,
             commands::open_system_screenshot_shortcuts_settings,
             commands::get_system_capture_status,
             commands::set_system_capture_mode,

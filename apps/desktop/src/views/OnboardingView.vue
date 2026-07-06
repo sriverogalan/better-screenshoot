@@ -4,7 +4,12 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { AppLocale } from "@better-screenshoot/shared-types";
 import { useSettingsStore } from "../stores/settings";
-import { getCaptureStatus, setLaunchAtLogin } from "../lib/tauri";
+import {
+  getCaptureStatus,
+  openScreenRecordingSettings,
+  requestScreenCapturePermission,
+  setLaunchAtLogin,
+} from "../lib/tauri";
 import { SUPPORTED_LOCALES, setLocale } from "../i18n";
 
 const { t } = useI18n();
@@ -57,6 +62,23 @@ function startPermissionPolling() {
       showSkipLink.value = true;
     }
   }, 30_000);
+}
+
+async function handleOpenScreenRecordingSettings() {
+  try {
+    await requestScreenCapturePermission();
+  } catch {
+    // If macOS refuses to show the prompt, the settings pane is still opened below.
+  }
+
+  try {
+    await openScreenRecordingSettings();
+  } catch {
+    // Polling still lets the user continue after granting the permission manually.
+  } finally {
+    await checkCaptureStatus();
+    startPermissionPolling();
+  }
 }
 
 // Step 3: Launch at Login
@@ -209,7 +231,7 @@ onUnmounted(() => {
           <button
             type="button"
             class="rounded-xl border border-border bg-surface px-5 py-2.5 text-sm hover:bg-border/40"
-            @click="startPermissionPolling"
+            @click="handleOpenScreenRecordingSettings"
           >
             {{ t("onboarding.stepPermission.openSettings") }}
           </button>
