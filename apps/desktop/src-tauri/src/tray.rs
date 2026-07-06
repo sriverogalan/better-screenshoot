@@ -6,7 +6,7 @@ use tauri::{
 };
 
 use crate::shortcuts::handle_hotkey_action;
-use crate::state::{AppState, AppSettings};
+use crate::state::{AppSettings, AppState};
 
 #[derive(Debug, Deserialize)]
 struct TrayLocaleFile {
@@ -58,12 +58,31 @@ fn current_locale(settings: &AppSettings) -> String {
     }
 }
 
-fn build_menu(app: &AppHandle, labels: &TrayLabels) -> Result<Menu<tauri::Wry>, Box<dyn std::error::Error>> {
-    let capture_area = MenuItem::with_id(app, "capture-area", &labels.capture_area, true, None::<&str>)?;
-    let capture_screen =
-        MenuItem::with_id(app, "capture-screen", &labels.capture_screen, true, None::<&str>)?;
-    let capture_window =
-        MenuItem::with_id(app, "capture-window", &labels.capture_window, true, None::<&str>)?;
+fn build_menu(
+    app: &AppHandle,
+    labels: &TrayLabels,
+) -> Result<Menu<tauri::Wry>, Box<dyn std::error::Error>> {
+    let capture_area = MenuItem::with_id(
+        app,
+        "capture-area",
+        &labels.capture_area,
+        true,
+        None::<&str>,
+    )?;
+    let capture_screen = MenuItem::with_id(
+        app,
+        "capture-screen",
+        &labels.capture_screen,
+        true,
+        None::<&str>,
+    )?;
+    let capture_window = MenuItem::with_id(
+        app,
+        "capture-window",
+        &labels.capture_window,
+        true,
+        None::<&str>,
+    )?;
     let separator = PredefinedMenuItem::separator(app)?;
     let quit = MenuItem::with_id(app, "quit", &labels.quit, true, None::<&str>)?;
 
@@ -168,8 +187,7 @@ fn update_tray(
 ) -> Result<(), String> {
     tray.set_menu(Some(menu.clone()))
         .map_err(|e| e.to_string())?;
-    tray.set_tooltip(Some(tooltip))
-        .map_err(|e| e.to_string())?;
+    tray.set_tooltip(Some(tooltip)).map_err(|e| e.to_string())?;
     Ok(())
 }
 

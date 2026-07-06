@@ -5,9 +5,7 @@ use crate::state::{save_settings, AppState, SystemCaptureMode};
 use crate::system_shortcuts::{self, SystemCaptureModeResult, SystemCaptureStatus};
 
 fn app_data_dir(app: &AppHandle) -> Result<std::path::PathBuf, String> {
-    app.path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())
+    app.path().app_data_dir().map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -39,7 +37,10 @@ pub async fn set_system_capture_mode(
     Ok(result)
 }
 
-pub fn reconcile_system_capture(app: &AppHandle, state: &AppState) -> Result<Option<String>, String> {
+pub fn reconcile_system_capture(
+    app: &AppHandle,
+    state: &AppState,
+) -> Result<Option<String>, String> {
     let app_data_dir = app_data_dir(app)?;
     let settings = state.settings.lock().map_err(|error| error.to_string())?;
     let status = system_shortcuts::build_status(&app_data_dir, &settings)?;

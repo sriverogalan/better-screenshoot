@@ -38,9 +38,7 @@ pub fn is_active_fresh() -> bool {
 
     let elapsed = now_ms().saturating_sub(started);
     if elapsed > STALE_SESSION_MS {
-        crate::app_trace!(
-            "capture_session: auto-clearing stale session after {elapsed}ms"
-        );
+        crate::app_trace!("capture_session: auto-clearing stale session after {elapsed}ms");
         force_clear_session();
         return false;
     }
@@ -94,7 +92,9 @@ fn can_end_generation(gen: u64, current: u64) -> bool {
 pub fn end_generation(app: &AppHandle, gen: u64) {
     if !can_end_generation(gen, CURRENT_GEN.load(Ordering::SeqCst)) {
         if gen != 0 {
-            crate::app_trace!("capture_session: end_generation(gen={gen}) ignored (session not current)");
+            crate::app_trace!(
+                "capture_session: end_generation(gen={gen}) ignored (session not current)"
+            );
         }
         return;
     }

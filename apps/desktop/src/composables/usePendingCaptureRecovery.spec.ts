@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { setActivePinia, createPinia } from "pinia"
 import { withSetup } from "../test-utils/with-setup"
 
@@ -24,10 +24,15 @@ const noopUnlisten = vi.fn()
 
 describe("usePendingCaptureRecovery", () => {
   beforeEach(() => {
+    vi.useFakeTimers()
     setActivePinia(createPinia())
     vi.clearAllMocks()
     // listen returns a Promise<UnlistenFn>
     vi.mocked(listen).mockResolvedValue(noopUnlisten)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it("detects a pending capture on mount", async () => {
@@ -47,7 +52,7 @@ describe("usePendingCaptureRecovery", () => {
     const [result, cleanup] = withSetup(() => usePendingCaptureRecovery(), [pinia, i18n])
 
     // Wait for onMounted async work to complete
-    await new Promise((r) => setTimeout(r, 0))
+    await vi.runAllTimersAsync()
 
     expect(peekPendingCapture).toHaveBeenCalled()
     expect(result.pendingCapture.value).toEqual(pendingCapture)
@@ -63,7 +68,7 @@ describe("usePendingCaptureRecovery", () => {
 
     const [result, cleanup] = withSetup(() => usePendingCaptureRecovery(), [pinia, i18n])
 
-    await new Promise((r) => setTimeout(r, 0))
+    await vi.runAllTimersAsync()
 
     expect(result.pendingCapture.value).toBeNull()
 
@@ -78,7 +83,7 @@ describe("usePendingCaptureRecovery", () => {
 
     const [result, cleanup] = withSetup(() => usePendingCaptureRecovery(), [pinia, i18n])
 
-    await new Promise((r) => setTimeout(r, 0))
+    await vi.runAllTimersAsync()
 
     // Should not throw — pendingCapture defaults to null on error
     expect(result.pendingCapture.value).toBeNull()

@@ -57,7 +57,10 @@ pub(crate) fn insert_record_with_conn(
     Ok(())
 }
 
-pub(crate) fn get_history_with_conn(conn: &Connection, limit: u32) -> Result<Vec<HistoryRecord>, String> {
+pub(crate) fn get_history_with_conn(
+    conn: &Connection,
+    limit: u32,
+) -> Result<Vec<HistoryRecord>, String> {
     let mut stmt = conn
         .prepare(
             "SELECT id, file_path, width, height, created_at, tags FROM captures ORDER BY created_at DESC LIMIT ?1",
@@ -97,9 +100,7 @@ pub async fn insert_record(
 #[tauri::command]
 pub async fn get_history(app: AppHandle, limit: Option<u32>) -> Result<Vec<HistoryRecord>, String> {
     let limit = limit.unwrap_or(100);
-    with_connection(&app, |conn| {
-        get_history_with_conn(conn, limit)
-    })
+    with_connection(&app, |conn| get_history_with_conn(conn, limit))
 }
 
 pub fn get_record_by_id(app: &AppHandle, id: &str) -> Result<HistoryRecord, String> {
@@ -175,14 +176,23 @@ mod tests {
                 tags TEXT NOT NULL DEFAULT '[]'
             )",
             [],
-        ).unwrap();
+        )
+        .unwrap();
         conn
     }
 
     #[test]
     fn insert_and_fetch_round_trip() {
         let conn = setup_in_memory();
-        insert_record_with_conn(&conn, "id1", "/tmp/cap.png", 1920, 1080, "2026-01-01T00:00:00Z").unwrap();
+        insert_record_with_conn(
+            &conn,
+            "id1",
+            "/tmp/cap.png",
+            1920,
+            1080,
+            "2026-01-01T00:00:00Z",
+        )
+        .unwrap();
         let rows = get_history_with_conn(&conn, 10).unwrap();
         assert_eq!(rows.len(), 1);
         assert_eq!(rows[0].id, "id1");
@@ -202,8 +212,15 @@ mod tests {
     fn limit_is_respected() {
         let conn = setup_in_memory();
         for i in 0..5u32 {
-            insert_record_with_conn(&conn, &format!("id{i}"), "/f.png", 1, 1,
-                &format!("2026-01-0{}T00:00:00Z", i + 1)).unwrap();
+            insert_record_with_conn(
+                &conn,
+                &format!("id{i}"),
+                "/f.png",
+                1,
+                1,
+                &format!("2026-01-0{}T00:00:00Z", i + 1),
+            )
+            .unwrap();
         }
         let rows = get_history_with_conn(&conn, 3).unwrap();
         assert_eq!(rows.len(), 3);

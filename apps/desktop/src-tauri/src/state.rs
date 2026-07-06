@@ -122,11 +122,13 @@ impl<'de> Deserialize<'de> for AppSettings {
         }
 
         let raw = AppSettingsRaw::deserialize(deserializer)?;
-        let system_capture_mode = raw.system_capture_mode.unwrap_or(if raw.replace_system_screenshots {
-            SystemCaptureMode::ReplaceSystem
-        } else {
-            SystemCaptureMode::Independent
-        });
+        let system_capture_mode =
+            raw.system_capture_mode
+                .unwrap_or(if raw.replace_system_screenshots {
+                    SystemCaptureMode::ReplaceSystem
+                } else {
+                    SystemCaptureMode::Independent
+                });
 
         Ok(Self {
             save_directory: raw.save_directory,
@@ -161,10 +163,7 @@ impl AppState {
 }
 
 pub fn settings_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
-    let dir = app
-        .path()
-        .app_config_dir()
-        .map_err(|e| e.to_string())?;
+    let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     Ok(dir.join("settings.json"))
 }
@@ -293,6 +292,9 @@ mod tests {
         }"#;
 
         let settings: AppSettings = serde_json::from_str(json).expect("parse settings");
-        assert_eq!(settings.system_capture_mode, SystemCaptureMode::ReplaceSystem);
+        assert_eq!(
+            settings.system_capture_mode,
+            SystemCaptureMode::ReplaceSystem
+        );
     }
 }

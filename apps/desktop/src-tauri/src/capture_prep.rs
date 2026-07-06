@@ -56,8 +56,7 @@ fn force_hide_hub_window(window: &WebviewWindow) {
 }
 
 async fn wait_until_windows_hidden(app: &AppHandle, labels: &[String], timeout_ms: u64) {
-    let deadline =
-        tokio::time::Instant::now() + tokio::time::Duration::from_millis(timeout_ms);
+    let deadline = tokio::time::Instant::now() + tokio::time::Duration::from_millis(timeout_ms);
 
     loop {
         let still_visible = labels.iter().any(|label| {
