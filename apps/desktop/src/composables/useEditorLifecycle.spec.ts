@@ -51,10 +51,9 @@ describe("useEditorLifecycle", () => {
   })
 
   it("sets image refs on successful load and calls onLoaded", async () => {
-    const mockElement = Object.assign(document.createElement("img"), {
-      naturalWidth: 1920,
-      naturalHeight: 1080,
-    }) as HTMLImageElement
+    const mockElement = document.createElement("img")
+    Object.defineProperty(mockElement, "naturalWidth", { value: 1920, configurable: true })
+    Object.defineProperty(mockElement, "naturalHeight", { value: 1080, configurable: true })
     mockLoadCaptureImage.mockResolvedValue({
       element: mockElement,
       dataUrl: "data:image/png;base64,abc",
@@ -76,10 +75,9 @@ describe("useEditorLifecycle", () => {
     const firstPromise = new Promise<any>((resolve) => {
       resolveFirst = resolve
     })
-    const secondElement = Object.assign(document.createElement("img"), {
-      naturalWidth: 800,
-      naturalHeight: 600,
-    }) as HTMLImageElement
+    const secondElement = document.createElement("img")
+    Object.defineProperty(secondElement, "naturalWidth", { value: 800, configurable: true })
+    Object.defineProperty(secondElement, "naturalHeight", { value: 600, configurable: true })
 
     mockLoadCaptureImage
       .mockReturnValueOnce(firstPromise)
