@@ -10,6 +10,7 @@ import EditorToolbar from "../components/editor/EditorToolbar.vue";
 import TextAnnotationEditor from "../components/editor/TextAnnotationEditor.vue";
 import { useEditorHistory } from "../composables/useEditorHistory";
 import { useEditorLayout } from "../composables/useEditorLayout";
+import { useEditorLifecycle } from "../composables/useEditorLifecycle";
 import { useEditorShortcuts } from "../composables/useEditorShortcuts";
 import { createBlurredRegionDataUrl } from "../lib/editor/blur";
 import { isCaptureSessionReady } from "../lib/editor/capture-session";
@@ -37,10 +38,6 @@ import {
 } from "../lib/editor/utils";
 import { useCaptureStore } from "../stores/capture";
 import { commitPendingText, compositeCaptureExport } from "../lib/editor-export";
-import {
-  disposeCaptureImage,
-  loadCaptureImage,
-} from "../lib/load-capture-image";
 import type { SavedCapture } from "../lib/tauri";
 import {
   exitCaptureEditor,
@@ -64,41 +61,19 @@ const canvasRef = ref<InstanceType<typeof EditorCanvas> | null>(null);
 const activeTool = ref<Tool>("arrow");
 const editorStyle = ref<EditorStyle>({ ...DEFAULT_EDITOR_STYLE });
 const selectedId = ref<string | null>(null);
-const konvaImage = ref<HTMLImageElement | null>(null);
-const imagePreviewSrc = ref<string | null>(null);
-const imageNatural = ref({ width: 0, height: 0 });
 const drawing = ref(false);
 const draft = ref<DraftAnnotation | null>(null);
 const textEditor = ref<TextEditorState | null>(null);
 const actionBusy = ref(false);
 const actionError = ref<string | null>(null);
-const imageLoadError = ref<string | null>(null);
-let loadGeneration = 0;
-let loadTimeoutId: number | undefined;
 
 const FULLSCREEN_LAYOUT_DELAY_MS = 150;
-const IMAGE_LOAD_TIMEOUT_MS = 8000;
 
 function isEphemeralCapturePath(filePath: string): boolean {
   return /[/\\]captures[/\\]capture-/.test(filePath);
 }
 
-function clearLoadTimeout() {
-  if (loadTimeoutId !== undefined) {
-    clearTimeout(loadTimeoutId);
-    loadTimeoutId = undefined;
-  }
-}
-
-function scheduleMeasureHost() {
-  measureHost();
-  requestAnimationFrame(() => {
-    measureHost();
-    requestAnimationFrame(measureHost);
-  });
-  window.setTimeout(measureHost, FULLSCREEN_LAYOUT_DELAY_MS);
-}
-
+// ── Composables (ORDER MATTERS) ───────────────────────────────────────────────
 const {
   annotations,
   history,
@@ -109,6 +84,12 @@ const {
   initHistory,
 } = useEditorHistory();
 
+// 1. Lifecycle first — produces imageNatural (scheduleMeasureHost is captured by closure; safe
+//    because onLoaded fires asynchronously, after measureHost is assigned below)
+const lifecycle = useEditorLifecycle({ onLoaded: () => scheduleMeasureHost() });
+const { konvaImage, imagePreviewSrc, imageNatural, imageLoadError } = lifecycle;
+
+// 2. Layout second — consumes imageNatural
 const { displayLayout, measureHost } = useEditorLayout(
   canvasHost,
   imageNatural,
@@ -116,57 +97,25 @@ const { displayLayout, measureHost } = useEditorLayout(
   computed(() => captureStore.current?.height),
 );
 
+function scheduleMeasureHost() {
+  measureHost();
+  requestAnimationFrame(() => {
+    measureHost();
+    requestAnimationFrame(measureHost);
+  });
+  window.setTimeout(measureHost, FULLSCREEN_LAYOUT_DELAY_MS);
+}
+
 const editingAnnotation = computed(() =>
   textEditor.value
     ? annotations.value.find((item) => item.id === textEditor.value?.annotationId)
     : undefined,
 );
 
-async function loadCapture(capture: SavedCapture | null) {
-  clearLoadTimeout();
-  konvaImage.value = null;
-  imagePreviewSrc.value = null;
-  imageNatural.value = { width: 0, height: 0 };
-  imageLoadError.value = null;
-
-  if (!capture) {
-    disposeCaptureImage();
-    return;
-  }
-
-  const generation = ++loadGeneration;
-  loadTimeoutId = window.setTimeout(() => {
-    if (generation !== loadGeneration) return;
-    if (!imagePreviewSrc.value && !imageLoadError.value) {
-      imageLoadError.value = t("errors.imageDisplayFailed");
-    }
-  }, IMAGE_LOAD_TIMEOUT_MS);
-
-  try {
-    const loaded = await loadCaptureImage(capture);
-    if (generation !== loadGeneration) return;
-
-    clearLoadTimeout();
-    konvaImage.value = loaded.element;
-    imagePreviewSrc.value = loaded.dataUrl;
-    imageNatural.value = {
-      width: loaded.element.naturalWidth,
-      height: loaded.element.naturalHeight,
-    };
-    await nextTick();
-    scheduleMeasureHost();
-  } catch (error) {
-    if (generation !== loadGeneration) return;
-    clearLoadTimeout();
-    imageLoadError.value =
-      error instanceof Error ? error.message : t("errors.imageLoadFailed");
-  }
-}
-
 watch(
   () => captureStore.current,
   (capture) => {
-    void loadCapture(capture);
+    void lifecycle.loadCapture(capture);
   },
   { immediate: true },
 );
@@ -596,7 +545,7 @@ async function applyIncomingCapture(capture: SavedCapture) {
   captureStore.setCapture(capture);
   // Load the image explicitly instead of relying on the watcher:
   // this ensures incoming captures always render.
-  await loadCapture(capture);
+  await lifecycle.loadCapture(capture);
   initHistory();
   await clearPendingCapture();
   await nextTick();
@@ -740,11 +689,10 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  clearLoadTimeout();
+  lifecycle.cleanup();
   window.removeEventListener("resize", measureHost);
   resizeObserver?.disconnect();
   unlisten?.();
-  disposeCaptureImage();
 });
 </script>
 
