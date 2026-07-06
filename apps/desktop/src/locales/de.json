@@ -53,7 +53,8 @@
       "captureMode": "Aufnahmemodus (macOS)",
       "globalShortcuts": "Globale Tastenkürzel",
       "license": "Lizenz",
-      "setup": "Einrichtung"
+      "setup": "Einrichtung",
+      "appearance": "Erscheinungsbild"
     },
     "runSetupWizard": "Einrichtungsassistenten erneut ausführen",
     "saveFolder": "Speicherordner",

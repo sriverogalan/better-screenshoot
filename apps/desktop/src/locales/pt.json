@@ -53,7 +53,8 @@
       "captureMode": "Modo de captura (macOS)",
       "globalShortcuts": "Atalhos globais",
       "license": "Licença",
-      "setup": "Configuração"
+      "setup": "Configuração",
+      "appearance": "Aparência"
     },
     "runSetupWizard": "Executar o assistente de configuração novamente",
     "saveFolder": "Pasta de salvamento",

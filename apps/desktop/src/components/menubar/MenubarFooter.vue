@@ -8,7 +8,7 @@ import { emit } from "@tauri-apps/api/event";
 const { t } = useI18n();
 
 async function navigateTo(route: string) {
-  const mainWindow = WebviewWindow.getByLabel("main");
+  const mainWindow = await WebviewWindow.getByLabel("main");
   if (mainWindow) {
     await mainWindow.show();
     await mainWindow.setFocus();

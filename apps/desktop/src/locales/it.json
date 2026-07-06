@@ -53,7 +53,8 @@
       "captureMode": "Modalità di cattura (macOS)",
       "globalShortcuts": "Scorciatoie globali",
       "license": "Licenza",
-      "setup": "Configurazione"
+      "setup": "Configurazione",
+      "appearance": "Aspetto"
     },
     "runSetupWizard": "Esegui nuovamente la procedura guidata di configurazione",
     "saveFolder": "Cartella di salvataggio",

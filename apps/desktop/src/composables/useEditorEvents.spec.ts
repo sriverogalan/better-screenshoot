@@ -96,6 +96,38 @@ describe("useEditorEvents", () => {
     expect(() => events.cleanup()).not.toThrow()
   })
 
+  it("cleanup disconnects ResizeObserver when canvasHost has an element", async () => {
+    const mockDisconnect = vi.fn()
+    vi.stubGlobal(
+      "ResizeObserver",
+      vi.fn().mockImplementation(() => ({
+        observe: vi.fn(),
+        disconnect: mockDisconnect,
+      })),
+    )
+
+    const unlistenA = vi.fn()
+    const unlistenB = vi.fn()
+    mockListen
+      .mockResolvedValueOnce(unlistenA as any)
+      .mockResolvedValueOnce(unlistenB as any)
+
+    const canvasEl = document.createElement("div")
+    const canvasHost = ref<HTMLElement | null>(canvasEl)
+
+    const events = useEditorEvents({
+      canvasHost,
+      measureHost: vi.fn(),
+      onCaptureComplete: vi.fn(),
+      onEditorPresented: vi.fn(),
+    })
+
+    await events.setup()
+    events.cleanup()
+
+    expect(mockDisconnect).toHaveBeenCalledOnce()
+  })
+
   it("calls onCaptureComplete with event payload when capture-complete fires", async () => {
     const onCaptureComplete = vi.fn()
     const unlistenA = vi.fn()
@@ -131,5 +163,33 @@ describe("useEditorEvents", () => {
     captureHandler({ payload: mockPayload })
 
     expect(onCaptureComplete).toHaveBeenCalledWith(mockPayload)
+  })
+
+  it("calls onEditorPresented when editor-presented fires", async () => {
+    const onEditorPresented = vi.fn()
+    const unlistenA = vi.fn()
+    const unlistenB = vi.fn()
+
+    let presentedHandler!: (event?: any) => void
+    mockListen.mockImplementation(async (eventName: string, handler: (event: any) => void) => {
+      if (eventName === "editor-presented") {
+        presentedHandler = handler
+        return unlistenB as any
+      }
+      return unlistenA as any
+    })
+
+    const canvasHost = ref<HTMLElement | null>(null)
+    const events = useEditorEvents({
+      canvasHost,
+      measureHost: vi.fn(),
+      onCaptureComplete: vi.fn(),
+      onEditorPresented,
+    })
+
+    await events.setup()
+    presentedHandler()
+
+    expect(onEditorPresented).toHaveBeenCalledOnce()
   })
 })

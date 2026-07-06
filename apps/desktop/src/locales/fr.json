@@ -53,7 +53,8 @@
       "captureMode": "Mode de capture (macOS)",
       "globalShortcuts": "Raccourcis globaux",
       "license": "Licence",
-      "setup": "Configuration"
+      "setup": "Configuration",
+      "appearance": "Apparence"
     },
     "runSetupWizard": "Relancer l'assistant de configuration",
     "saveFolder": "Dossier d'enregistrement",
