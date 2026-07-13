@@ -31,7 +31,7 @@ fn parse_action(url: &str) -> Option<String> {
 
 fn dispatch_action(app: &AppHandle, action: &str) {
     match action {
-        "capture-area" | "capture-screen" | "capture-window" | "open-history" => {
+        "capture-area" | "capture-screen" | "open-history" => {
             handle_hotkey_action(app, action);
         }
         "open-settings" => show_main_window(app, "/settings"),

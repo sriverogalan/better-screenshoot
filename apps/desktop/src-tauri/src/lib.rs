@@ -31,6 +31,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_drag::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(
@@ -66,6 +67,16 @@ pub fn run() {
             let state = app.state::<AppState>();
             load_settings(&handle, state.inner())?;
             tray::setup_tray(&handle)?;
+
+            #[cfg(target_os = "macos")]
+            if let Some(menubar) = handle.get_webview_window("menubar") {
+                let _ = window_vibrancy::apply_vibrancy(
+                    &menubar,
+                    window_vibrancy::NSVisualEffectMaterial::Menu,
+                    None,
+                    Some(13.0),
+                );
+            }
 
             if let Some(message) = commands::reconcile_system_capture(&handle, state.inner())? {
                 let _ = handle.emit("system-capture-drift", message);
@@ -105,9 +116,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::list_displays,
-            commands::list_windows,
             commands::capture_screen,
-            commands::capture_window,
             commands::capture_region,
             commands::get_overlay_preview,
             commands::complete_area_capture,
@@ -142,14 +151,18 @@ pub fn run() {
             window_layout::reset_main_window_layout,
             window_layout::exit_main_editor_mode,
             shortcuts::handle_capture_action,
-            tray::rebuild_tray_menu,
+            tray::update_tray_tooltip,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app, event| {
             match event {
-                tauri::RunEvent::ExitRequested { api, .. } => {
-                    api.prevent_exit();
+                tauri::RunEvent::ExitRequested { api, code, .. } => {
+                    // Keep running from the tray when all windows close, but
+                    // let explicit exits (quit button / app.exit) through.
+                    if code.is_none() {
+                        api.prevent_exit();
+                    }
                 }
                 tauri::RunEvent::WindowEvent { label, event, .. } => {
                     if label == "main" && matches!(event, tauri::WindowEvent::Destroyed) {

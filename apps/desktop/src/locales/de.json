@@ -6,7 +6,6 @@
     "and": "und",
     "region": "Bereich",
     "screen": "Bildschirm",
-    "window": "Fenster",
     "untitled": "Ohne Titel",
     "disabled": "Deaktiviert",
     "opening": "Wird geöffnet…",
@@ -25,7 +24,6 @@
     "captureShortcutsHint": "Verwenden Sie globale Tastenkürzel zum Aufnehmen. Sie können auch das Menüleistensymbol verwenden.",
     "captureRegion": "Bereich aufnehmen",
     "captureScreen": "Bildschirm aufnehmen",
-    "captureWindow": "Fenster aufnehmen",
     "customizeShortcuts": "Tastenkürzel in Einstellungen anpassen",
     "loadingCaptures": "Aufnahmen werden geladen…",
     "empty": "Noch keine Aufnahmen.",
@@ -47,6 +45,11 @@
       "pt": "Português",
       "it": "Italiano"
     },
+    "appearanceOptions": {
+      "auto": "Automatisch",
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
     "sections": {
       "capture": "Aufnahme",
       "integrations": "Integrationen",
@@ -64,22 +67,27 @@
     "urlSchemeHint": "URL-Schema: {scheme}",
     "systemCaptureModeLegend": "System-Aufnahmemodus",
     "independentModeTitle": "Better Screenshoot-Tastenkürzel",
-    "independentModeHint": "macOS behält {cmd3}, {cmd4} und {cmd5}.",
+    "independentModeHint": "macOS behält {cmd3} und {cmd4}.",
     "replaceModeTitle": "Systemaufnahmen ersetzen",
     "replaceModeHint": "Deaktiviert native Tastenkürzel und weist sie Better Screenshoot zu.",
     "activeOnMacos": "Aktiv auf macOS",
     "restoreSystemCaptures": "Systemaufnahmen wiederherstellen",
-    "restoreSystemCapturesHint": "Aktiviert macOS {cmd3}, {cmd4} und {cmd5} wieder und kehrt zu den eigenen Tastenkürzeln der App zurück.",
+    "restoreSystemCapturesHint": "Aktiviert macOS {cmd3} und {cmd4} wieder und kehrt zu den eigenen Tastenkürzeln der App zurück.",
     "repairState": "Zustand reparieren",
     "repairScreenRecordingDescription": "macOS behält nach einem Update möglicherweise eine alte Berechtigung für Bildschirmaufnahme bei.",
     "repairScreenRecordingPermission": "Berechtigung reparieren",
     "repairScreenRecordingConfirm": "Dadurch wird die Bildschirmaufnahme-Berechtigung von Better Screenshoot zurückgesetzt und die macOS-Systemeinstellungen werden geöffnet. Sie müssen die Berechtigung erneut aktivieren.",
     "repairScreenRecordingStarted": "Die Bildschirmaufnahme-Berechtigung wurde zurückgesetzt. Aktivieren Sie Better Screenshoot in den macOS-Systemeinstellungen erneut und versuchen Sie die Aufnahme noch einmal.",
+    "capturePermissionImpact": {
+      "granted": "Die Aufnahme ist verfügbar.",
+      "denied": "Die Bildschirmaufnahme-Berechtigung ist erforderlich, damit Aufnahmen funktionieren.",
+      "unknown": "Es wurden keine Bildschirme erkannt, daher kann die Aufnahmeverfügbarkeit nicht bestätigt werden.",
+      "repairNeeded": "macOS meldet, dass die Berechtigung erteilt ist, aber Aufnahmen können weiterhin keine Bildschirme sehen."
+    },
     "hotkeys": {
       "captureArea": "Bereich aufnehmen",
       "captureAreaHint": "Öffnet auf macOS den nativen Systemselektor",
       "captureScreen": "Bildschirm aufnehmen",
-      "captureWindow": "Fenster aufnehmen",
       "openHistory": "Verlauf öffnen",
       "managedByReplace": "Verwaltet durch «Systemaufnahmen ersetzen» ({shortcut})."
     },
@@ -122,12 +130,6 @@
     "regionSelector": "Bereichsauswahl für Aufnahme",
     "preparing": "Aufnahme wird vorbereitet…",
     "hint": "Ziehen zum Auswählen · Esc zum Abbrechen"
-  },
-  "captureWindow": {
-    "title": "Fenster aufnehmen",
-    "subtitle": "Wählen Sie das aufzunehmende Fenster",
-    "searching": "Fenster werden gesucht…",
-    "empty": "Keine Fenster gefunden."
   },
   "editor": {
     "title": "Editor",
@@ -173,7 +175,7 @@
       "community": {
         "name": "Community",
         "features": [
-          "Bildschirm-, Fenster- und Bereichsaufnahme",
+          "Bildschirm- und Bereichsaufnahme",
           "Einfache Anmerkungen",
           "Lokaler Verlauf",
           "CLI und URL-Schema",
@@ -224,8 +226,7 @@
     "captureScreen": "Bildschirm aufnehmen (⌘⇧3)",
     "copyScreen": "Bildschirm in Zwischenablage kopieren (⌃⌘⇧3)",
     "captureRegion": "Bereich aufnehmen (⌘⇧4)",
-    "copyRegion": "Bereich in Zwischenablage kopieren (⌃⌘⇧4)",
-    "captureOptions": "Aufnahmeoptionen (⌘⇧5)"
+    "copyRegion": "Bereich in Zwischenablage kopieren (⌃⌘⇧4)"
   },
   "errors": {
     "appStartFailed": "Fehler beim Starten der Anwendung",
@@ -246,6 +247,7 @@
     "mainWindowNotFound": "Hauptfenster nicht gefunden",
     "noMonitorFound": "Kein Monitor gefunden",
     "displayNotFound": "Bildschirm {id} nicht gefunden",
+    "windowActivationFailed": "Konnte nicht rechtzeitig zum Schreibtisch dieses Fensters wechseln. Wechsle manuell dorthin und versuche es erneut.",
     "noDisplaysFound": "Keine Bildschirme gefunden",
     "invalidPortalPath": "Ungültiger Portal-Screenshot-Pfad",
     "noPendingCapture": "Keine ausstehende Aufnahme",
@@ -272,7 +274,7 @@
     "alreadyReplaced": "Systemaufnahmen sind bereits ersetzt.",
     "independentModeActive": "Unabhängiger Modus aktiv.",
     "systemCapturesRestoredFull": "Systemaufnahmen wiederhergestellt. Better Screenshoot verwendet eigene Tastenkürzel.",
-    "systemCapturesReplaced": "Systemaufnahmen ersetzt: ⌘⇧3 Bildschirm, ⌘⇧4 Bereich, ⌘⇧5 Fenster.",
+    "systemCapturesReplaced": "Systemaufnahmen ersetzt: ⌘⇧3 Bildschirm, ⌘⇧4 Bereich.",
     "driftReplaceIndependent": "macOS-Tastenkürzel sind noch aktiv, obwohl die App im Ersetzungsmodus ist.",
     "driftIndependentReplace": "macOS hat Systemaufnahmen deaktiviert, aber die App ist nicht im Ersetzungsmodus.",
     "driftNoBackup": "macOS hat Systemaufnahmen ohne Backup deaktiviert. Reparieren Sie den Zustand, um sie wieder zu aktivieren.",
@@ -316,12 +318,14 @@
     "step": "Schritt {current} von {total}"
   },
   "tray": {
-    "tooltip": "Better Screenshoot",
-    "captureArea": "Bereich aufnehmen",
-    "captureScreen": "Bildschirm aufnehmen",
-    "captureWindow": "Fenster aufnehmen",
+    "tooltip": "Better Screenshoot"
+  },
+  "menubar": {
+    "recentCaptures": "Letzte Aufnahmen",
     "history": "Verlauf",
     "settings": "Einstellungen",
-    "quit": "Beenden"
+    "quit": "Beenden",
+    "copy": "Kopieren",
+    "revealInFinder": "Im Finder anzeigen"
   }
 }

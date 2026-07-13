@@ -13,7 +13,7 @@ const ACTIVATE_SETTINGS: &str =
 const BACKUP_FILE_NAME: &str = "system-screenshot-shortcuts-backup.json";
 const BACKUP_VERSION: u32 = 1;
 
-const PRIMARY_SYSTEM_HOTKEY_IDS: [u32; 3] = [28, 30, 184];
+const PRIMARY_SYSTEM_HOTKEY_IDS: [u32; 2] = [28, 30];
 
 #[derive(Debug, Clone, Copy)]
 struct ScreenshotHotkey {
@@ -43,11 +43,6 @@ const SCREENSHOT_HOTKEYS: &[ScreenshotHotkey] = &[
         label: "Copy region to clipboard (⌃⌘⇧4)",
         parameters: [52, 21, 1_441_792],
     },
-    ScreenshotHotkey {
-        id: 184,
-        label: "Capture options (⌘⇧5)",
-        parameters: [53, 23, 1_179_648],
-    },
 ];
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -60,7 +55,6 @@ struct HotkeyBackupEntry {
 pub struct AppHotkeysBackup {
     pub capture_area: String,
     pub capture_screen: String,
-    pub capture_window: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -89,7 +83,6 @@ pub fn system_replacement_hotkeys() -> HotkeyConfig {
     HotkeyConfig {
         capture_screen: "Command+Shift+3".into(),
         capture_area: "Command+Shift+4".into(),
-        capture_window: "Command+Shift+5".into(),
         open_history: "CommandOrControl+Shift+H".into(),
     }
 }
@@ -239,7 +232,6 @@ fn read_backup_file(app_data_dir: &Path) -> Result<Option<HotkeyBackupV1>, Strin
             app_hotkeys: legacy.app_hotkeys.unwrap_or_else(|| AppHotkeysBackup {
                 capture_area: default_app_hotkeys().capture_area,
                 capture_screen: default_app_hotkeys().capture_screen,
-                capture_window: default_app_hotkeys().capture_window,
             }),
             previous_mode: SystemCaptureMode::Independent,
         },
@@ -446,7 +438,6 @@ fn uses_system_replacement_hotkeys(settings: &AppSettings) -> bool {
     let replacement = system_replacement_hotkeys();
     settings.hotkeys.capture_screen == replacement.capture_screen
         && settings.hotkeys.capture_area == replacement.capture_area
-        && settings.hotkeys.capture_window == replacement.capture_window
 }
 
 #[cfg(target_os = "macos")]
@@ -465,7 +456,6 @@ fn restore_to_independent(app_data_dir: &Path, settings: &mut AppSettings) -> Re
         restore_system_shortcuts_from_backup(backup)?;
         settings.hotkeys.capture_area = backup.app_hotkeys.capture_area.clone();
         settings.hotkeys.capture_screen = backup.app_hotkeys.capture_screen.clone();
-        settings.hotkeys.capture_window = backup.app_hotkeys.capture_window.clone();
         remove_backup(app_data_dir)?;
     } else {
         restore_system_shortcuts_to_defaults()?;
@@ -473,7 +463,6 @@ fn restore_to_independent(app_data_dir: &Path, settings: &mut AppSettings) -> Re
             let defaults = default_app_hotkeys();
             settings.hotkeys.capture_area = defaults.capture_area;
             settings.hotkeys.capture_screen = defaults.capture_screen;
-            settings.hotkeys.capture_window = defaults.capture_window;
         }
     }
 
@@ -518,7 +507,6 @@ pub fn apply_mode(
             let app_hotkeys = AppHotkeysBackup {
                 capture_area: settings.hotkeys.capture_area.clone(),
                 capture_screen: settings.hotkeys.capture_screen.clone(),
-                capture_window: settings.hotkeys.capture_window.clone(),
             };
             disable_system_shortcuts(app_data_dir, app_hotkeys, settings.system_capture_mode)?;
 
@@ -526,7 +514,6 @@ pub fn apply_mode(
             settings.system_capture_mode = SystemCaptureMode::ReplaceSystem;
             settings.hotkeys.capture_screen = replacement.capture_screen;
             settings.hotkeys.capture_area = replacement.capture_area;
-            settings.hotkeys.capture_window = replacement.capture_window;
         }
         SystemCaptureMode::Independent => {
             restore_to_independent(app_data_dir, settings)?;
@@ -574,7 +561,6 @@ mod tests {
         let ids: Vec<u32> = SCREENSHOT_HOTKEYS.iter().map(|hotkey| hotkey.id).collect();
         assert!(ids.contains(&28));
         assert!(ids.contains(&30));
-        assert!(ids.contains(&184));
     }
 
     #[test]

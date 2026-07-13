@@ -10,7 +10,6 @@ describe("shared-types", () => {
   it("maps system replacement hotkeys to macOS defaults", () => {
     expect(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen).toBe("Command+Shift+3");
     expect(SYSTEM_REPLACEMENT_HOTKEYS.capture_area).toBe("Command+Shift+4");
-    expect(SYSTEM_REPLACEMENT_HOTKEYS.capture_window).toBe("Command+Shift+5");
   });
 
   it("defaults to independent system capture mode", () => {

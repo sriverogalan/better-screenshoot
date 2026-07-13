@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { IconDownload, IconX } from "@tabler/icons-vue";
 import { useAppUpdater } from "../composables/useAppUpdater";
+import AppButton from "./ui/AppButton.vue";
 
 const { t } = useI18n();
 
@@ -36,7 +37,7 @@ const progressLabel = computed(() => {
 
 <template>
   <div
-    class="fixed inset-x-4 top-4 z-50 rounded-xl border border-accent/40 bg-[#1a2233] px-4 py-3 text-sm text-[#e8eaed] shadow-lg"
+    class="fixed inset-x-4 top-4 z-50 rounded-xl border border-accent/40 bg-elev px-4 py-3 text-sm text-fg shadow-window"
     role="status"
     aria-live="polite"
   >
@@ -53,26 +54,16 @@ const progressLabel = computed(() => {
           {{ progressLabel }}
         </p>
         <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/80 disabled:opacity-50"
-            :disabled="isDownloading"
-            @click="installAvailableUpdate"
-          >
+          <AppButton variant="primary" :disabled="isDownloading" @click="installAvailableUpdate">
             {{
               isDownloading
                 ? t("settings.updates.downloadingAction")
                 : t("settings.updates.updateNow")
             }}
-          </button>
-          <button
-            type="button"
-            class="rounded-lg border border-sep px-3 py-1.5 text-xs hover:bg-sep/40 disabled:opacity-50"
-            :disabled="isDownloading"
-            @click="dismissPrompt"
-          >
+          </AppButton>
+          <AppButton variant="secondary" :disabled="isDownloading" @click="dismissPrompt">
             {{ t("settings.updates.later") }}
-          </button>
+          </AppButton>
         </div>
       </div>
       <button

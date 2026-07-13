@@ -6,7 +6,6 @@
     "and": "e",
     "region": "regione",
     "screen": "schermo",
-    "window": "finestra",
     "untitled": "Senza titolo",
     "disabled": "Disattivato",
     "opening": "Apertura…",
@@ -25,7 +24,6 @@
     "captureShortcutsHint": "Usa le scorciatoie globali per catturare. Puoi anche usare il menu dell'icona nella barra dei menu.",
     "captureRegion": "Cattura regione",
     "captureScreen": "Cattura schermo",
-    "captureWindow": "Cattura finestra",
     "customizeShortcuts": "Personalizza le scorciatoie in Impostazioni",
     "loadingCaptures": "Caricamento catture…",
     "empty": "Nessuna cattura ancora.",
@@ -47,6 +45,11 @@
       "pt": "Português",
       "it": "Italiano"
     },
+    "appearanceOptions": {
+      "auto": "Automatico",
+      "light": "Chiaro",
+      "dark": "Scuro"
+    },
     "sections": {
       "capture": "Cattura",
       "integrations": "Integrazioni",
@@ -64,22 +67,27 @@
     "urlSchemeHint": "Schema URL: {scheme}",
     "systemCaptureModeLegend": "Modalità di cattura di sistema",
     "independentModeTitle": "Scorciatoie Better Screenshoot",
-    "independentModeHint": "macOS mantiene {cmd3}, {cmd4} e {cmd5}.",
+    "independentModeHint": "macOS mantiene {cmd3} e {cmd4}.",
     "replaceModeTitle": "Sostituisci catture di sistema",
     "replaceModeHint": "Disattiva le scorciatoie native e le riassegna a Better Screenshoot.",
     "activeOnMacos": "Attivo su macOS",
     "restoreSystemCaptures": "Ripristina catture di sistema",
-    "restoreSystemCapturesHint": "Riattiva {cmd3}, {cmd4} e {cmd5} su macOS e torna alle scorciatoie dell'app.",
+    "restoreSystemCapturesHint": "Riattiva {cmd3} e {cmd4} su macOS e torna alle scorciatoie dell'app.",
     "repairState": "Ripara stato",
     "repairScreenRecordingDescription": "macOS potrebbe conservare una vecchia autorizzazione di Registrazione schermo dopo un aggiornamento.",
     "repairScreenRecordingPermission": "Ripara autorizzazione",
     "repairScreenRecordingConfirm": "Questa azione reimposterà l'autorizzazione di Registrazione schermo di Better Screenshoot e aprirà le Impostazioni di sistema di macOS. Dovrai riattivare l'autorizzazione.",
     "repairScreenRecordingStarted": "L'autorizzazione di Registrazione schermo è stata reimpostata. Riattiva Better Screenshoot nelle Impostazioni di sistema di macOS, poi riprova la cattura.",
+    "capturePermissionImpact": {
+      "granted": "La cattura è disponibile.",
+      "denied": "L'autorizzazione di Registrazione schermo è necessaria perché le catture funzionino.",
+      "unknown": "Non sono stati rilevati schermi, quindi la disponibilità della cattura non può essere confermata.",
+      "repairNeeded": "macOS indica che l'autorizzazione è concessa, ma le catture non riescono ancora a vedere schermi."
+    },
     "hotkeys": {
       "captureArea": "Cattura regione",
       "captureAreaHint": "Su macOS apre il selettore nativo di sistema",
       "captureScreen": "Cattura schermo",
-      "captureWindow": "Cattura finestra",
       "openHistory": "Apri cronologia",
       "managedByReplace": "Gestito da «Sostituisci catture di sistema» ({shortcut})."
     },
@@ -122,12 +130,6 @@
     "regionSelector": "Selettore regione di cattura",
     "preparing": "Preparazione cattura…",
     "hint": "Trascina per selezionare · Esc per annullare"
-  },
-  "captureWindow": {
-    "title": "Cattura finestra",
-    "subtitle": "Seleziona la finestra da catturare",
-    "searching": "Ricerca finestre…",
-    "empty": "Nessuna finestra trovata."
   },
   "editor": {
     "title": "Editor",
@@ -173,7 +175,7 @@
       "community": {
         "name": "Community",
         "features": [
-          "Cattura schermo, finestra e regione",
+          "Cattura schermo e regione",
           "Annotazione di base",
           "Cronologia locale",
           "CLI e schema URL",
@@ -224,8 +226,7 @@
     "captureScreen": "Cattura schermo (⌘⇧3)",
     "copyScreen": "Copia schermo negli appunti (⌃⌘⇧3)",
     "captureRegion": "Cattura regione (⌘⇧4)",
-    "copyRegion": "Copia regione negli appunti (⌃⌘⇧4)",
-    "captureOptions": "Opzioni di cattura (⌘⇧5)"
+    "copyRegion": "Copia regione negli appunti (⌃⌘⇧4)"
   },
   "errors": {
     "appStartFailed": "Errore all'avvio dell'applicazione",
@@ -246,6 +247,7 @@
     "mainWindowNotFound": "Finestra principale non trovata",
     "noMonitorFound": "Nessun monitor trovato",
     "displayNotFound": "Schermo {id} non trovato",
+    "windowActivationFailed": "Impossibile passare in tempo alla scrivania di quella finestra. Passa manualmente e riprova.",
     "noDisplaysFound": "Nessuno schermo trovato",
     "invalidPortalPath": "Percorso screenshot del portale non valido",
     "noPendingCapture": "Nessuna cattura in sospeso",
@@ -272,7 +274,7 @@
     "alreadyReplaced": "Le catture di sistema sono già sostituite.",
     "independentModeActive": "Modalità indipendente attiva.",
     "systemCapturesRestoredFull": "Catture di sistema ripristinate. Better Screenshoot usa le proprie scorciatoie.",
-    "systemCapturesReplaced": "Catture di sistema sostituite: ⌘⇧3 schermo, ⌘⇧4 regione, ⌘⇧5 finestra.",
+    "systemCapturesReplaced": "Catture di sistema sostituite: ⌘⇧3 schermo, ⌘⇧4 regione.",
     "driftReplaceIndependent": "Le scorciatoie di macOS sono ancora attive anche se l'app è in modalità sostituzione.",
     "driftIndependentReplace": "macOS ha disattivato le catture di sistema ma l'app non è in modalità sostituzione.",
     "driftNoBackup": "macOS ha disattivato le catture di sistema senza backup. Ripara lo stato per riattivarle.",
@@ -316,12 +318,14 @@
     "step": "Passaggio {current} di {total}"
   },
   "tray": {
-    "tooltip": "Better Screenshoot",
-    "captureArea": "Cattura regione",
-    "captureScreen": "Cattura schermo",
-    "captureWindow": "Cattura finestra",
+    "tooltip": "Better Screenshoot"
+  },
+  "menubar": {
+    "recentCaptures": "Catture recenti",
     "history": "Cronologia",
     "settings": "Impostazioni",
-    "quit": "Esci"
+    "quit": "Esci",
+    "copy": "Copia",
+    "revealInFinder": "Mostra nel Finder"
   }
 }

@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { IconRefresh } from "@tabler/icons-vue";
 import { useAppUpdater } from "../../composables/useAppUpdater";
+import AppButton from "../ui/AppButton.vue";
 
 const { t } = useI18n();
 
@@ -74,30 +75,24 @@ onMounted(() => {
       </p>
 
       <div class="flex flex-wrap gap-2">
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-sep bg-win px-3 py-2 text-sm hover:bg-border disabled:opacity-50"
-          :disabled="isBusy"
-          @click="checkForUpdates()"
-        >
+        <AppButton variant="secondary" :disabled="isBusy" @click="checkForUpdates()">
           <IconRefresh class="size-4" aria-hidden="true" />
           {{ t("settings.updates.checkForUpdates") }}
-        </button>
-        <button
+        </AppButton>
+        <AppButton
           v-if="updateAvailable"
-          type="button"
-          class="rounded-lg bg-accent px-3 py-2 text-sm text-white hover:bg-accent/80 disabled:opacity-50"
+          variant="primary"
           :disabled="isBusy"
           @click="installAvailableUpdate"
         >
           {{ t("settings.updates.installVersion", { version: updateSummary?.version }) }}
-        </button>
+        </AppButton>
       </div>
 
       <p
         v-if="statusMessage"
         class="text-xs"
-        :class="phase === 'error' ? 'text-red-400' : 'text-fg-muted'"
+        :class="phase === 'error' ? 'text-danger' : 'text-fg-muted'"
         role="status"
       >
         {{ statusMessage }}

@@ -13,6 +13,8 @@ import { formatHotkey } from "../lib/format-hotkey";
 import { translateAppError } from "../i18n/resolveError";
 import type { AppErrorPayload } from "../i18n/resolveError";
 import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
+import AlertBanner from "../components/ui/AlertBanner.vue";
+import AppButton from "../components/ui/AppButton.vue";
 
 const { t } = useI18n();
 const items = ref<CaptureRecord[]>([]);
@@ -27,7 +29,6 @@ const { permissionMessage, devBinaryPath, checkPermissions, requestPermission } 
 const captureShortcuts = computed(() => [
   { label: t("history.captureRegion"), hotkey: settingsStore.settings.hotkeys.capture_area },
   { label: t("history.captureScreen"), hotkey: settingsStore.settings.hotkeys.capture_screen },
-  { label: t("history.captureWindow"), hotkey: settingsStore.settings.hotkeys.capture_window },
 ]);
 
 async function load() {
@@ -99,23 +100,17 @@ onUnmounted(() => {
 
     <PendingCaptureBanner />
 
-    <div
-      v-if="permissionMessage"
-      class="mb-4 rounded-xl border border-amber-500/40 bg-amber-950/40 px-4 py-3 text-sm text-amber-100"
-      role="status"
-    >
+    <AlertBanner v-if="permissionMessage" tone="warning" class="mb-4">
       <p>{{ permissionMessage }}</p>
-      <p v-if="devBinaryPath" class="mt-2 font-mono text-xs text-amber-200/80">
+      <p v-if="devBinaryPath" class="font-mono text-xs text-amber-200/80">
         {{ t("history.devBinary", { path: devBinaryPath }) }}
       </p>
-      <button
-        type="button"
-        class="mt-3 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
-        @click="requestPermission"
-      >
-        {{ t("history.openMacosPermissions") }}
-      </button>
-    </div>
+      <template #actions>
+        <AppButton variant="secondary" @click="requestPermission">
+          {{ t("history.openMacosPermissions") }}
+        </AppButton>
+      </template>
+    </AlertBanner>
 
     <section
       class="mb-6 rounded-xl border border-sep bg-elev p-4"
@@ -150,7 +145,7 @@ onUnmounted(() => {
     </section>
 
     <p v-if="loading" class="text-sm text-fg-muted">{{ t("history.loadingCaptures") }}</p>
-    <p v-else-if="error" class="text-sm text-red-400">{{ error }}</p>
+    <p v-else-if="error" class="text-sm text-danger">{{ error }}</p>
     <div v-else-if="items.length === 0" class="space-y-3 text-sm text-fg-muted">
       <p>{{ t("history.empty") }}</p>
       <p class="text-xs">{{ t("history.emptyHint") }}</p>

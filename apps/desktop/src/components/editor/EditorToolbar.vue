@@ -14,6 +14,8 @@ import {
   IconTypography,
 } from "@tabler/icons-vue";
 import type { Tool } from "../../lib/editor/types";
+import AppButton from "../ui/AppButton.vue";
+import AlertBanner from "../ui/AlertBanner.vue";
 
 defineProps<{
   activeTool: Tool;
@@ -67,34 +69,28 @@ const tools = computed(() => [
       </div>
 
       <div class="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-sep bg-elev px-3 py-2 text-sm hover:bg-win disabled:opacity-50"
+        <AppButton
+          variant="secondary"
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndDiscard')"
         >
           <IconTrash class="size-4" />
           {{ t("editor.copyAndDiscard") }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm text-white hover:bg-accent/80 disabled:opacity-50"
+        </AppButton>
+        <AppButton
+          variant="primary"
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndSave')"
         >
           <IconDeviceFloppy class="size-4" />
           {{ t("editor.copyAndSave") }}
-        </button>
+        </AppButton>
       </div>
     </div>
 
-    <p
-      v-if="actionError"
-      class="border-t border-red-500/30 bg-red-950/40 px-4 py-2 text-xs text-red-200"
-      role="alert"
-    >
+    <AlertBanner v-if="actionError" tone="danger" class="mx-4 mb-2">
       {{ actionError }}
-    </p>
+    </AlertBanner>
 
     <div class="flex items-center gap-1 overflow-x-auto border-t border-sep/60 px-4 py-2">
       <button

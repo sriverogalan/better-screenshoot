@@ -5,7 +5,6 @@ import type {
   HotkeyConfig,
   Region,
   SystemCaptureMode,
-  WindowInfo,
 } from "@better-screenshoot/shared-types";
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 
@@ -22,10 +21,6 @@ export function frontendLog(_scope: string, _message: string): void { }
 
 export async function listDisplays(): Promise<DisplayInfo[]> {
   return invoke("list_displays");
-}
-
-export async function listWindows(): Promise<WindowInfo[]> {
-  return invoke("list_windows");
 }
 
 export interface CaptureStatus {
@@ -91,10 +86,6 @@ export async function setSystemCaptureMode(
 
 export async function captureScreen(displayId?: number): Promise<SavedCapture> {
   return invoke("capture_screen", { displayId });
-}
-
-export async function captureWindow(windowId: number): Promise<SavedCapture> {
-  return invoke("capture_window", { windowId });
 }
 
 export async function captureRegion(
@@ -184,6 +175,10 @@ export async function getHistory(limit = 100): Promise<CaptureRecord[]> {
 
 export async function deleteHistoryItem(id: string): Promise<void> {
   return invoke("delete_history_item", { id });
+}
+
+export async function readCaptureDataUrl(filePath: string): Promise<string> {
+  return invoke("read_capture_data_url", { filePath });
 }
 
 export async function discardCapture(

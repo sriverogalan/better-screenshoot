@@ -15,7 +15,7 @@ defineProps<{
       class="rounded-[var(--radius-control)] px-3 py-1 text-sm transition-colors duration-150"
       :class="
         model === option.value
-          ? 'bg-accent text-white font-medium'
+          ? 'bg-win text-fg font-medium shadow-sm'
           : 'text-fg-muted hover:text-fg'
       "
       :aria-pressed="model === option.value"

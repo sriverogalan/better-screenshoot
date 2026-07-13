@@ -7,7 +7,7 @@ use tokio::sync::Mutex;
 
 use base64::{engine::general_purpose::STANDARD, Engine};
 use capture_core::encode::{downscale_for_preview, encode_jpeg_preview};
-use capture_core::types::{CaptureImage, DisplayInfo, Region, WindowInfo};
+use capture_core::types::{CaptureImage, DisplayInfo, Region};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
@@ -145,6 +145,8 @@ fn show_main_hub(app: &AppHandle) {
     let Some(main) = app.get_webview_window("main") else {
         return;
     };
+
+    let _ = crate::window_layout::prepare_main_hub_window(&main);
 
     let hub_epoch = capture_session::current_hub_show_epoch();
     let main_handle = main.clone();
@@ -453,9 +455,9 @@ async fn finalize_capture(
     state: &State<'_, AppState>,
     image: CaptureImage,
 ) -> Result<SavedCapture, String> {
-    let auto_copy = {
+    let (auto_copy, auto_save) = {
         let settings = state.settings.lock().map_err(|e| e.to_string())?;
-        settings.auto_copy
+        (settings.auto_copy, settings.auto_save)
     };
 
     let image_width = image.width;
@@ -486,6 +488,23 @@ async fn finalize_capture(
         *state.pending_capture.lock().map_err(|e| e.to_string())? = Some(json);
     }
 
+    if auto_save {
+        if let Err(_error) = crate::commands::history::insert_record(
+            app,
+            &record.id,
+            &record.file_path,
+            image_width,
+            image_height,
+            &record.created_at,
+        )
+        .await
+        {
+            crate::app_trace!("finalize_capture: insert_record failed: {_error}");
+        } else {
+            let _ = app.emit("history-changed", ());
+        }
+    }
+
     let _ = app.emit("capture-complete", &record);
     show_editor_with_capture(app, &record, true);
 
@@ -502,11 +521,6 @@ async fn finalize_capture(
 #[tauri::command]
 pub async fn list_displays(state: State<'_, AppState>) -> Result<Vec<DisplayInfo>, String> {
     state.provider.list_displays().map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub async fn list_windows(state: State<'_, AppState>) -> Result<Vec<WindowInfo>, String> {
-    state.provider.list_windows().map_err(|e| e.to_string())
 }
 
 pub async fn capture_overlay_preview_internal(
@@ -629,36 +643,6 @@ pub async fn capture_screen(
 ) -> Result<SavedCapture, String> {
     let _ = state;
     capture_screen_internal(app, display_id).await
-}
-
-#[tauri::command]
-pub async fn capture_window(
-    app: AppHandle,
-    state: State<'_, AppState>,
-    window_id: u64,
-) -> Result<SavedCapture, String> {
-    let gen = capture_session::begin(&app);
-    if gen == 0 {
-        return Err("Ya hay una captura en curso".into());
-    }
-    crate::capture_prep::hide_app_windows_before_capture(&app).await;
-
-    let app_capture = app.clone();
-    let image = tauri::async_runtime::spawn_blocking(move || {
-        let state = app_capture.state::<AppState>();
-        state
-            .provider
-            .capture_window(window_id)
-            .map_err(|e| e.to_string())
-    })
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|error| {
-        capture_session::end_generation(&app, gen);
-        error
-    })?;
-
-    finalize_capture(&app, &state, image).await
 }
 
 #[tauri::command]

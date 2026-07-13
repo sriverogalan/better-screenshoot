@@ -153,6 +153,10 @@ fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
     #[cfg(target_os = "macos")]
     let _ = window.set_simple_fullscreen(false);
     let _ = window.set_fullscreen(false);
+    // The main window is reused as the editor surface, which turns decorations off
+    // (see present_editor_window). Restore them whenever the hub is shown again,
+    // otherwise the native traffic-light buttons stay missing for the rest of the session.
+    let _ = window.set_decorations(true);
     Ok(())
 }
 

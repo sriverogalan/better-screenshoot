@@ -31,10 +31,6 @@ const replacements = computed(() => [
     hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area),
     action: t("history.captureRegion"),
   },
-  {
-    hotkey: formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window),
-    action: t("history.captureWindow"),
-  },
 ]);
 
 function shortcutLabel(shortcut: SystemScreenshotShortcut) {

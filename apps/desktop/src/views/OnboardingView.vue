@@ -11,6 +11,11 @@ import {
   setLaunchAtLogin,
 } from "../lib/tauri";
 import { SUPPORTED_LOCALES, setLocale } from "../i18n";
+import AppButton from "../components/ui/AppButton.vue";
+import AppToggle from "../components/ui/AppToggle.vue";
+import AlertBanner from "../components/ui/AlertBanner.vue";
+import SettingsGroup from "../components/ui/SettingsGroup.vue";
+import SettingsRow from "../components/ui/SettingsRow.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -176,15 +181,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-full flex-col bg-[#111318] text-[#e8eaed]">
+  <div class="flex min-h-full flex-col bg-win text-fg">
     <!-- Wizard header -->
-    <header class="flex items-center justify-between border-b border-border px-6 py-4">
-      <span class="text-sm text-text-muted">
+    <header class="flex items-center justify-between border-b border-sep px-6 py-4">
+      <span class="text-sm text-fg-muted">
         {{ t("onboarding.step", { current: currentStep, total: TOTAL_STEPS }) }}
       </span>
       <select
         :value="settings.locale"
-        class="rounded-lg border border-border bg-surface px-2 py-1 text-sm"
+        class="rounded-lg border border-sep bg-field px-2 py-1 text-sm text-fg"
         :aria-label="t('onboarding.language')"
         @change="onLocaleChange(($event.target as HTMLSelectElement).value as AppLocale)"
       >
@@ -204,52 +209,43 @@ onUnmounted(() => {
       <!-- Step 1: Welcome -->
       <section v-if="currentStep === 1">
         <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepWelcome.title") }}</h1>
-        <p class="mb-8 text-text-muted">{{ t("onboarding.stepWelcome.description") }}</p>
-        <button
-          type="button"
-          class="rounded-xl bg-accent px-6 py-3 font-medium text-white hover:bg-accent/90"
-          @click="nextStep"
-        >
+        <p class="mb-8 text-fg-muted">{{ t("onboarding.stepWelcome.description") }}</p>
+        <AppButton variant="primary" @click="nextStep">
           {{ t("onboarding.stepWelcome.next") }}
-        </button>
+        </AppButton>
       </section>
 
       <!-- Step 2: Screen Recording -->
       <section v-else-if="currentStep === 2">
         <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepPermission.title") }}</h1>
-        <p class="mb-6 text-text-muted">{{ t("onboarding.stepPermission.description") }}</p>
+        <p class="mb-6 text-fg-muted">{{ t("onboarding.stepPermission.description") }}</p>
 
-        <div
+        <AlertBanner
           v-if="captureMessageCode && captureMessageCode !== 'displaysDetected'"
-          class="mb-6 rounded-xl border border-amber-500/40 bg-amber-950/30 px-4 py-3 text-sm text-amber-100"
-          role="status"
+          tone="warning"
+          class="mb-6"
         >
           {{ t(`errors.${captureMessageCode}`, { count: 0 }) }}
-        </div>
+        </AlertBanner>
 
         <div class="space-y-3">
-          <button
-            type="button"
-            class="rounded-xl border border-border bg-surface px-5 py-2.5 text-sm hover:bg-border/40"
-            @click="handleOpenScreenRecordingSettings"
-          >
+          <AppButton variant="secondary" @click="handleOpenScreenRecordingSettings">
             {{ t("onboarding.stepPermission.openSettings") }}
-          </button>
+          </AppButton>
 
           <div class="flex items-center gap-4">
-            <button
-              type="button"
-              class="rounded-xl bg-accent px-6 py-3 font-medium text-white hover:bg-accent/90 disabled:opacity-40 disabled:cursor-not-allowed"
+            <AppButton
+              variant="primary"
               :disabled="!permissionGranted"
               @click="nextStep"
             >
               {{ permissionGranted ? t("onboarding.stepPermission.next") : t("onboarding.stepPermission.waiting") }}
-            </button>
+            </AppButton>
 
             <button
               v-if="showSkipLink"
               type="button"
-              class="text-sm text-text-muted underline hover:text-[#e8eaed]"
+              class="text-sm text-fg-muted underline hover:text-fg"
               @click="skipPermissionStep"
             >
               {{ t("onboarding.stepPermission.skip") }}
@@ -261,73 +257,57 @@ onUnmounted(() => {
       <!-- Step 3: Launch at Login -->
       <section v-else-if="currentStep === 3">
         <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepAutostart.title") }}</h1>
-        <p class="mb-6 text-text-muted">{{ t("onboarding.stepAutostart.description") }}</p>
+        <p class="mb-6 text-fg-muted">{{ t("onboarding.stepAutostart.description") }}</p>
 
-        <label class="mb-8 flex items-center gap-3">
-          <input
-            :checked="autostartEnabled"
-            type="checkbox"
-            class="size-4 rounded border-border"
-            @change="toggleAutostart(($event.target as HTMLInputElement).checked)"
-          />
-          <span class="text-sm">{{ t("onboarding.stepAutostart.toggle") }}</span>
-        </label>
+        <SettingsGroup class="mb-8">
+          <SettingsRow>
+            <span class="text-sm">{{ t("onboarding.stepAutostart.toggle") }}</span>
+            <AppToggle
+              :model-value="autostartEnabled"
+              @update:model-value="toggleAutostart"
+            />
+          </SettingsRow>
+        </SettingsGroup>
 
-        <button
-          type="button"
-          class="rounded-xl bg-accent px-6 py-3 font-medium text-white hover:bg-accent/90"
-          @click="nextStep"
-        >
+        <AppButton variant="primary" @click="nextStep">
           {{ t("onboarding.stepAutostart.next") }}
-        </button>
+        </AppButton>
       </section>
 
       <!-- Step 4: Quick Settings -->
       <section v-else-if="currentStep === 4">
         <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepQuickSettings.title") }}</h1>
-        <p class="mb-6 text-text-muted">{{ t("onboarding.stepQuickSettings.description") }}</p>
+        <p class="mb-6 text-fg-muted">{{ t("onboarding.stepQuickSettings.description") }}</p>
 
-        <div class="mb-8 space-y-4 rounded-xl border border-border bg-surface-raised p-4">
-          <label class="flex items-center gap-3">
-            <input
-              :checked="settings.auto_copy"
-              type="checkbox"
-              class="size-4 rounded border-border"
-              @change="updateAutoCopy(($event.target as HTMLInputElement).checked)"
-            />
+        <SettingsGroup class="mb-8">
+          <SettingsRow>
             <span class="text-sm">{{ t("onboarding.stepQuickSettings.autoCopy") }}</span>
-          </label>
-          <label class="flex items-center gap-3">
-            <input
-              :checked="settings.auto_save"
-              type="checkbox"
-              class="size-4 rounded border-border"
-              @change="updateAutoSave(($event.target as HTMLInputElement).checked)"
+            <AppToggle
+              :model-value="settings.auto_copy"
+              @update:model-value="updateAutoCopy"
             />
+          </SettingsRow>
+          <SettingsRow>
             <span class="text-sm">{{ t("onboarding.stepQuickSettings.autoSave") }}</span>
-          </label>
-        </div>
+            <AppToggle
+              :model-value="settings.auto_save"
+              @update:model-value="updateAutoSave"
+            />
+          </SettingsRow>
+        </SettingsGroup>
 
-        <button
-          type="button"
-          class="rounded-xl bg-accent px-6 py-3 font-medium text-white hover:bg-accent/90"
-          @click="nextStep"
-        >
+        <AppButton variant="primary" @click="nextStep">
           {{ t("onboarding.stepQuickSettings.next") }}
-        </button>
+        </AppButton>
       </section>
 
       <!-- Step 5: Done -->
       <section v-else-if="currentStep === 5">
         <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepDone.title") }}</h1>
-        <p class="mb-8 text-text-muted">{{ t("onboarding.stepDone.description") }}</p>
-        <button
-          type="button"
-          class="rounded-xl bg-accent px-6 py-3 font-medium text-white hover:bg-accent/90"
-          @click="completeOnboarding"
-        >
+        <p class="mb-8 text-fg-muted">{{ t("onboarding.stepDone.description") }}</p>
+        <AppButton variant="primary" @click="completeOnboarding">
           {{ t("onboarding.stepDone.done") }}
-        </button>
+        </AppButton>
       </section>
 
     </main>
