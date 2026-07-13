@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { IconCheck } from "@tabler/icons-vue";
 import type { EditorStyle } from "../../lib/editor/types";
 import {
   COLOR_PRESETS,
@@ -28,17 +29,18 @@ const { t } = useI18n();
         v-for="color in COLOR_PRESETS"
         :key="color"
         type="button"
-        class="size-5 rounded-full transition hover:scale-110"
-        :class="
-          props.style.stroke === color
-            ? 'ring-2 ring-white ring-offset-1 ring-offset-win'
-            : ''
-        "
+        class="flex size-5 items-center justify-center rounded-full border border-black/10 transition hover:scale-110"
         :style="{ backgroundColor: color }"
         :aria-label="t('editor.style.colorAria', { color })"
         :aria-pressed="props.style.stroke === color"
         @click="emit('update:stroke', color)"
-      />
+      >
+        <IconCheck
+          v-if="props.style.stroke === color"
+          class="size-3 text-white drop-shadow-[0_0_1px_rgba(0,0,0,0.6)]"
+          stroke-width="3"
+        />
+      </button>
     </div>
 
     <span class="mx-1 h-5 w-px bg-sep" />

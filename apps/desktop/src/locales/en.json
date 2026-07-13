@@ -6,7 +6,6 @@
     "and": "and",
     "region": "region",
     "screen": "screen",
-    "window": "window",
     "untitled": "Untitled",
     "disabled": "Disabled",
     "opening": "Opening…",
@@ -25,7 +24,6 @@
     "captureShortcutsHint": "Use global shortcuts to capture. You can also use the tray icon menu.",
     "captureRegion": "Capture region",
     "captureScreen": "Capture screen",
-    "captureWindow": "Capture window",
     "customizeShortcuts": "Customize shortcuts in Settings",
     "loadingCaptures": "Loading captures…",
     "empty": "No captures yet.",
@@ -47,6 +45,11 @@
       "pt": "Português",
       "it": "Italiano"
     },
+    "appearanceOptions": {
+      "auto": "Automatic",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "sections": {
       "capture": "Capture",
       "integrations": "Integrations",
@@ -64,22 +67,27 @@
     "urlSchemeHint": "URL scheme: {scheme}",
     "systemCaptureModeLegend": "System capture mode",
     "independentModeTitle": "Better Screenshoot shortcuts",
-    "independentModeHint": "macOS keeps {cmd3}, {cmd4} and {cmd5}.",
+    "independentModeHint": "macOS keeps {cmd3} and {cmd4}.",
     "replaceModeTitle": "Replace system captures",
     "replaceModeHint": "Disables native shortcuts and reassigns them to Better Screenshoot.",
     "activeOnMacos": "Active on macOS",
     "restoreSystemCaptures": "Restore system captures",
-    "restoreSystemCapturesHint": "Re-enables macOS {cmd3}, {cmd4}, and {cmd5} and returns to the app's own shortcuts.",
+    "restoreSystemCapturesHint": "Re-enables macOS {cmd3} and {cmd4} and returns to the app's own shortcuts.",
     "repairState": "Repair state",
     "repairScreenRecordingDescription": "macOS may be keeping an old Screen Recording permission after an update.",
     "repairScreenRecordingPermission": "Repair permission",
     "repairScreenRecordingConfirm": "This will reset Better Screenshoot's Screen Recording permission and open macOS System Settings. You will need to enable the permission again.",
     "repairScreenRecordingStarted": "Screen Recording permission was reset. Re-enable Better Screenshoot in macOS System Settings, then try capturing again.",
+    "capturePermissionImpact": {
+      "granted": "Capture is available.",
+      "denied": "Screen Recording permission is required before captures can work.",
+      "unknown": "No displays were detected, so capture availability cannot be confirmed.",
+      "repairNeeded": "macOS reports permission is granted, but captures still cannot see displays."
+    },
     "hotkeys": {
       "captureArea": "Capture region",
       "captureAreaHint": "On macOS opens the native system selector",
       "captureScreen": "Capture screen",
-      "captureWindow": "Capture window",
       "openHistory": "Open history",
       "managedByReplace": "Managed by «Replace system captures» ({shortcut})."
     },
@@ -122,12 +130,6 @@
     "regionSelector": "Capture region selector",
     "preparing": "Preparing capture…",
     "hint": "Drag to select · Esc to cancel"
-  },
-  "captureWindow": {
-    "title": "Capture window",
-    "subtitle": "Select the window to capture",
-    "searching": "Searching for windows…",
-    "empty": "No windows found."
   },
   "editor": {
     "title": "Editor",
@@ -173,7 +175,7 @@
       "community": {
         "name": "Community",
         "features": [
-          "Screen, window, and region capture",
+          "Screen and region capture",
           "Basic annotation",
           "Local history",
           "CLI and URL scheme",
@@ -224,8 +226,7 @@
     "captureScreen": "Capture screen (⌘⇧3)",
     "copyScreen": "Copy screen to clipboard (⌃⌘⇧3)",
     "captureRegion": "Capture region (⌘⇧4)",
-    "copyRegion": "Copy region to clipboard (⌃⌘⇧4)",
-    "captureOptions": "Capture options (⌘⇧5)"
+    "copyRegion": "Copy region to clipboard (⌃⌘⇧4)"
   },
   "errors": {
     "appStartFailed": "Error starting application",
@@ -246,6 +247,7 @@
     "mainWindowNotFound": "Main window not found",
     "noMonitorFound": "No monitor found",
     "displayNotFound": "Display {id} not found",
+    "windowActivationFailed": "Couldn't switch to that window's desktop in time. Switch to it manually and try again.",
     "noDisplaysFound": "No displays found",
     "invalidPortalPath": "Invalid portal screenshot path",
     "noPendingCapture": "No pending capture",
@@ -272,7 +274,7 @@
     "alreadyReplaced": "System captures are already replaced.",
     "independentModeActive": "Independent mode active.",
     "systemCapturesRestoredFull": "System captures restored. Better Screenshoot uses its own shortcuts.",
-    "systemCapturesReplaced": "System captures replaced: ⌘⇧3 screen, ⌘⇧4 region, ⌘⇧5 window.",
+    "systemCapturesReplaced": "System captures replaced: ⌘⇧3 screen, ⌘⇧4 region.",
     "driftReplaceIndependent": "macOS shortcuts are still active even though the app is in replacement mode.",
     "driftIndependentReplace": "macOS has system captures disabled but the app is not in replacement mode.",
     "driftNoBackup": "macOS has system captures disabled with no backup. Repair the state to re-enable them.",
@@ -316,12 +318,14 @@
     "step": "Step {current} of {total}"
   },
   "tray": {
-    "tooltip": "Better Screenshoot",
-    "captureArea": "Capture Area",
-    "captureScreen": "Capture Screen",
-    "captureWindow": "Capture Window",
+    "tooltip": "Better Screenshoot"
+  },
+  "menubar": {
+    "recentCaptures": "Recent captures",
     "history": "History",
     "settings": "Settings",
-    "quit": "Quit"
+    "quit": "Quit",
+    "copy": "Copy",
+    "revealInFinder": "Show in Finder"
   }
 }

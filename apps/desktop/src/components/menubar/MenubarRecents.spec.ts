@@ -6,13 +6,39 @@ import MenubarRecents from "./MenubarRecents.vue"
 
 vi.mock("../../lib/tauri", () => ({
   getHistory: vi.fn(),
+  openCaptureInEditor: vi.fn(),
+  readCaptureDataUrl: vi.fn(async () => "data:image/png;base64,abc"),
+  copyImageToClipboard: vi.fn(),
+  deleteHistoryItem: vi.fn(),
 }))
 
 vi.mock("@tauri-apps/api/core", () => ({
   convertFileSrc: vi.fn((path: string) => `asset://${path}`),
 }))
 
-import { getHistory } from "../../lib/tauri"
+const hideMock = vi.fn()
+
+vi.mock("@tauri-apps/api/window", () => ({
+  getCurrentWindow: vi.fn(() => ({
+    hide: hideMock,
+    onFocusChanged: vi.fn(async () => () => {}),
+  })),
+}))
+
+vi.mock("@tauri-apps/api/event", () => ({
+  listen: vi.fn(async () => () => {}),
+}))
+
+vi.mock("@tauri-apps/plugin-opener", () => ({
+  revealItemInDir: vi.fn(),
+}))
+
+vi.mock("@crabnebula/tauri-plugin-drag", () => ({
+  startDrag: vi.fn(),
+}))
+
+import { getHistory, openCaptureInEditor, copyImageToClipboard, deleteHistoryItem } from "../../lib/tauri"
+import { revealItemInDir } from "@tauri-apps/plugin-opener"
 import type { CaptureRecord } from "@better-screenshoot/shared-types"
 
 const makeRecord = (id: string): CaptureRecord => ({
@@ -51,6 +77,25 @@ describe("MenubarRecents", () => {
     expect(imgs).toHaveLength(3)
   })
 
+  it("opens a capture in the editor when its thumbnail is clicked", async () => {
+    vi.mocked(getHistory).mockResolvedValue([makeRecord("a")])
+
+    const wrapper = mount(MenubarRecents, {
+      global: {
+        plugins: [createPinia(), i18n],
+      },
+    })
+
+    await vi.runAllTimersAsync()
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find("button").trigger("click")
+    await vi.runAllTimersAsync()
+
+    expect(hideMock).toHaveBeenCalled()
+    expect(openCaptureInEditor).toHaveBeenCalledWith("a")
+  })
+
   it("shows empty state when history returns no records", async () => {
     vi.mocked(getHistory).mockResolvedValue([])
 
@@ -82,5 +127,86 @@ describe("MenubarRecents", () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.findAll("img")).toHaveLength(0)
+  })
+
+  it("opens a context menu on right-click with copy, reveal, and delete actions", async () => {
+    vi.mocked(getHistory).mockResolvedValue([makeRecord("a")])
+
+    const wrapper = mount(MenubarRecents, {
+      global: {
+        plugins: [createPinia(), i18n],
+      },
+    })
+
+    await vi.runAllTimersAsync()
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find("button").trigger("contextmenu")
+    await wrapper.vm.$nextTick()
+
+    const menuButtons = wrapper.findAll("button")
+    // thumbnail button + copy + reveal + delete
+    expect(menuButtons.length).toBe(4)
+  })
+
+  it("copies the capture to the clipboard from the context menu", async () => {
+    vi.mocked(getHistory).mockResolvedValue([makeRecord("a")])
+
+    const wrapper = mount(MenubarRecents, {
+      global: {
+        plugins: [createPinia(), i18n],
+      },
+    })
+
+    await vi.runAllTimersAsync()
+    await wrapper.vm.$nextTick()
+    await wrapper.find("button").trigger("contextmenu")
+    await wrapper.vm.$nextTick()
+
+    await wrapper.findAll("button").at(1)?.trigger("click")
+    await vi.runAllTimersAsync()
+
+    expect(copyImageToClipboard).toHaveBeenCalledWith("abc")
+  })
+
+  it("reveals the capture in Finder from the context menu", async () => {
+    vi.mocked(getHistory).mockResolvedValue([makeRecord("a")])
+
+    const wrapper = mount(MenubarRecents, {
+      global: {
+        plugins: [createPinia(), i18n],
+      },
+    })
+
+    await vi.runAllTimersAsync()
+    await wrapper.vm.$nextTick()
+    await wrapper.find("button").trigger("contextmenu")
+    await wrapper.vm.$nextTick()
+
+    await wrapper.findAll("button").at(2)?.trigger("click")
+    await vi.runAllTimersAsync()
+
+    expect(revealItemInDir).toHaveBeenCalledWith("/tmp/a.png")
+  })
+
+  it("deletes the capture and refreshes the list from the context menu", async () => {
+    vi.mocked(getHistory).mockResolvedValue([makeRecord("a")])
+
+    const wrapper = mount(MenubarRecents, {
+      global: {
+        plugins: [createPinia(), i18n],
+      },
+    })
+
+    await vi.runAllTimersAsync()
+    await wrapper.vm.$nextTick()
+    await wrapper.find("button").trigger("contextmenu")
+    await wrapper.vm.$nextTick()
+
+    await wrapper.findAll("button").at(3)?.trigger("click")
+    await vi.runAllTimersAsync()
+
+    expect(deleteHistoryItem).toHaveBeenCalledWith("a")
+    expect(getHistory).toHaveBeenCalledTimes(2)
   })
 })

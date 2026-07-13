@@ -1,6 +1,6 @@
 {
   "name": "@better-screenshoot/cli",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "scripts": {
     "build": "cargo build --release -p better-screenshoot-cli",

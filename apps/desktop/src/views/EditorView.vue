@@ -686,7 +686,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="grid h-full min-h-0 w-full grid-rows-[auto_auto_1fr] bg-surface">
+  <div class="grid h-full min-h-0 w-full grid-rows-[auto_auto_1fr] bg-win">
     <EditorToolbar
       :active-tool="activeTool"
       :action-busy="actionBusy"

@@ -16,10 +16,29 @@ vi.mock("@tauri-apps/api/webviewWindow", () => ({
 }))
 
 vi.mock("@tauri-apps/api/event", () => ({
-  emit: vi.fn(),
+  emitTo: vi.fn(),
 }))
 
+vi.mock("@tauri-apps/plugin-process", () => ({
+  exit: vi.fn(),
+}))
+
+import { exit } from "@tauri-apps/plugin-process"
+
 describe("MenubarFooter", () => {
+  it("quits the app when the quit button is clicked", async () => {
+    const wrapper = mount(MenubarFooter, {
+      global: {
+        plugins: [createPinia(), i18n],
+      },
+    })
+
+    const quitButton = wrapper.findAll("button").at(-1)
+    await quitButton?.trigger("click")
+
+    expect(exit).toHaveBeenCalledWith(0)
+  })
+
   it.fails(
     // intentional-fail: hardcoded hotkey — blocked on Slice C
     "does not render the hardcoded ⌘⇧H shortcut (should come from settings)",

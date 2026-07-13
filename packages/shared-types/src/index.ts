@@ -9,16 +9,6 @@ export interface DisplayInfo {
   y: number;
 }
 
-export interface WindowInfo {
-  id: number;
-  title: string;
-  app_name: string;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-}
-
 export interface Region {
   x: number;
   y: number;
@@ -41,7 +31,7 @@ export interface CaptureRecord {
   tags: string[];
 }
 
-export type CaptureMode = "screen" | "window" | "area";
+export type CaptureMode = "screen" | "area";
 
 export type SystemCaptureMode = "independent" | "replace_system";
 
@@ -61,7 +51,6 @@ export interface AppSettings {
 export interface HotkeyConfig {
   capture_area: string;
   capture_screen: string;
-  capture_window: string;
   open_history: string;
 }
 
@@ -74,14 +63,12 @@ export type AppLocale = "en" | "es" | "fr" | "de" | "pt" | "it";
 export type DeepLinkAction =
   | "capture-area"
   | "capture-screen"
-  | "capture-window"
   | "open-history"
   | "open-settings";
 
 export const DEFAULT_HOTKEYS: HotkeyConfig = {
   capture_area: "CommandOrControl+Shift+X",
   capture_screen: "CommandOrControl+Shift+Option+S",
-  capture_window: "CommandOrControl+Shift+Option+W",
   open_history: "CommandOrControl+Shift+H",
 };
 
@@ -89,8 +76,7 @@ export const DEFAULT_HOTKEYS: HotkeyConfig = {
 export const SYSTEM_REPLACEMENT_HOTKEYS = {
   capture_screen: "Command+Shift+3",
   capture_area: "Command+Shift+4",
-  capture_window: "Command+Shift+5",
-} as const satisfies Pick<HotkeyConfig, "capture_screen" | "capture_area" | "capture_window">;
+} as const satisfies Pick<HotkeyConfig, "capture_screen" | "capture_area">;
 
 export const DEFAULT_SETTINGS: AppSettings = {
   save_directory: "",

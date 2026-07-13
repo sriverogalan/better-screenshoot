@@ -15,6 +15,10 @@ import { useSettingsStore } from "../stores/settings";
 import { useAppearance } from "../composables/useAppearance";
 import AppToggle from "../components/ui/AppToggle.vue";
 import AppSegmentedControl from "../components/ui/AppSegmentedControl.vue";
+import AppButton from "../components/ui/AppButton.vue";
+import AlertBanner from "../components/ui/AlertBanner.vue";
+import SettingsGroup from "../components/ui/SettingsGroup.vue";
+import SettingsRow from "../components/ui/SettingsRow.vue";
 import SystemScreenshotPermissionDialog from "../components/settings/SystemScreenshotPermissionDialog.vue";
 import AppUpdateSection from "../components/settings/AppUpdateSection.vue";
 import {
@@ -31,6 +35,7 @@ import PendingCaptureBanner from "../components/PendingCaptureBanner.vue";
 import { SUPPORTED_LOCALES, setLocale } from "../i18n";
 import { translateAppError, translateMessageCode } from "../i18n/resolveError";
 import { systemShortcutLabelKey } from "../lib/system-shortcut-labels";
+import { deriveCapturePermissionPresentation } from "../lib/permission-presentation";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -45,15 +50,10 @@ const hotkeyFields = computed(() => [
     hint: t("settings.hotkeys.captureAreaHint"),
   },
   { key: "capture_screen" as const, label: t("settings.hotkeys.captureScreen") },
-  { key: "capture_window" as const, label: t("settings.hotkeys.captureWindow") },
   { key: "open_history" as const, label: t("settings.hotkeys.openHistory") },
 ]);
 
-const captureHotkeyKeys: Array<keyof HotkeyConfig> = [
-  "capture_area",
-  "capture_screen",
-  "capture_window",
-];
+const captureHotkeyKeys: Array<keyof HotkeyConfig> = ["capture_area", "capture_screen"];
 
 const settings = computed(() => settingsStore.settings);
 const systemMessage = ref<string | null>(null);
@@ -72,16 +72,15 @@ const languageOptions = computed(() =>
 );
 
 const appearanceOptions = computed(() => [
-  { value: "auto", label: t("ui.appearance.auto") },
-  { value: "light", label: t("ui.appearance.light") },
-  { value: "dark", label: t("ui.appearance.dark") },
+  { value: "auto", label: t("settings.appearanceOptions.auto") },
+  { value: "light", label: t("settings.appearanceOptions.light") },
+  { value: "dark", label: t("settings.appearanceOptions.dark") },
 ]);
 
 const independentHotkeyPreview = computed(() =>
   [
     `${formatHotkey(DEFAULT_HOTKEYS.capture_area)} ${t("common.region")}`,
     `${formatHotkey(DEFAULT_HOTKEYS.capture_screen)} ${t("common.screen")}`,
-    `${formatHotkey(DEFAULT_HOTKEYS.capture_window)} ${t("common.window")}`,
   ].join(" · "),
 );
 
@@ -89,7 +88,6 @@ const replacementHotkeyPreview = computed(() =>
   [
     `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_screen)} ${t("common.screen")}`,
     `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_area)} ${t("common.region")}`,
-    `${formatHotkey(SYSTEM_REPLACEMENT_HOTKEYS.capture_window)} ${t("common.window")}`,
   ].join(" · "),
 );
 
@@ -100,8 +98,10 @@ const driftMessage = computed(() => {
   const code = captureStatus.value?.messageCode;
   return code ? translateMessageCode(t, code) : null;
 });
-const brokenScreenRecordingPermissionDetected = computed(
-  () => capturePermissionStatus.value?.messageCode === "macosPermissionGrantedNoDisplays",
+const capturePermissionPresentation = computed(() =>
+  capturePermissionStatus.value
+    ? deriveCapturePermissionPresentation(capturePermissionStatus.value)
+    : null,
 );
 
 function isCaptureHotkeyLocked(key: keyof HotkeyConfig) {
@@ -278,19 +278,16 @@ onUnmounted(() => {
     </h1>
 
     <main class="flex-1 overflow-y-auto pb-8">
-      <div class="mx-auto w-full max-w-2xl">
+      <div class="mx-auto w-full max-w-2xl px-6">
         <PendingCaptureBanner />
 
         <!-- Idioma -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.language") }}
-          </p>
-          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+        <SettingsGroup :label="t('settings.language')">
+          <SettingsRow>
             <span class="text-sm">{{ t("settings.language") }}</span>
             <select
               :value="settings.locale"
-              class="rounded-lg border border-sep bg-elev px-3 py-1.5 text-sm text-fg"
+              class="rounded-lg border border-sep bg-field px-3 py-1.5 text-sm text-fg"
               @change="updateLocale(($event.target as HTMLSelectElement).value as AppLocale)"
             >
               <option
@@ -301,15 +298,12 @@ onUnmounted(() => {
                 {{ option.label }}
               </option>
             </select>
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsGroup>
 
         <!-- Captura -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.sections.capture") }}
-          </p>
-          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+        <SettingsGroup :label="t('settings.sections.capture')">
+          <SettingsRow>
             <span class="min-w-0 flex-1 truncate text-sm text-fg-muted">
               {{ settings.save_directory || t("settings.saveFolder") }}
             </span>
@@ -320,51 +314,45 @@ onUnmounted(() => {
               :placeholder="t('settings.saveFolder')"
               @change="updateField('save_directory', ($event.target as HTMLInputElement).value)"
             />
-          </div>
-          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+          </SettingsRow>
+          <SettingsRow>
             <span class="text-sm">{{ t("settings.autoCopy") }}</span>
             <AppToggle
               :model-value="settings.auto_copy"
               @update:model-value="updateField('auto_copy', $event)"
             />
-          </div>
-          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+          </SettingsRow>
+          <SettingsRow>
             <span class="text-sm">{{ t("settings.autoSave") }}</span>
             <AppToggle
               :model-value="settings.auto_save"
               @update:model-value="updateField('auto_save', $event)"
             />
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsGroup>
 
         <!-- Aspecto -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.sections.appearance") }}
-          </p>
-          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+        <SettingsGroup :label="t('settings.sections.appearance')">
+          <SettingsRow>
             <span class="text-sm">{{ t("settings.sections.appearance") }}</span>
             <AppSegmentedControl
               :model-value="settings.appearance"
               :options="appearanceOptions"
               @update:model-value="onAppearanceChange"
             />
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsGroup>
 
         <!-- Integraciones -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.sections.integrations") }}
-          </p>
-          <div class="flex items-center justify-between border-b border-sep px-6 py-3">
+        <SettingsGroup :label="t('settings.sections.integrations')">
+          <SettingsRow>
             <span class="text-sm">{{ t("settings.allowExternalControl") }}</span>
             <AppToggle
               :model-value="settings.allow_external_control"
               @update:model-value="updateField('allow_external_control', $event)"
             />
-          </div>
-          <div class="border-b border-sep px-6 py-3">
+          </SettingsRow>
+          <SettingsRow layout="block">
             <p class="text-xs text-fg-muted">
               {{
                 t("settings.urlSchemeHint", {
@@ -372,46 +360,39 @@ onUnmounted(() => {
                 })
               }}
             </p>
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsGroup>
 
         <!-- Modo de captura -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.sections.captureMode") }}
-          </p>
-          <div class="px-6 py-3">
-            <div
-              v-if="brokenScreenRecordingPermissionDetected"
-              class="mb-4 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
-              role="alert"
+        <SettingsGroup :label="t('settings.sections.captureMode')">
+          <SettingsRow layout="block" class="space-y-4">
+            <AlertBanner
+              v-if="capturePermissionPresentation?.showRepairAction"
+              tone="warning"
             >
               <p>{{ t("settings.repairScreenRecordingDescription") }}</p>
-              <button
-                type="button"
-                class="mt-2 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
-                :disabled="permissionRepairBusy"
-                @click="repairScreenRecordingPermission"
-              >
-                {{ t("settings.repairScreenRecordingPermission") }}
-              </button>
-            </div>
+              <p class="text-xs text-amber-100/80">
+                {{ t(capturePermissionPresentation.impactCode) }}
+              </p>
+              <template #actions>
+                <AppButton
+                  variant="secondary"
+                  :disabled="permissionRepairBusy"
+                  @click="repairScreenRecordingPermission"
+                >
+                  {{ t("settings.repairScreenRecordingPermission") }}
+                </AppButton>
+              </template>
+            </AlertBanner>
 
-            <div
-              v-if="driftDetected"
-              class="mb-4 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-3 text-sm text-amber-100"
-              role="alert"
-            >
+            <AlertBanner v-if="driftDetected" tone="warning">
               <p>{{ driftMessage }}</p>
-              <button
-                type="button"
-                class="mt-2 rounded-lg bg-amber-600/80 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-50"
-                :disabled="systemBusy"
-                @click="repairDrift"
-              >
-                {{ t("settings.repairState") }}
-              </button>
-            </div>
+              <template #actions>
+                <AppButton variant="secondary" :disabled="systemBusy" @click="repairDrift">
+                  {{ t("settings.repairState") }}
+                </AppButton>
+              </template>
+            </AlertBanner>
 
             <fieldset
               class="space-y-3"
@@ -447,7 +428,6 @@ onUnmounted(() => {
                       t("settings.independentModeHint", {
                         cmd3: "⌘⇧3",
                         cmd4: "⌘⇧4",
-                        cmd5: "⌘⇧5",
                       })
                     }}
                   </span>
@@ -513,40 +493,32 @@ onUnmounted(() => {
               </li>
             </ul>
 
-            <button
-              v-if="isReplaceMode"
-              type="button"
-              class="mt-3 rounded-lg border border-sep bg-elev px-3 py-2 text-sm hover:bg-win disabled:opacity-50"
-              :disabled="systemBusy"
-              @click="restoreSystemCaptures"
-            >
-              {{ t("settings.restoreSystemCaptures") }}
-            </button>
-            <p v-if="isReplaceMode" class="mt-2 text-xs text-fg-muted">
-              {{
-                t("settings.restoreSystemCapturesHint", {
-                  cmd3: "⌘⇧3",
-                  cmd4: "⌘⇧4",
-                  cmd5: "⌘⇧5",
-                })
-              }}
-            </p>
+            <div v-if="isReplaceMode">
+              <AppButton variant="secondary" :disabled="systemBusy" @click="restoreSystemCaptures">
+                {{ t("settings.restoreSystemCaptures") }}
+              </AppButton>
+              <p class="mt-2 text-xs text-fg-muted">
+                {{
+                  t("settings.restoreSystemCapturesHint", {
+                    cmd3: "⌘⇧3",
+                    cmd4: "⌘⇧4",
+                  })
+                }}
+              </p>
+            </div>
 
-            <p v-if="systemSuccess" class="mt-2 text-xs text-emerald-400" role="status">
+            <p v-if="systemSuccess" class="text-xs text-success" role="status">
               {{ systemSuccess }}
             </p>
-            <p v-if="systemMessage" class="mt-2 text-xs text-red-400" role="alert">
+            <p v-if="systemMessage" class="text-xs text-danger" role="alert">
               {{ systemMessage }}
             </p>
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsGroup>
 
         <!-- Atajos globales -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.sections.globalShortcuts") }}
-          </p>
-          <div class="px-6 py-3 space-y-3">
+        <SettingsGroup :label="t('settings.sections.globalShortcuts')">
+          <SettingsRow layout="block" class="space-y-3">
             <label v-for="field in hotkeyFields" :key="field.key" class="block">
               <span class="mb-1 block text-sm">
                 {{ field.label }}
@@ -570,30 +542,26 @@ onUnmounted(() => {
                 }}
               </p>
             </label>
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsGroup>
 
         <!-- Actualizaciones -->
-        <div class="mt-4 px-6">
+        <div class="mt-6">
           <AppUpdateSection />
         </div>
 
         <!-- Configuración -->
-        <div class="mt-4">
-          <p class="px-6 pb-1 pt-5 text-xs font-semibold uppercase tracking-wider text-fg-muted">
-            {{ t("settings.sections.setup") }}
-          </p>
-          <div class="border-b border-sep px-6 py-3">
-            <button
-              type="button"
-              class="rounded-lg border border-sep bg-elev px-3 py-2 text-sm hover:bg-win disabled:cursor-not-allowed disabled:opacity-50"
+        <SettingsGroup :label="t('settings.sections.setup')">
+          <SettingsRow>
+            <AppButton
+              variant="secondary"
               :disabled="isOnOnboardingRoute"
               @click="runSetupWizardAgain"
             >
               {{ t("settings.runSetupWizard") }}
-            </button>
-          </div>
-        </div>
+            </AppButton>
+          </SettingsRow>
+        </SettingsGroup>
       </div>
     </main>
 

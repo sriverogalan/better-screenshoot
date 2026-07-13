@@ -17,6 +17,51 @@
   --shadow-window: 0 24px 60px rgb(0 0 0 / .4);
 }
 
+html.theme-dark,
+html.theme-auto {
+  color-scheme: dark;
+  --color-accent: #0A84FF;
+  --color-danger: #FF453A;
+  --color-success: #30D158;
+  --color-win: #1E1E20;
+  --color-elev: #2A2A2D;
+  --color-field: #161618;
+  --color-sep: rgb(255 255 255 / .09);
+  --color-fg: #F2F2F7;
+  --color-fg-muted: #8E8E93;
+  --shadow-window: 0 24px 60px rgb(0 0 0 / .4);
+}
+
+html.theme-light {
+  color-scheme: light;
+  --color-accent: #006EDB;
+  --color-danger: #D70015;
+  --color-success: #248A3D;
+  --color-win: #F5F5F7;
+  --color-elev: #FFFFFF;
+  --color-field: #FFFFFF;
+  --color-sep: rgb(60 60 67 / .18);
+  --color-fg: #1D1D1F;
+  --color-fg-muted: #6E6E73;
+  --shadow-window: 0 24px 60px rgb(0 0 0 / .14);
+}
+
+@media (prefers-color-scheme: light) {
+  html.theme-auto {
+    color-scheme: light;
+    --color-accent: #006EDB;
+    --color-danger: #D70015;
+    --color-success: #248A3D;
+    --color-win: #F5F5F7;
+    --color-elev: #FFFFFF;
+    --color-field: #FFFFFF;
+    --color-sep: rgb(60 60 67 / .18);
+    --color-fg: #1D1D1F;
+    --color-fg-muted: #6E6E73;
+    --shadow-window: 0 24px 60px rgb(0 0 0 / .14);
+  }
+}
+
 html,
 body,
 #app {
@@ -34,5 +79,11 @@ body {
 html.overlay-mode,
 html.overlay-mode body,
 html.overlay-mode #app {
+  background: transparent !important;
+}
+
+html.vibrancy-mode,
+html.vibrancy-mode body,
+html.vibrancy-mode #app {
   background: transparent !important;
 }

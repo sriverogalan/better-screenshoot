@@ -466,20 +466,20 @@ defineExpose({
 
     <p
       v-if="imageLoadError"
-      class="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-red-300"
+      class="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-danger"
       role="alert"
     >
       {{ imageLoadError }}
     </p>
     <p
       v-else-if="!imagePreviewSrc && hasCapture"
-      class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
+      class="absolute inset-0 flex items-center justify-center text-sm text-fg-muted"
     >
       {{ t("editor.loadingImage") }}
     </p>
     <p
       v-else-if="!hasCapture"
-      class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
+      class="absolute inset-0 flex items-center justify-center text-sm text-fg-muted"
     >
       {{ t("editor.empty") }}
     </p>

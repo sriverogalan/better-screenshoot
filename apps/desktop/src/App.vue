@@ -21,19 +21,25 @@ useAppearance();
 const isOverlay = ref(false);
 const notice = ref<string | null>(null);
 let unlisteners: UnlistenFn[] = [];
+let noticeTimeout: number | null = null;
+
+function setNotice(payload: string | AppErrorPayload, durationMs: number) {
+  if (noticeTimeout !== null) {
+    window.clearTimeout(noticeTimeout);
+  }
+  notice.value = translateAppError(t, payload);
+  noticeTimeout = window.setTimeout(() => {
+    notice.value = null;
+    noticeTimeout = null;
+  }, durationMs);
+}
 
 function showNotice(payload: string | AppErrorPayload) {
-  notice.value = translateAppError(t, payload);
-  window.setTimeout(() => {
-    notice.value = null;
-  }, 6000);
+  setNotice(payload, 3000);
 }
 
 function showWarning(payload: string | AppErrorPayload) {
-  notice.value = translateAppError(t, payload);
-  window.setTimeout(() => {
-    notice.value = null;
-  }, 4000);
+  setNotice(payload, 3000);
 }
 
 onMounted(async () => {
@@ -44,7 +50,7 @@ onMounted(async () => {
     await settingsStore.load();
     initLocaleFromSettings(normalizeLocale(settingsStore.settings.locale));
 
-    if (!settingsStore.settings.onboarding_completed && !isOverlay.value) {
+    if (!settingsStore.settings.onboarding_completed && win.label === "main") {
       await router.replace("/onboarding");
     }
   } catch (error) {
@@ -54,12 +60,7 @@ onMounted(async () => {
         : t("errors.appStartFailed");
   }
 
-  unlisteners = await Promise.all([
-    listen<string>("navigate", (event) => {
-      if (event.payload) {
-        router.push(event.payload);
-      }
-    }),
+  const listeners: Promise<UnlistenFn>[] = [
     listen<string | AppErrorPayload>("capture-error", (event) => {
       showNotice(event.payload);
     }),
@@ -75,7 +76,22 @@ onMounted(async () => {
       }
     }),
     setupLocaleListener(),
-  ]);
+  ];
+
+  // Only the main window reacts to navigation requests; module-level
+  // listeners receive targeted events too, so other windows (menubar,
+  // overlay, editor) would otherwise navigate themselves.
+  if (getCurrentWindow().label === "main") {
+    listeners.push(
+      listen<string>("navigate", (event) => {
+        if (event.payload) {
+          router.push(event.payload);
+        }
+      }),
+    );
+  }
+
+  unlisteners = await Promise.all(listeners);
 });
 
 onUnmounted(() => {

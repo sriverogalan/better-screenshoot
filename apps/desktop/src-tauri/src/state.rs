@@ -17,7 +17,6 @@ pub enum SystemCaptureMode {
 pub struct HotkeyConfig {
     pub capture_area: String,
     pub capture_screen: String,
-    pub capture_window: String,
     pub open_history: String,
 }
 
@@ -26,7 +25,6 @@ impl Default for HotkeyConfig {
         Self {
             capture_area: "CommandOrControl+Shift+X".into(),
             capture_screen: "CommandOrControl+Shift+Option+S".into(),
-            capture_window: "CommandOrControl+Shift+Option+W".into(),
             open_history: "CommandOrControl+Shift+H".into(),
         }
     }

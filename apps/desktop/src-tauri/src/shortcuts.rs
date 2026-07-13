@@ -21,7 +21,6 @@ pub fn register_hotkeys(app: &AppHandle) -> Result<(), String> {
     // A failure registering one shortcut must not prevent registering the others.
     register_one(app, &settings.capture_area, "capture-area");
     register_one(app, &settings.capture_screen, "capture-screen");
-    register_one(app, &settings.capture_window, "capture-window");
     register_one(app, &settings.open_history, "open-history");
 
     Ok(())
@@ -63,10 +62,6 @@ pub fn handle_hotkey_action(app: &AppHandle, action: &str) {
                     let _ = app.emit("capture-error", payload.to_emit_value());
                 }
             });
-        }
-        "capture-window" => {
-            let _ = app.emit("open-window-picker", ());
-            show_main_window(app, "/capture-window");
         }
         "open-history" => show_main_window(app, "/history"),
         _ => {}
