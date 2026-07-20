@@ -49,15 +49,12 @@ jobs:
         run: |
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
-          DMG_URL_ARM="https://github.com/sriverogalan/better-screenshoot/releases/download/${{ github.ref_name }}/Better-Screenshoot_${VERSION}_aarch64.dmg"
-          DMG_URL_X64="https://github.com/sriverogalan/better-screenshoot/releases/download/${{ github.ref_name }}/Better-Screenshoot_${VERSION}_x64.dmg"
-          curl -L -o /tmp/release-arm.dmg "$DMG_URL_ARM"
-          curl -L -o /tmp/release-x64.dmg "$DMG_URL_X64"
+          # Tauri bundles the DMG using the productName with spaces replaced by dots,
+          # e.g. "Better Screenshoot" -> Better.Screenshoot_<version>_aarch64.dmg
+          DMG_URL_ARM="https://github.com/sriverogalan/better-screenshoot/releases/download/${{ github.ref_name }}/Better.Screenshoot_${VERSION}_aarch64.dmg"
+          curl -fL -o /tmp/release-arm.dmg "$DMG_URL_ARM"
           SHA256_ARM=$(shasum -a 256 /tmp/release-arm.dmg | awk '{print $1}')
-          SHA256_INTEL=$(shasum -a 256 /tmp/release-x64.dmg | awk '{print $1}')
           gh api repos/sriverogalan/homebrew-tap/dispatches \
             -f event_type=update-cask \
             -f "client_payload[version]=${VERSION}" \
-            -f "client_payload[sha256_arm]=${SHA256_ARM}" \
-            -f "client_payload[sha256_intel]=${SHA256_INTEL}" \
-            -f "client_payload[sha256_x64]=${SHA256_INTEL}"
+            -f "client_payload[sha256_arm]=${SHA256_ARM}"
