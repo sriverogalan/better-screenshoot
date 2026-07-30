@@ -1,0 +1,76 @@
+schema: spec-driven
+project: better-screenshoot
+generated: 2026-07-02
+persistence:
+  mode: openspec
+
+context: |
+  Tech stack: pnpm workspace, TypeScript, Vue 3, Vite 6, Tauri 2, Rust workspace, Raycast extension package.
+  Architecture: desktop app in apps/desktop, Rust/Tauri backend in apps/desktop/src-tauri, shared TS packages, Rust capture-core, CLI crate.
+  Testing: Vitest for TypeScript/Vue units and cargo test for Rust units; no E2E runner detected.
+  Style: TypeScript type checks via tsc/vue-tsc, Raycast lint for extension, locale checks for desktop.
+
+strict_tdd: true
+
+testing:
+  detected: 2026-07-02
+  strict_tdd: true
+  strict_tdd_reason: "Test runners are present and no explicit strict TDD marker/config was found."
+  runners:
+    - framework: Vitest
+      command: "pnpm test"
+      scope: "Workspace TypeScript/Vue unit tests, excluding @better-screenshoot/cli at root."
+    - framework: Rust cargo test
+      command: "cargo test --workspace"
+      scope: "Rust workspace unit tests for capture-core, Tauri backend, and CLI crates."
+  layers:
+    unit:
+      available: true
+      tools: ["Vitest", "cargo test"]
+    integration:
+      available: false
+      tools: []
+    e2e:
+      available: false
+      tools: []
+  coverage:
+    available: false
+    command: ""
+  quality:
+    linter:
+      available: true
+      command: "pnpm lint"
+    type_checker:
+      available: true
+      command: "pnpm typecheck"
+    formatter:
+      available: true
+      command: "pnpm --filter better-screenshoot lint"
+      note: "Prettier is detected only in the Raycast extension package via Raycast tooling."
+  build:
+    command: "pnpm build"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes.
+    - Keep public technical artifacts in English unless explicitly requested otherwise.
+  specs:
+    - Use Given/When/Then for scenarios.
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY).
+  design:
+    - Document architecture decisions with rationale.
+    - Include sequence diagrams for complex flows.
+  tasks:
+    - Group by phase, use hierarchical numbering.
+    - Keep tasks completable in one session.
+  apply:
+    - Follow existing code patterns.
+    - Preserve unrelated worktree changes.
+    tdd: true
+    test_command: "pnpm test"
+  verify:
+    test_command: "pnpm test"
+    build_command: "pnpm build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas.
