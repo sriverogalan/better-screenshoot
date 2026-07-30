@@ -48,24 +48,25 @@ export interface TextEditorState {
 }
 
 export const DEFAULT_EDITOR_STYLE: EditorStyle = {
-  stroke: "#5b8def",
-  strokeWidth: 3,
+  stroke: "#0A84FF",
+  strokeWidth: 4,
   fontSize: 18,
 };
 
-export const HEADER_HEIGHT = 96;
+/** Fallback when canvas host has no measured size (toolbar + style bar). */
+export const HEADER_HEIGHT = 128;
 export const MIN_DRAW_SIZE = 4;
 export const HIGHLIGHT_OPACITY = 0.35;
 
 export const COLOR_PRESETS = [
-  "#5b8def",
-  "#ef4444",
-  "#22c55e",
-  "#facc15",
-  "#ffffff",
+  "#0A84FF",
+  "#FF453A",
+  "#30D158",
+  "#FFD60A",
+  "#FFFFFF",
   "#000000",
-  "#f97316",
-  "#a855f7",
+  "#FF9F0A",
+  "#BF5AF2",
 ] as const;
 
 export const STROKE_WIDTHS = [2, 4, 6] as const;

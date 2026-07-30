@@ -138,7 +138,7 @@
     "copyAndSave": "Copy and save",
     "undo": "Undo",
     "redo": "Redo",
-    "shortcutHint": "V select · A arrow · R rectangle · T text",
+    "shortcutHint": "V select · A arrow · R rect · T text · H highlight · P pen · B blur",
     "tools": {
       "select": "Select",
       "arrow": "Arrow",

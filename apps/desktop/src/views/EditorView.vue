@@ -78,6 +78,8 @@ function isEphemeralCapturePath(filePath: string): boolean {
 const {
   annotations,
   history,
+  canUndo,
+  canRedo,
   pushHistory,
   undo,
   redo,
@@ -120,6 +122,11 @@ const editingAnnotation = computed(() =>
     ? annotations.value.find((item) => item.id === textEditor.value?.annotationId)
     : undefined,
 );
+
+const selectedAnnotationTool = computed(() => {
+  if (!selectedId.value) return null;
+  return annotations.value.find((item) => item.id === selectedId.value)?.tool ?? null;
+});
 
 watch(
   () => captureStore.current,
@@ -692,6 +699,8 @@ onUnmounted(() => {
       :action-busy="actionBusy"
       :action-error="actionError"
       :can-export="!!imagePreviewSrc"
+      :can-undo="canUndo"
+      :can-redo="canRedo"
       :image-width="displayLayout.imageWidth"
       :image-height="displayLayout.imageHeight"
       :zoom-percent="displayLayout.zoomPercent"
@@ -705,6 +714,8 @@ onUnmounted(() => {
 
     <EditorStyleBar
       :style="editorStyle"
+      :active-tool="activeTool"
+      :selected-tool="selectedAnnotationTool"
       @update:stroke="onStyleStroke"
       @update:stroke-width="onStyleStrokeWidth"
       @update:font-size="onStyleFontSize"

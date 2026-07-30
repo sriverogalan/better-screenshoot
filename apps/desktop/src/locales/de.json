@@ -138,7 +138,7 @@
     "copyAndSave": "Kopieren und speichern",
     "undo": "Rückgängig",
     "redo": "Wiederholen",
-    "shortcutHint": "V Auswahl · A Pfeil · R Rechteck · T Text",
+    "shortcutHint": "V Auswahl · A Pfeil · R Rechteck · T Text · H Markierung · P Stift · B Unschärfe",
     "tools": {
       "select": "Auswahl",
       "arrow": "Pfeil",

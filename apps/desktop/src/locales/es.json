@@ -138,7 +138,7 @@
     "copyAndSave": "Copiar y guardar",
     "undo": "Deshacer",
     "redo": "Rehacer",
-    "shortcutHint": "V seleccionar · A flecha · R rectángulo · T texto",
+    "shortcutHint": "V seleccionar · A flecha · R rectángulo · T texto · H resaltar · P lápiz · B desenfoque",
     "tools": {
       "select": "Seleccionar",
       "arrow": "Flecha",

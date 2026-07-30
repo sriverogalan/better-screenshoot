@@ -138,7 +138,7 @@
     "copyAndSave": "Copiar e salvar",
     "undo": "Desfazer",
     "redo": "Refazer",
-    "shortcutHint": "V selecionar · A seta · R retângulo · T texto",
+    "shortcutHint": "V selecionar · A seta · R retângulo · T texto · H destaque · P caneta · B desfoque",
     "tools": {
       "select": "Selecionar",
       "arrow": "Seta",

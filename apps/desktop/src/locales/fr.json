@@ -138,7 +138,7 @@
     "copyAndSave": "Copier et enregistrer",
     "undo": "Annuler",
     "redo": "Rétablir",
-    "shortcutHint": "V sélection · A flèche · R rectangle · T texte",
+    "shortcutHint": "V sélection · A flèche · R rectangle · T texte · H surlignage · P stylo · B flou",
     "tools": {
       "select": "Sélection",
       "arrow": "Flèche",
