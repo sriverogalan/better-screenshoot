@@ -2,9 +2,10 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
   IconArrowRight,
   IconBlur,
-  IconClipboardCopy,
   IconDeviceFloppy,
   IconHighlight,
   IconPencil,
@@ -22,6 +23,8 @@ defineProps<{
   actionBusy: boolean;
   actionError: string | null;
   canExport: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
   imageWidth: number;
   imageHeight: number;
   zoomPercent: number;
@@ -50,13 +53,15 @@ const tools = computed(() => [
 </script>
 
 <template>
-  <header class="shrink-0 border-b border-sep">
-    <div class="flex items-center justify-between gap-4 px-4 py-3">
+  <header class="shrink-0 border-b border-sep bg-win/80 backdrop-blur-xl">
+    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
       <div class="min-w-0">
-        <h1 class="text-sm font-medium text-fg">{{ t("editor.title") }}</h1>
+        <h1 class="text-[13px] font-semibold tracking-tight text-fg">
+          {{ t("editor.title") }}
+        </h1>
         <p
           v-if="hasCapture"
-          class="truncate text-xs text-fg-muted"
+          class="truncate font-mono text-[11px] tabular-nums text-fg-muted"
         >
           {{
             t("editor.dimensions", {
@@ -74,7 +79,7 @@ const tools = computed(() => [
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndDiscard')"
         >
-          <IconTrash class="size-4" />
+          <IconTrash class="size-3.5" />
           {{ t("editor.copyAndDiscard") }}
         </AppButton>
         <AppButton
@@ -82,7 +87,7 @@ const tools = computed(() => [
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndSave')"
         >
-          <IconDeviceFloppy class="size-4" />
+          <IconDeviceFloppy class="size-3.5" />
           {{ t("editor.copyAndSave") }}
         </AppButton>
       </div>
@@ -92,43 +97,55 @@ const tools = computed(() => [
       {{ actionError }}
     </AlertBanner>
 
-    <div class="flex items-center gap-1 overflow-x-auto border-t border-sep/60 px-4 py-2">
-      <button
-        v-for="tool in tools"
-        :key="tool.id"
-        type="button"
-        class="shrink-0 rounded-lg p-2 hover:bg-elev"
-        :class="
-          activeTool === tool.id
-            ? 'bg-accent/15 text-accent'
-            : 'text-fg-muted hover:text-fg'
-        "
-        :aria-label="`${tool.label} (${tool.shortcut})`"
-        :title="`${tool.label} (${tool.shortcut})`"
-        @click="emit('update:activeTool', tool.id)"
+    <div class="flex items-center gap-2 overflow-x-auto px-4 pb-2.5">
+      <div
+        class="inline-flex shrink-0 items-center gap-0.5 rounded-[var(--radius-control)] bg-field p-0.5"
+        role="toolbar"
+        :aria-label="t('editor.title')"
       >
-        <component :is="tool.icon" class="size-4" />
-      </button>
+        <button
+          v-for="tool in tools"
+          :key="tool.id"
+          type="button"
+          class="relative flex size-8 items-center justify-center rounded-[calc(var(--radius-control)-2px)] transition-colors duration-150"
+          :class="
+            activeTool === tool.id
+              ? 'bg-elev text-accent shadow-sm'
+              : 'text-fg-muted hover:bg-win/60 hover:text-fg'
+          "
+          :aria-label="`${tool.label} (${tool.shortcut})`"
+          :aria-pressed="activeTool === tool.id"
+          :title="`${tool.label} (${tool.shortcut})`"
+          @click="emit('update:activeTool', tool.id)"
+        >
+          <component :is="tool.icon" class="size-4" stroke-width="1.75" />
+        </button>
+      </div>
 
-      <span class="mx-1 h-5 w-px shrink-0 bg-sep" />
+      <div class="flex shrink-0 items-center gap-0.5">
+        <button
+          type="button"
+          class="flex size-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition-colors hover:bg-elev hover:text-fg disabled:cursor-not-allowed disabled:opacity-35"
+          :disabled="!canUndo"
+          :aria-label="t('editor.undo')"
+          :title="t('editor.undo')"
+          @click="emit('undo')"
+        >
+          <IconArrowBackUp class="size-4" stroke-width="1.75" />
+        </button>
+        <button
+          type="button"
+          class="flex size-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition-colors hover:bg-elev hover:text-fg disabled:cursor-not-allowed disabled:opacity-35"
+          :disabled="!canRedo"
+          :aria-label="t('editor.redo')"
+          :title="t('editor.redo')"
+          @click="emit('redo')"
+        >
+          <IconArrowForwardUp class="size-4" stroke-width="1.75" />
+        </button>
+      </div>
 
-      <button
-        type="button"
-        class="shrink-0 rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-elev hover:text-fg"
-        @click="emit('undo')"
-      >
-        {{ t("editor.undo") }}
-      </button>
-      <button
-        type="button"
-        class="shrink-0 rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-elev hover:text-fg"
-        @click="emit('redo')"
-      >
-        {{ t("editor.redo") }}
-      </button>
-
-      <p class="ml-auto hidden shrink-0 text-xs text-fg-muted lg:block">
-        <IconClipboardCopy class="mr-1 inline size-3.5" />
+      <p class="ml-auto hidden shrink-0 text-[11px] text-fg-muted xl:block">
         {{ t("editor.shortcutHint") }}
       </p>
     </div>

@@ -138,7 +138,7 @@
     "copyAndSave": "Copia e salva",
     "undo": "Annulla",
     "redo": "Ripeti",
-    "shortcutHint": "V seleziona · A freccia · R rettangolo · T testo",
+    "shortcutHint": "V seleziona · A freccia · R rettangolo · T testo · H evidenzia · P penna · B sfocatura",
     "tools": {
       "select": "Seleziona",
       "arrow": "Freccia",

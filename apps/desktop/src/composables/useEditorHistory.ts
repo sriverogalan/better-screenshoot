@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type { Annotation } from "../lib/editor/types";
 import { cloneAnnotations } from "../lib/editor/utils";
 
@@ -6,6 +6,11 @@ export function useEditorHistory() {
   const annotations = ref<Annotation[]>([]);
   const history = ref<Annotation[][]>([]);
   const historyIndex = ref(-1);
+
+  const canUndo = computed(() => historyIndex.value > 0);
+  const canRedo = computed(
+    () => historyIndex.value >= 0 && historyIndex.value < history.value.length - 1,
+  );
 
   function pushHistory() {
     history.value = history.value.slice(0, historyIndex.value + 1);
@@ -41,6 +46,8 @@ export function useEditorHistory() {
     annotations,
     history,
     historyIndex,
+    canUndo,
+    canRedo,
     pushHistory,
     undo,
     redo,
