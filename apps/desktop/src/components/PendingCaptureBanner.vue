@@ -17,10 +17,10 @@ const {
     class="mb-4 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm"
     role="status"
   >
-    <p class="font-medium text-text">
+    <p class="font-medium text-fg">
       {{ t("pendingCapture.title") }}
     </p>
-    <p class="mt-1 text-xs text-text-muted">
+    <p class="mt-1 text-xs text-fg-muted">
       {{
         t("pendingCapture.description", {
           width: pendingCapture.width,
@@ -33,7 +33,7 @@ const {
     </p>
     <button
       type="button"
-      class="mt-3 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-hover disabled:opacity-50"
+      class="mt-3 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/80 disabled:opacity-50"
       :disabled="recoveryBusy"
       @click="openPendingInEditor"
     >

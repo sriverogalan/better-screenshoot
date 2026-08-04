@@ -99,6 +99,7 @@ impl CaptureProvider for LinuxProvider {
                 height: window.height().unwrap_or(0),
                 x: window.x().unwrap_or(0),
                 y: window.y().unwrap_or(0),
+                on_current_space: true,
             })
             .collect())
     }

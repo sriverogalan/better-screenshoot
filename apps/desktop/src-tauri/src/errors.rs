@@ -16,7 +16,11 @@ impl AppErrorPayload {
         }
     }
 
-    pub fn with_detail(mut self, key: impl Into<String>, value: impl Into<serde_json::Value>) -> Self {
+    pub fn with_detail(
+        mut self,
+        key: impl Into<String>,
+        value: impl Into<serde_json::Value>,
+    ) -> Self {
         self.detail
             .get_or_insert_with(HashMap::new)
             .insert(key.into(), value.into());

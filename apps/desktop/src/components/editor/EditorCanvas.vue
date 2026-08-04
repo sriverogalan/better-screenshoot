@@ -65,6 +65,17 @@ type AnnotationLayerNode = {
 
 const blurImages = ref<Map<string, HTMLImageElement>>(new Map());
 
+const stageCursor = computed(() => {
+  switch (props.activeTool) {
+    case "select":
+      return "default";
+    case "text":
+      return "text";
+    default:
+      return "crosshair";
+  }
+});
+
 const arrows = computed(() =>
   props.annotations.filter((item) => item.tool === "arrow"),
 );
@@ -226,25 +237,30 @@ defineExpose({
 </script>
 
 <template>
-  <div class="relative h-full min-h-0 overflow-hidden bg-[#0a0c10]">
-    <img
+  <div class="editor-canvas relative h-full min-h-0 overflow-hidden">
+    <div
       v-if="imagePreviewSrc"
-      class="pointer-events-none absolute select-none"
-      :src="imagePreviewSrc"
+      class="pointer-events-none absolute rounded-[2px] shadow-[0_8px_40px_rgba(0,0,0,0.35),0_0_0_1px_var(--editor-frame)]"
       :style="{
         left: `${layout.offsetX}px`,
         top: `${layout.offsetY}px`,
         width: `${layout.displayW}px`,
         height: `${layout.displayH}px`,
       }"
-      draggable="false"
-      alt=""
-    />
+    >
+      <img
+        class="size-full select-none object-fill"
+        :src="imagePreviewSrc"
+        draggable="false"
+        alt=""
+      />
+    </div>
 
     <v-stage
       v-if="imagePreviewSrc && layout.stageWidth > 0"
       ref="stageRef"
       class="absolute inset-0"
+      :style="{ cursor: stageCursor }"
       :config="{
         width: layout.stageWidth,
         height: layout.stageHeight,
@@ -253,24 +269,6 @@ defineExpose({
       @mousemove="emit('stageMouseMove', $event)"
       @mouseup="emit('stageMouseUp')"
     >
-      <v-layer :config="{ listening: false }">
-        <v-rect
-          :config="{
-            x: layout.offsetX,
-            y: layout.offsetY,
-            width: layout.displayW,
-            height: layout.displayH,
-            fill: 'transparent',
-            stroke: '#2a2f3a',
-            strokeWidth: 1,
-            shadowColor: '#000000',
-            shadowBlur: 24,
-            shadowOpacity: 0.45,
-            listening: false,
-          }"
-        />
-      </v-layer>
-
       <v-layer ref="annotationLayerRef">
         <v-group
           :config="{
@@ -460,28 +458,71 @@ defineExpose({
           />
         </v-group>
 
-        <v-transformer ref="transformerRef" />
+        <v-transformer
+          ref="transformerRef"
+          :config="{
+            borderStroke: '#0A84FF',
+            borderStrokeWidth: 1.5,
+            anchorStroke: '#0A84FF',
+            anchorFill: '#FFFFFF',
+            anchorSize: 8,
+            anchorCornerRadius: 2,
+            rotateEnabled: false,
+            padding: 2,
+          }"
+        />
       </v-layer>
     </v-stage>
 
     <p
       v-if="imageLoadError"
-      class="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-red-300"
+      class="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-danger"
       role="alert"
     >
       {{ imageLoadError }}
     </p>
-    <p
+    <div
       v-else-if="!imagePreviewSrc && hasCapture"
-      class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-fg-muted"
     >
-      {{ t("editor.loadingImage") }}
-    </p>
-    <p
+      <span
+        class="size-5 animate-spin rounded-full border-2 border-sep border-t-accent"
+        aria-hidden="true"
+      />
+      <p class="text-sm">{{ t("editor.loadingImage") }}</p>
+    </div>
+    <div
       v-else-if="!hasCapture"
-      class="absolute inset-0 flex items-center justify-center text-sm text-text-muted"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center"
     >
-      {{ t("editor.empty") }}
-    </p>
+      <p class="text-sm font-medium text-fg">{{ t("editor.empty") }}</p>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.editor-canvas {
+  --editor-frame: rgb(255 255 255 / 0.08);
+  background-color: var(--color-field);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgb(255 255 255 / 0.04), transparent 70%),
+    radial-gradient(circle, rgb(255 255 255 / 0.055) 1px, transparent 1px);
+  background-size: auto, 18px 18px;
+}
+
+:global(html.theme-light) .editor-canvas {
+  --editor-frame: rgb(0 0 0 / 0.1);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgb(0 0 0 / 0.03), transparent 70%),
+    radial-gradient(circle, rgb(0 0 0 / 0.07) 1px, transparent 1px);
+}
+
+@media (prefers-color-scheme: light) {
+  :global(html.theme-auto) .editor-canvas {
+    --editor-frame: rgb(0 0 0 / 0.1);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgb(0 0 0 / 0.03), transparent 70%),
+      radial-gradient(circle, rgb(0 0 0 / 0.07) 1px, transparent 1px);
+  }
+}
+</style>

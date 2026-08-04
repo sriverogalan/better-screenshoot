@@ -14,6 +14,9 @@ pub enum CaptureError {
     #[error("window not found: {0}")]
     WindowNotFound(u64),
 
+    #[error("could not switch to the desktop/space of window {0} in time")]
+    WindowActivationFailed(u64),
+
     #[error("invalid region: {message}")]
     InvalidRegion { message: String },
 
@@ -28,6 +31,17 @@ pub enum CaptureError {
 
     #[error(transparent)]
     Io(#[from] std::io::Error),
+}
+
+impl CaptureError {
+    /// Stable i18n key for errors that deserve a dedicated, translated message.
+    /// Everything else falls back to this type's `Display` text.
+    pub fn i18n_code(&self) -> Option<&'static str> {
+        match self {
+            CaptureError::WindowActivationFailed(_) => Some("windowActivationFailed"),
+            _ => None,
+        }
+    }
 }
 
 pub type CaptureResult<T> = Result<T, CaptureError>;

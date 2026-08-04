@@ -2,9 +2,10 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
   IconArrowRight,
   IconBlur,
-  IconClipboardCopy,
   IconDeviceFloppy,
   IconHighlight,
   IconPencil,
@@ -14,12 +15,16 @@ import {
   IconTypography,
 } from "@tabler/icons-vue";
 import type { Tool } from "../../lib/editor/types";
+import AppButton from "../ui/AppButton.vue";
+import AlertBanner from "../ui/AlertBanner.vue";
 
 defineProps<{
   activeTool: Tool;
   actionBusy: boolean;
   actionError: string | null;
   canExport: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
   imageWidth: number;
   imageHeight: number;
   zoomPercent: number;
@@ -48,13 +53,15 @@ const tools = computed(() => [
 </script>
 
 <template>
-  <header class="shrink-0 border-b border-border">
-    <div class="flex items-center justify-between gap-4 px-4 py-3">
+  <header class="shrink-0 border-b border-sep bg-win/80 backdrop-blur-xl">
+    <div class="flex items-center justify-between gap-3 px-4 py-2.5">
       <div class="min-w-0">
-        <h1 class="text-sm font-medium">{{ t("editor.title") }}</h1>
+        <h1 class="text-[13px] font-semibold tracking-tight text-fg">
+          {{ t("editor.title") }}
+        </h1>
         <p
           v-if="hasCapture"
-          class="truncate text-xs text-text-muted"
+          class="truncate font-mono text-[11px] tabular-nums text-fg-muted"
         >
           {{
             t("editor.dimensions", {
@@ -67,68 +74,78 @@ const tools = computed(() => [
       </div>
 
       <div class="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm hover:bg-border disabled:opacity-50"
+        <AppButton
+          variant="secondary"
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndDiscard')"
         >
-          <IconTrash class="size-4" />
+          <IconTrash class="size-3.5" />
           {{ t("editor.copyAndDiscard") }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm text-white hover:bg-accent-hover disabled:opacity-50"
+        </AppButton>
+        <AppButton
+          variant="primary"
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndSave')"
         >
-          <IconDeviceFloppy class="size-4" />
+          <IconDeviceFloppy class="size-3.5" />
           {{ t("editor.copyAndSave") }}
-        </button>
+        </AppButton>
       </div>
     </div>
 
-    <p
-      v-if="actionError"
-      class="border-t border-red-500/30 bg-red-950/40 px-4 py-2 text-xs text-red-200"
-      role="alert"
-    >
+    <AlertBanner v-if="actionError" tone="danger" class="mx-4 mb-2">
       {{ actionError }}
-    </p>
+    </AlertBanner>
 
-    <div class="flex items-center gap-1 overflow-x-auto border-t border-border/60 px-4 py-2">
-      <button
-        v-for="tool in tools"
-        :key="tool.id"
-        type="button"
-        class="shrink-0 rounded-lg p-2 hover:bg-surface-raised"
-        :class="{ 'bg-surface-raised text-accent': activeTool === tool.id }"
-        :aria-label="`${tool.label} (${tool.shortcut})`"
-        :title="`${tool.label} (${tool.shortcut})`"
-        @click="emit('update:activeTool', tool.id)"
+    <div class="flex items-center gap-2 overflow-x-auto px-4 pb-2.5">
+      <div
+        class="inline-flex shrink-0 items-center gap-0.5 rounded-[var(--radius-control)] bg-field p-0.5"
+        role="toolbar"
+        :aria-label="t('editor.title')"
       >
-        <component :is="tool.icon" class="size-4" />
-      </button>
+        <button
+          v-for="tool in tools"
+          :key="tool.id"
+          type="button"
+          class="relative flex size-8 items-center justify-center rounded-[calc(var(--radius-control)-2px)] transition-colors duration-150"
+          :class="
+            activeTool === tool.id
+              ? 'bg-elev text-accent shadow-sm'
+              : 'text-fg-muted hover:bg-win/60 hover:text-fg'
+          "
+          :aria-label="`${tool.label} (${tool.shortcut})`"
+          :aria-pressed="activeTool === tool.id"
+          :title="`${tool.label} (${tool.shortcut})`"
+          @click="emit('update:activeTool', tool.id)"
+        >
+          <component :is="tool.icon" class="size-4" stroke-width="1.75" />
+        </button>
+      </div>
 
-      <span class="mx-1 h-5 w-px shrink-0 bg-border" />
+      <div class="flex shrink-0 items-center gap-0.5">
+        <button
+          type="button"
+          class="flex size-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition-colors hover:bg-elev hover:text-fg disabled:cursor-not-allowed disabled:opacity-35"
+          :disabled="!canUndo"
+          :aria-label="t('editor.undo')"
+          :title="t('editor.undo')"
+          @click="emit('undo')"
+        >
+          <IconArrowBackUp class="size-4" stroke-width="1.75" />
+        </button>
+        <button
+          type="button"
+          class="flex size-8 items-center justify-center rounded-[var(--radius-control)] text-fg-muted transition-colors hover:bg-elev hover:text-fg disabled:cursor-not-allowed disabled:opacity-35"
+          :disabled="!canRedo"
+          :aria-label="t('editor.redo')"
+          :title="t('editor.redo')"
+          @click="emit('redo')"
+        >
+          <IconArrowForwardUp class="size-4" stroke-width="1.75" />
+        </button>
+      </div>
 
-      <button
-        type="button"
-        class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
-        @click="emit('undo')"
-      >
-        {{ t("editor.undo") }}
-      </button>
-      <button
-        type="button"
-        class="shrink-0 rounded-lg px-3 py-1.5 text-sm hover:bg-surface-raised"
-        @click="emit('redo')"
-      >
-        {{ t("editor.redo") }}
-      </button>
-
-      <p class="ml-auto hidden shrink-0 text-xs text-text-muted lg:block">
-        <IconClipboardCopy class="mr-1 inline size-3.5" />
+      <p class="ml-auto hidden shrink-0 text-[11px] text-fg-muted xl:block">
         {{ t("editor.shortcutHint") }}
       </p>
     </div>

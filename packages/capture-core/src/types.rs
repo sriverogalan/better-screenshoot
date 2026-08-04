@@ -21,6 +21,9 @@ pub struct WindowInfo {
     pub height: u32,
     pub x: i32,
     pub y: i32,
+    /// False when the window lives on another virtual desktop/Space (macOS) and
+    /// capturing it will briefly switch spaces to bring it onscreen first.
+    pub on_current_space: bool,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]

@@ -7,7 +7,7 @@ use tokio::sync::Mutex;
 
 use base64::{engine::general_purpose::STANDARD, Engine};
 use capture_core::encode::{downscale_for_preview, encode_jpeg_preview};
-use capture_core::types::{CaptureImage, DisplayInfo, Region, WindowInfo};
+use capture_core::types::{CaptureImage, DisplayInfo, Region};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
@@ -56,16 +56,15 @@ fn copy_rgba_to_clipboard(
 }
 
 async fn copy_png_to_clipboard_async(app: AppHandle, png_bytes: Vec<u8>) {
-    let decoded = tauri::async_runtime::spawn_blocking(
-        move || -> Result<(Vec<u8>, u32, u32), String> {
+    let decoded =
+        tauri::async_runtime::spawn_blocking(move || -> Result<(Vec<u8>, u32, u32), String> {
             let img = image::load_from_memory(&png_bytes).map_err(|e| e.to_string())?;
             let rgba = img.to_rgba8();
             let width = rgba.width();
             let height = rgba.height();
             Ok((rgba.into_raw(), width, height))
-        },
-    )
-    .await;
+        })
+        .await;
 
     match decoded {
         Ok(Ok((raw, width, height))) => {
@@ -147,6 +146,8 @@ fn show_main_hub(app: &AppHandle) {
         return;
     };
 
+    let _ = crate::window_layout::prepare_main_hub_window(&main);
+
     let hub_epoch = capture_session::current_hub_show_epoch();
     let main_handle = main.clone();
     tauri::async_runtime::spawn(async move {
@@ -202,7 +203,10 @@ async fn prepare_capture_surface(app: &AppHandle) -> Result<WebviewWindow, Strin
     hide_detached_editor_window(app).await;
     crate::window_layout::set_main_editor_mode(true);
     let _ = main.emit("navigate", "/editor");
-    tokio::time::sleep(tokio::time::Duration::from_millis(EDITOR_NAVIGATE_SETTLE_MS)).await;
+    tokio::time::sleep(tokio::time::Duration::from_millis(
+        EDITOR_NAVIGATE_SETTLE_MS,
+    ))
+    .await;
 
     Ok(main)
 }
@@ -347,7 +351,10 @@ async fn present_editor_window(surface: &WebviewWindow, fullscreen: bool) {
         hide_detached_editor_window(&app).await;
     }
 
-    crate::app_trace!("present_editor_window: superficie de captura mostrada ({})", surface.label());
+    crate::app_trace!(
+        "present_editor_window: superficie de captura mostrada ({})",
+        surface.label()
+    );
 }
 
 async fn present_editor_with_capture(
@@ -381,7 +388,9 @@ async fn present_editor_with_capture(
     {
         Ok(guard) => guard,
         Err(_) => {
-            crate::app_trace!("present_editor_with_capture: timeout waiting for EDITOR_PRESENT_LOCK");
+            crate::app_trace!(
+                "present_editor_with_capture: timeout waiting for EDITOR_PRESENT_LOCK"
+            );
             return false;
         }
     };
@@ -446,9 +455,9 @@ async fn finalize_capture(
     state: &State<'_, AppState>,
     image: CaptureImage,
 ) -> Result<SavedCapture, String> {
-    let auto_copy = {
+    let (auto_copy, auto_save) = {
         let settings = state.settings.lock().map_err(|e| e.to_string())?;
-        settings.auto_copy
+        (settings.auto_copy, settings.auto_save)
     };
 
     let image_width = image.width;
@@ -460,9 +469,10 @@ async fn finalize_capture(
     };
 
     let app_save = app.clone();
-    let (id, file_path) = tauri::async_runtime::spawn_blocking(move || save_temp_png(&app_save, &image))
-        .await
-        .map_err(|e| e.to_string())??;
+    let (id, file_path) =
+        tauri::async_runtime::spawn_blocking(move || save_temp_png(&app_save, &image))
+            .await
+            .map_err(|e| e.to_string())??;
 
     let record = SavedCapture {
         id: id.clone(),
@@ -476,6 +486,23 @@ async fn finalize_capture(
     {
         let json = serde_json::to_string(&record).map_err(|e| e.to_string())?;
         *state.pending_capture.lock().map_err(|e| e.to_string())? = Some(json);
+    }
+
+    if auto_save {
+        if let Err(_error) = crate::commands::history::insert_record(
+            app,
+            &record.id,
+            &record.file_path,
+            image_width,
+            image_height,
+            &record.created_at,
+        )
+        .await
+        {
+            crate::app_trace!("finalize_capture: insert_record failed: {_error}");
+        } else {
+            let _ = app.emit("history-changed", ());
+        }
     }
 
     let _ = app.emit("capture-complete", &record);
@@ -493,18 +520,7 @@ async fn finalize_capture(
 
 #[tauri::command]
 pub async fn list_displays(state: State<'_, AppState>) -> Result<Vec<DisplayInfo>, String> {
-    state
-        .provider
-        .list_displays()
-        .map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub async fn list_windows(state: State<'_, AppState>) -> Result<Vec<WindowInfo>, String> {
-    state
-        .provider
-        .list_windows()
-        .map_err(|e| e.to_string())
+    state.provider.list_displays().map_err(|e| e.to_string())
 }
 
 pub async fn capture_overlay_preview_internal(
@@ -514,14 +530,11 @@ pub async fn capture_overlay_preview_internal(
     let state = app.state::<AppState>();
     let displays = state.provider.list_displays().map_err(|e| e.to_string())?;
     let display = match display_id {
-        Some(id) => displays
-            .iter()
-            .find(|d| d.id == id)
-            .ok_or_else(|| {
-                AppErrorPayload::new("displayNotFound")
-                    .with_detail("id", id)
-                    .to_invoke_error()
-            })?,
+        Some(id) => displays.iter().find(|d| d.id == id).ok_or_else(|| {
+            AppErrorPayload::new("displayNotFound")
+                .with_detail("id", id)
+                .to_invoke_error()
+        })?,
         None => displays
             .iter()
             .find(|d| d.is_primary)
@@ -532,26 +545,28 @@ pub async fn capture_overlay_preview_internal(
     let capture_display_id = display.id;
     let app_capture = app.clone();
     let (jpeg_bytes, preview_width, preview_height, source_width, source_height) =
-        tauri::async_runtime::spawn_blocking(move || -> Result<(Vec<u8>, u32, u32, u32, u32), String> {
-            let state = app_capture.state::<AppState>();
-            let rgba = state
-                .provider
-                .capture_display_rgba(capture_display_id)
-                .map_err(|e| e.to_string())?;
-            let source_width = rgba.width();
-            let source_height = rgba.height();
-            let preview = downscale_for_preview(rgba);
-            let preview_width = preview.width();
-            let preview_height = preview.height();
-            let jpeg_bytes = encode_jpeg_preview(&preview).map_err(|e| e.to_string())?;
-            Ok((
-                jpeg_bytes,
-                preview_width,
-                preview_height,
-                source_width,
-                source_height,
-            ))
-        })
+        tauri::async_runtime::spawn_blocking(
+            move || -> Result<(Vec<u8>, u32, u32, u32, u32), String> {
+                let state = app_capture.state::<AppState>();
+                let rgba = state
+                    .provider
+                    .capture_display_rgba(capture_display_id)
+                    .map_err(|e| e.to_string())?;
+                let source_width = rgba.width();
+                let source_height = rgba.height();
+                let preview = downscale_for_preview(rgba);
+                let preview_width = preview.width();
+                let preview_height = preview.height();
+                let jpeg_bytes = encode_jpeg_preview(&preview).map_err(|e| e.to_string())?;
+                Ok((
+                    jpeg_bytes,
+                    preview_width,
+                    preview_height,
+                    source_width,
+                    source_height,
+                ))
+            },
+        )
         .await
         .map_err(|e| e.to_string())??;
 
@@ -591,9 +606,7 @@ pub async fn capture_area_interactive_internal(app: AppHandle) -> Result<SavedCa
 }
 
 #[tauri::command]
-pub async fn capture_area_interactive(
-    app: AppHandle,
-) -> Result<SavedCapture, String> {
+pub async fn capture_area_interactive(app: AppHandle) -> Result<SavedCapture, String> {
     capture_area_interactive_internal(app).await
 }
 
@@ -630,36 +643,6 @@ pub async fn capture_screen(
 ) -> Result<SavedCapture, String> {
     let _ = state;
     capture_screen_internal(app, display_id).await
-}
-
-#[tauri::command]
-pub async fn capture_window(
-    app: AppHandle,
-    state: State<'_, AppState>,
-    window_id: u64,
-) -> Result<SavedCapture, String> {
-    let gen = capture_session::begin(&app);
-    if gen == 0 {
-        return Err("Ya hay una captura en curso".into());
-    }
-    crate::capture_prep::hide_app_windows_before_capture(&app).await;
-
-    let app_capture = app.clone();
-    let image = tauri::async_runtime::spawn_blocking(move || {
-        let state = app_capture.state::<AppState>();
-        state
-            .provider
-            .capture_window(window_id)
-            .map_err(|e| e.to_string())
-    })
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|error| {
-        capture_session::end_generation(&app, gen);
-        error
-    })?;
-
-    finalize_capture(&app, &state, image).await
 }
 
 #[tauri::command]
@@ -816,8 +799,7 @@ fn read_pending_capture(state: &State<'_, AppState>) -> Result<Option<SavedCaptu
         .clone();
     match json {
         Some(raw) => {
-            let capture: SavedCapture =
-                serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+            let capture: SavedCapture = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
             Ok(Some(capture))
         }
         None => Ok(None),
@@ -838,8 +820,7 @@ pub fn take_pending_capture(state: State<'_, AppState>) -> Result<Option<SavedCa
         .take();
     match json {
         Some(raw) => {
-            let capture: SavedCapture =
-                serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+            let capture: SavedCapture = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
             Ok(Some(capture))
         }
         None => Ok(None),
@@ -864,24 +845,17 @@ pub async fn open_pending_capture_in_editor(
 
 #[tauri::command]
 pub fn clear_pending_capture(state: State<'_, AppState>) -> Result<(), String> {
-    *state
-        .pending_capture
-        .lock()
-        .map_err(|e| e.to_string())? = None;
+    *state.pending_capture.lock().map_err(|e| e.to_string())? = None;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn read_capture_data_url(file_path: String) -> Result<String, String> {
-    let bytes = fs::read(&file_path)
-        .map_err(|_| app_error("readImageFailed"))?;
+    let bytes = fs::read(&file_path).map_err(|_| app_error("readImageFailed"))?;
     if bytes.is_empty() {
         return Err("Capture file is empty".into());
     }
-    Ok(format!(
-        "data:image/png;base64,{}",
-        STANDARD.encode(&bytes)
-    ))
+    Ok(format!("data:image/png;base64,{}", STANDARD.encode(&bytes)))
 }
 
 #[tauri::command]

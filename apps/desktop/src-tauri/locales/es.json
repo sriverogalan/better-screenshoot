@@ -1,11 +1,5 @@
 {
   "tray": {
-    "tooltip": "Better Screenshoot",
-    "captureArea": "Capturar región",
-    "captureScreen": "Capturar pantalla",
-    "captureWindow": "Capturar ventana",
-    "history": "Historial",
-    "settings": "Ajustes",
-    "quit": "Salir"
+    "tooltip": "Better Screenshoot"
   }
 }

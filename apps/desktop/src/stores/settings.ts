@@ -12,6 +12,8 @@ export const useSettingsStore = defineStore("settings", () => {
     loading.value = true;
     try {
       settings.value = await getSettings();
+    } catch (error) {
+      console.error("[settings] Failed to load settings, retaining defaults:", error);
     } finally {
       loading.value = false;
     }

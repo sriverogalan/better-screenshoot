@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: '. -> target'
+          cache-on-failure: true
+          shared-key: release-macos
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Better Screenshoot ${{ github.ref_name }}'
+          releaseDraft: false
+          prerelease: false
+
+      - name: Update Homebrew tap
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          # Tauri bundles the DMG using the productName with spaces replaced by dots,
+          # e.g. "Better Screenshoot" -> Better.Screenshoot_<version>_aarch64.dmg
+          DMG_URL_ARM="https://github.com/sriverogalan/better-screenshoot/releases/download/${{ github.ref_name }}/Better.Screenshoot_${VERSION}_aarch64.dmg"
+          curl -fL -o /tmp/release-arm.dmg "$DMG_URL_ARM"
+          SHA256_ARM=$(shasum -a 256 /tmp/release-arm.dmg | awk '{print $1}')
+          gh api repos/sriverogalan/homebrew-tap/dispatches \
+            -f event_type=update-cask \
+            -f "client_payload[version]=${VERSION}" \
+            -f "client_payload[sha256_arm]=${SHA256_ARM}"

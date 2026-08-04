@@ -38,6 +38,10 @@ rfd = "0.15"
 tauri-plugin-updater = "2.10.1"
 tauri-plugin-process = "2.3.1"
 tauri-plugin-autostart = "2"
+tauri-plugin-drag = "2.1.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 ashpd = { version = "0.10", features = ["tokio"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+window-vibrancy = "0.7.1"

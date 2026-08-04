@@ -76,9 +76,9 @@ describe("editor utils", () => {
 
   it("creates annotations with style defaults", () => {
     const annotation = createAnnotation({ tool: "arrow", points: [0, 0, 10, 10] }, DEFAULT_EDITOR_STYLE);
-    expect(annotation.stroke).toBe("#5b8def");
-    expect(annotation.strokeWidth).toBe(3);
-    expect(annotation.fontSize).toBe(18);
+    expect(annotation.stroke).toBe(DEFAULT_EDITOR_STYLE.stroke);
+    expect(annotation.strokeWidth).toBe(DEFAULT_EDITOR_STYLE.strokeWidth);
+    expect(annotation.fontSize).toBe(DEFAULT_EDITOR_STYLE.fontSize);
     expect(annotation.id).toBeTruthy();
   });
 

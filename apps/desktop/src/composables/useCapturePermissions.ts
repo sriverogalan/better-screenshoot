@@ -2,6 +2,10 @@ import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { getCaptureStatus, requestScreenCapturePermission } from "../lib/tauri";
 import { translateAppError, translateMessageCode } from "../i18n/resolveError";
+import {
+  deriveCapturePermissionPresentation,
+  type CapturePermissionPresentation,
+} from "../lib/permission-presentation";
 
 /**
  * Builds the human-readable permission message for a given messageCode.
@@ -25,21 +29,25 @@ export function useCapturePermissions() {
   const { t } = useI18n();
   const permissionMessage = ref<string | null>(null);
   const devBinaryPath = ref<string | null>(null);
+  const permissionPresentation = ref<CapturePermissionPresentation | null>(null);
 
   async function checkPermissions() {
     try {
       const status = await getCaptureStatus();
-      if (!status.screen_capture_granted) {
+      const presentation = deriveCapturePermissionPresentation(status);
+      permissionPresentation.value = presentation;
+
+      if (presentation.showPermissionRequest || presentation.showRepairAction) {
         let message = translateMessageCode(
           t,
-          status.messageCode,
-          status.messageParams ?? undefined,
+          presentation.messageCode,
+          presentation.messageParams ?? undefined,
         );
-        if (status.messageCode === "macosPermissionRequired") {
+        if (presentation.messageCode === "macosPermissionRequired") {
           message += t("errors.macosDevBinaryHint");
         }
         permissionMessage.value = message;
-        devBinaryPath.value = status.dev_binary_path;
+        devBinaryPath.value = presentation.devBinaryPath;
       } else {
         permissionMessage.value = null;
         devBinaryPath.value = null;
@@ -60,6 +68,7 @@ export function useCapturePermissions() {
   return {
     permissionMessage,
     devBinaryPath,
+    permissionPresentation,
     checkPermissions,
     requestPermission,
   };

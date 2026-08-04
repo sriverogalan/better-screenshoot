@@ -48,7 +48,7 @@ export async function setLocale(locale: AppLocale) {
   applyDocumentLocale(locale);
 
   try {
-    await invoke("rebuild_tray_menu");
+    await invoke("update_tray_tooltip");
   } catch {
     // Tray may be unavailable in tests or non-Tauri contexts.
   }
