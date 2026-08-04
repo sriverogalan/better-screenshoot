@@ -60,7 +60,9 @@
       "appearance": "Apariencia"
     },
     "runSetupWizard": "Volver a ejecutar el asistente de configuración",
+    "theme": "Tema",
     "saveFolder": "Carpeta de guardado",
+    "chooseFolder": "Elegir…",
     "autoCopy": "Copiar al portapapeles automáticamente",
     "autoSave": "Guardar capturas en disco",
     "allowExternalControl": "Permitir control externo (Raycast, CLI, esquema URL)",
@@ -89,7 +91,11 @@
       "captureAreaHint": "En macOS abre el selector nativo del sistema",
       "captureScreen": "Capturar pantalla",
       "openHistory": "Abrir historial",
-      "managedByReplace": "Gestionado por «Reemplazar capturas del sistema» ({shortcut})."
+      "managedByReplace": "Gestionado por «Reemplazar capturas del sistema» ({shortcut}).",
+      "pressShortcut": "Sin atajo",
+      "recording": "Grabando…",
+      "pressKeys": "Pulsa teclas",
+      "clickToRecord": "Clic para grabar"
     },
     "license": {
       "currentPlan": "Plan actual:",

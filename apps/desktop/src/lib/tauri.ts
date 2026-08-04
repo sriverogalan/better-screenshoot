@@ -210,6 +210,12 @@ export async function saveImageWithDialog(
   return invoke("save_image_with_dialog", { pngBase64 });
 }
 
+export async function pickDirectory(
+  current?: string | null,
+): Promise<string | null> {
+  return invoke("pick_directory", { current: current ?? null });
+}
+
 export interface LicenseValidationResult {
   valid: boolean;
   tier: string;

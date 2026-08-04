@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { IconX } from "@tabler/icons-vue";
 import { SYSTEM_REPLACEMENT_HOTKEYS } from "@better-screenshoot/shared-types";
-import { nextTick, onUnmounted, ref, watch } from "vue";
 import type { SystemScreenshotShortcut } from "../../lib/tauri";
 import { formatHotkey } from "../../lib/format-hotkey";
 import { systemShortcutLabelKey } from "../../lib/system-shortcut-labels";
+import AppDialog from "../ui/AppDialog.vue";
+import AppButton from "../ui/AppButton.vue";
+import AppBadge from "../ui/AppBadge.vue";
+import AppKbd from "../ui/AppKbd.vue";
 
-const props = defineProps<{
+defineProps<{
   open: boolean;
   busy: boolean;
   shortcuts: SystemScreenshotShortcut[];
@@ -20,7 +22,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const closeButtonRef = ref<HTMLButtonElement | null>(null);
 
 const replacements = computed(() => [
   {
@@ -37,142 +38,58 @@ function shortcutLabel(shortcut: SystemScreenshotShortcut) {
   const key = systemShortcutLabelKey(shortcut.id);
   return key ? t(key) : shortcut.label;
 }
-
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === "Escape" && !props.busy) {
-    emit("close");
-  }
-}
-
-watch(
-  () => props.open,
-  async (isOpen) => {
-    if (!isOpen) return;
-    await nextTick();
-    closeButtonRef.value?.focus();
-  },
-);
-
-watch(
-  () => props.open,
-  (isOpen) => {
-    if (isOpen) {
-      document.addEventListener("keydown", onKeydown);
-      return;
-    }
-    document.removeEventListener("keydown", onKeydown);
-  },
-);
-
-onUnmounted(() => {
-  document.removeEventListener("keydown", onKeydown);
-});
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      @click.self="!busy && emit('close')"
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="system-screenshot-permission-title"
-        aria-describedby="system-screenshot-permission-description"
-        class="w-full max-w-lg rounded-xl border border-sep bg-[#1a1d24] p-5 shadow-2xl"
+  <AppDialog
+    :open="open"
+    :title="t('systemScreenshotDialog.title')"
+    :description="t('systemScreenshotDialog.description')"
+    :busy="busy"
+    @close="emit('close')"
+  >
+    <ul class="space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm">
+      <li
+        v-for="item in replacements"
+        :key="item.hotkey"
+        class="flex items-center justify-between gap-3"
       >
-        <div class="mb-4 flex items-start justify-between gap-4">
-          <div>
-            <h2
-              id="system-screenshot-permission-title"
-              class="text-base font-semibold text-fg"
-            >
-              {{ t("systemScreenshotDialog.title") }}
-            </h2>
-            <p
-              id="system-screenshot-permission-description"
-              class="mt-1 text-sm text-fg-muted"
-            >
-              {{ t("systemScreenshotDialog.description") }}
-            </p>
-          </div>
-          <button
-            ref="closeButtonRef"
-            type="button"
-            class="rounded-lg p-1 text-fg-muted hover:bg-sep hover:text-fg disabled:opacity-50"
-            :aria-label="t('common.close')"
-            :disabled="busy"
-            @click="emit('close')"
-          >
-            <IconX class="size-5" />
-          </button>
-        </div>
+        <span class="text-fg-muted">{{ item.action }}</span>
+        <AppKbd>{{ item.hotkey }}</AppKbd>
+      </li>
+    </ul>
 
-        <ul class="space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm">
-          <li
-            v-for="item in replacements"
-            :key="item.hotkey"
-            class="flex items-center justify-between gap-3"
-          >
-            <span class="text-fg-muted">{{ item.action }}</span>
-            <kbd class="rounded-md border border-sep bg-elev px-2 py-0.5 font-mono text-xs">
-              {{ item.hotkey }}
-            </kbd>
-          </li>
-        </ul>
+    <ul
+      v-if="shortcuts.length > 0"
+      class="mt-3 space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm"
+    >
+      <li
+        v-for="shortcut in shortcuts"
+        :key="shortcut.id"
+        class="flex items-center justify-between gap-3"
+      >
+        <span class="text-fg-muted">{{ shortcutLabel(shortcut) }}</span>
+        <AppBadge :tone="shortcut.enabled ? 'warning' : 'success'">
+          {{
+            shortcut.enabled
+              ? t("settings.activeOnMacos")
+              : t("systemScreenshotDialog.willBeDisabled")
+          }}
+        </AppBadge>
+      </li>
+    </ul>
 
-        <ul
-          v-if="shortcuts.length > 0"
-          class="mt-3 space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm"
-        >
-          <li
-            v-for="shortcut in shortcuts"
-            :key="shortcut.id"
-            class="flex items-center justify-between gap-3"
-          >
-            <span class="text-fg-muted">{{ shortcutLabel(shortcut) }}</span>
-            <span
-              class="rounded-md px-2 py-0.5 text-xs"
-              :class="
-                shortcut.enabled
-                  ? 'bg-amber-950/50 text-amber-100'
-                  : 'bg-emerald-950/50 text-emerald-100'
-              "
-            >
-              {{
-                shortcut.enabled
-                  ? t("settings.activeOnMacos")
-                  : t("systemScreenshotDialog.willBeDisabled")
-              }}
-            </span>
-          </li>
-        </ul>
-
-        <div class="mt-5 flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            class="rounded-lg border border-sep px-4 py-2 text-sm hover:bg-sep disabled:opacity-50"
-            :disabled="busy"
-            @click="emit('close')"
-          >
-            {{ t("common.cancel") }}
-          </button>
-          <button
-            type="button"
-            class="rounded-lg bg-accent px-4 py-2 text-sm text-white hover:bg-accent/80 disabled:opacity-50"
-            :disabled="busy"
-            @click="emit('confirm')"
-          >
-            {{
-              busy
-                ? t("common.replacing")
-                : t("systemScreenshotDialog.confirm")
-            }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+    <template #footer>
+      <AppButton variant="secondary" :disabled="busy" @click="emit('close')">
+        {{ t("common.cancel") }}
+      </AppButton>
+      <AppButton variant="primary" :disabled="busy" @click="emit('confirm')">
+        {{
+          busy
+            ? t("common.replacing")
+            : t("systemScreenshotDialog.confirm")
+        }}
+      </AppButton>
+    </template>
+  </AppDialog>
 </template>
