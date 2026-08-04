@@ -137,6 +137,7 @@ pub fn run() {
             commands::get_settings,
             commands::update_settings,
             commands::reload_settings,
+            commands::pick_directory,
             commands::validate_license_key,
             commands::upload_for_share,
             commands::set_launch_at_login,

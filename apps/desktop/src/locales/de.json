@@ -60,7 +60,9 @@
       "appearance": "Erscheinungsbild"
     },
     "runSetupWizard": "Einrichtungsassistenten erneut ausführen",
+    "theme": "Erscheinungsbild",
     "saveFolder": "Speicherordner",
+    "chooseFolder": "Auswählen…",
     "autoCopy": "Automatisch in die Zwischenablage kopieren",
     "autoSave": "Aufnahmen auf der Festplatte speichern",
     "allowExternalControl": "Externe Steuerung erlauben (Raycast, CLI, URL-Schema)",
@@ -89,7 +91,11 @@
       "captureAreaHint": "Öffnet auf macOS den nativen Systemselektor",
       "captureScreen": "Bildschirm aufnehmen",
       "openHistory": "Verlauf öffnen",
-      "managedByReplace": "Verwaltet durch «Systemaufnahmen ersetzen» ({shortcut})."
+      "managedByReplace": "Verwaltet durch «Systemaufnahmen ersetzen» ({shortcut}).",
+      "pressShortcut": "Kein Kurzbefehl",
+      "recording": "Aufnahme…",
+      "pressKeys": "Tasten drücken",
+      "clickToRecord": "Klicken zum Aufnehmen"
     },
     "license": {
       "currentPlan": "Aktueller Plan:",

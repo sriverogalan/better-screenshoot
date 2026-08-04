@@ -60,7 +60,9 @@
       "appearance": "Appearance"
     },
     "runSetupWizard": "Run setup wizard again",
+    "theme": "Theme",
     "saveFolder": "Save folder",
+    "chooseFolder": "Choose…",
     "autoCopy": "Copy to clipboard automatically",
     "autoSave": "Save captures to disk",
     "allowExternalControl": "Allow external control (Raycast, CLI, URL scheme)",
@@ -89,7 +91,11 @@
       "captureAreaHint": "On macOS opens the native system selector",
       "captureScreen": "Capture screen",
       "openHistory": "Open history",
-      "managedByReplace": "Managed by «Replace system captures» ({shortcut})."
+      "managedByReplace": "Managed by «Replace system captures» ({shortcut}).",
+      "pressShortcut": "No shortcut",
+      "recording": "Recording…",
+      "pressKeys": "Press keys",
+      "clickToRecord": "Click to record"
     },
     "license": {
       "currentPlan": "Current plan:",

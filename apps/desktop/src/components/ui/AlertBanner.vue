@@ -9,7 +9,7 @@ withDefaults(
 );
 
 const toneClasses: Record<string, string> = {
-  warning: "border-amber-500/40 bg-amber-950/40 text-amber-100",
+  warning: "border-warning-border bg-warning-bg text-warning-fg",
   danger: "border-danger/40 bg-danger/10 text-danger",
 };
 </script>
