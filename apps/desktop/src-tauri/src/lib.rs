@@ -130,6 +130,8 @@ pub fn run() {
             commands::open_capture_in_editor,
             commands::read_capture_data_url,
             commands::discard_capture,
+            commands::estimate_image_sizes,
+            commands::encode_png_to_jpeg,
             commands::copy_image_to_clipboard,
             commands::save_image_to_disk,
             commands::save_image_with_dialog,

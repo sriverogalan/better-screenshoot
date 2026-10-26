@@ -6,7 +6,9 @@ use std::sync::LazyLock;
 use tokio::sync::Mutex;
 
 use base64::{engine::general_purpose::STANDARD, Engine};
-use capture_core::encode::{downscale_for_preview, encode_jpeg_preview};
+use capture_core::encode::{
+    downscale_for_preview, encode_jpeg_preview, jpeg_from_png_bytes, EXPORT_JPEG_QUALITY,
+};
 use capture_core::types::{CaptureImage, DisplayInfo, Region};
 use chrono::{Local, Utc};
 use serde::{Deserialize, Serialize};
@@ -119,26 +121,43 @@ fn library_day_dir(save_directory: &str, now: chrono::DateTime<Local>) -> Result
     Ok(dir)
 }
 
-/// Prefer `BetterScreenshoot-HHMMSS.png`; on collision append a short id.
-fn unique_library_png_path(dir: &std::path::Path, now: chrono::DateTime<Local>) -> PathBuf {
+fn is_jpeg_bytes(bytes: &[u8]) -> bool {
+    bytes.len() >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF
+}
+
+/// Prefer `BetterScreenshoot-HHMMSS.{ext}`; on collision append a short id.
+fn unique_library_image_path(
+    dir: &std::path::Path,
+    now: chrono::DateTime<Local>,
+    extension: &str,
+) -> PathBuf {
     let stamp = now.format("%H%M%S").to_string();
-    let primary = dir.join(format!("BetterScreenshoot-{stamp}.png"));
+    let primary = dir.join(format!("BetterScreenshoot-{stamp}.{extension}"));
     if !primary.exists() {
         return primary;
     }
     let suffix = &Uuid::new_v4().to_string()[..6];
-    dir.join(format!("BetterScreenshoot-{stamp}-{suffix}.png"))
+    dir.join(format!("BetterScreenshoot-{stamp}-{suffix}.{extension}"))
 }
 
-/// Writes a PNG into the configured library folder (date subfolder) and returns id + path + created_at.
-fn save_png_to_library(
+fn unique_library_png_path(dir: &std::path::Path, now: chrono::DateTime<Local>) -> PathBuf {
+    unique_library_image_path(dir, now, "png")
+}
+
+/// Writes an image into the configured library folder (date subfolder) and returns id + path + created_at.
+fn save_image_to_library(
     save_directory: &str,
-    png_bytes: &[u8],
+    image_bytes: &[u8],
 ) -> Result<(String, String, String), String> {
     let now = Local::now();
     let dir = library_day_dir(save_directory, now)?;
-    let path = unique_library_png_path(&dir, now);
-    fs::write(&path, png_bytes).map_err(|e| e.to_string())?;
+    let extension = if is_jpeg_bytes(image_bytes) {
+        "jpg"
+    } else {
+        "png"
+    };
+    let path = unique_library_image_path(&dir, now, extension);
+    fs::write(&path, image_bytes).map_err(|e| e.to_string())?;
     let id = Uuid::new_v4().to_string();
     Ok((
         id,
@@ -147,12 +166,23 @@ fn save_png_to_library(
     ))
 }
 
+fn save_png_to_library(
+    save_directory: &str,
+    png_bytes: &[u8],
+) -> Result<(String, String, String), String> {
+    save_image_to_library(save_directory, png_bytes)
+}
+
 fn png_dimensions(bytes: &[u8]) -> Result<(u32, u32), String> {
     image::ImageReader::new(Cursor::new(bytes))
         .with_guessed_format()
         .map_err(|e| e.to_string())?
         .into_dimensions()
         .map_err(|e| e.to_string())
+}
+
+fn image_dimensions(bytes: &[u8]) -> Result<(u32, u32), String> {
+    png_dimensions(bytes)
 }
 
 fn capture_from_png_bytes(bytes: Vec<u8>) -> Result<CaptureImage, String> {
@@ -951,6 +981,44 @@ pub async fn discard_capture(
     Ok(())
 }
 
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ImageSizeEstimate {
+    pub png_bytes: usize,
+    pub jpeg_bytes: usize,
+}
+
+#[tauri::command]
+pub async fn estimate_image_sizes(png_base64: String) -> Result<ImageSizeEstimate, String> {
+    let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
+    let png_len = bytes.len();
+    let jpeg = tauri::async_runtime::spawn_blocking(move || {
+        jpeg_from_png_bytes(&bytes, EXPORT_JPEG_QUALITY).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+
+    Ok(ImageSizeEstimate {
+        png_bytes: png_len,
+        jpeg_bytes: jpeg.len(),
+    })
+}
+
+#[tauri::command]
+pub async fn encode_png_to_jpeg(
+    png_base64: String,
+    quality: Option<u8>,
+) -> Result<String, String> {
+    let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
+    let q = quality.unwrap_or(EXPORT_JPEG_QUALITY);
+    let jpeg = tauri::async_runtime::spawn_blocking(move || {
+        jpeg_from_png_bytes(&bytes, q).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    Ok(STANDARD.encode(jpeg))
+}
+
 #[tauri::command]
 pub async fn copy_image_to_clipboard(app: AppHandle, png_base64: String) -> Result<(), String> {
     let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
@@ -966,7 +1034,7 @@ pub async fn save_image_to_disk(
     png_base64: String,
 ) -> Result<SavedCapture, String> {
     let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
-    let (width, height) = png_dimensions(&bytes)?;
+    let (width, height) = image_dimensions(&bytes)?;
     let save_directory = {
         let settings = state.settings.lock().map_err(|e| e.to_string())?;
         settings.save_directory.clone()
@@ -974,7 +1042,7 @@ pub async fn save_image_to_disk(
 
     let bytes_for_disk = bytes.clone();
     let (id, file_path, created_at) = tauri::async_runtime::spawn_blocking(move || {
-        save_png_to_library(&save_directory, &bytes_for_disk)
+        save_image_to_library(&save_directory, &bytes_for_disk)
     })
     .await
     .map_err(|e| e.to_string())??;
@@ -999,14 +1067,21 @@ pub async fn save_image_with_dialog(
     png_base64: String,
 ) -> Result<Option<SavedCapture>, String> {
     let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
-    let default_name = format!("capture-{}.png", &Uuid::new_v4().to_string()[..8]);
+    let jpeg = is_jpeg_bytes(&bytes);
+    let default_name = format!(
+        "capture-{}.{}",
+        &Uuid::new_v4().to_string()[..8],
+        if jpeg { "jpg" } else { "png" }
+    );
 
     let picked_path = tauri::async_runtime::spawn_blocking(move || {
-        rfd::FileDialog::new()
-            .set_title("Save capture")
-            .add_filter("PNG image", &["png"])
-            .set_file_name(&default_name)
-            .save_file()
+        let mut dialog = rfd::FileDialog::new().set_title("Save capture");
+        if jpeg {
+            dialog = dialog.add_filter("JPEG image", &["jpg", "jpeg"]);
+        } else {
+            dialog = dialog.add_filter("PNG image", &["png"]);
+        }
+        dialog.set_file_name(&default_name).save_file()
     })
     .await
     .map_err(|e| e.to_string())?;
@@ -1016,7 +1091,7 @@ pub async fn save_image_with_dialog(
     };
 
     if path.extension().is_none() {
-        path.set_extension("png");
+        path.set_extension(if jpeg { "jpg" } else { "png" });
     }
 
     fs::write(&path, &bytes).map_err(|e| e.to_string())?;

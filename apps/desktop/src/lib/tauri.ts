@@ -196,6 +196,24 @@ export async function updateSettings(settings: AppSettings): Promise<AppSettings
   return invoke("update_settings", { settings });
 }
 
+export interface ImageSizeEstimate {
+  pngBytes: number;
+  jpegBytes: number;
+}
+
+export async function estimateImageSizes(
+  pngBase64: string,
+): Promise<ImageSizeEstimate> {
+  return invoke("estimate_image_sizes", { pngBase64 });
+}
+
+export async function encodePngToJpeg(
+  pngBase64: string,
+  quality?: number,
+): Promise<string> {
+  return invoke("encode_png_to_jpeg", { pngBase64, quality: quality ?? null });
+}
+
 export async function copyImageToClipboard(pngBase64: string): Promise<void> {
   return invoke("copy_image_to_clipboard", { pngBase64 });
 }

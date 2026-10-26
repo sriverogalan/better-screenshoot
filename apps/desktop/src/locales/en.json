@@ -164,7 +164,7 @@
     "copyAndSave": "Copy and save",
     "undo": "Undo",
     "redo": "Redo",
-    "shortcutHint": "V select · A arrow · R rect · T text · H highlight · P pen · B blur",
+    "shortcutHint": "V select · A arrow · R rect · T text · H highlight · P pen · B pixelate",
     "tools": {
       "select": "Select",
       "arrow": "Arrow",
@@ -172,7 +172,7 @@
       "text": "Text",
       "highlight": "Highlight",
       "pen": "Pen",
-      "blur": "Blur"
+      "blur": "Pixelate"
     },
     "style": {
       "color": "Color",
@@ -183,7 +183,14 @@
     "loadingImage": "Loading image…",
     "empty": "Take a capture to start editing.",
     "textPlaceholder": "Type here…",
-    "editAnnotationText": "Edit annotation text"
+    "editAnnotationText": "Edit annotation text",
+    "compress": {
+      "label": "Compress",
+      "on": "Compress on — export as JPEG",
+      "off": "Compress off — export as PNG",
+      "sizes": "PNG {png} · JPEG {jpeg}",
+      "estimating": "Estimating sizes…"
+    }
   },
   "pendingCapture": {
     "title": "Capture ready but editor did not open",

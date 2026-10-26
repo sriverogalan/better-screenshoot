@@ -164,7 +164,7 @@
     "copyAndSave": "Copier et enregistrer",
     "undo": "Annuler",
     "redo": "Rétablir",
-    "shortcutHint": "V sélection · A flèche · R rectangle · T texte · H surlignage · P stylo · B flou",
+    "shortcutHint": "V sélection · A flèche · R rectangle · T texte · H surlignage · P stylo · B pixeliser",
     "tools": {
       "select": "Sélection",
       "arrow": "Flèche",
@@ -172,7 +172,7 @@
       "text": "Texte",
       "highlight": "Surlignage",
       "pen": "Stylo",
-      "blur": "Flou"
+      "blur": "Pixeliser"
     },
     "style": {
       "color": "Couleur",
@@ -183,7 +183,14 @@
     "loadingImage": "Chargement de l'image…",
     "empty": "Effectuez une capture pour commencer à éditer.",
     "textPlaceholder": "Saisissez ici…",
-    "editAnnotationText": "Modifier le texte de l'annotation"
+    "editAnnotationText": "Modifier le texte de l'annotation",
+    "compress": {
+      "label": "Compresser",
+      "on": "Compression activée — exporter en JPEG",
+      "off": "Compression désactivée — exporter en PNG",
+      "sizes": "PNG {png} · JPEG {jpeg}",
+      "estimating": "Estimation des tailles…"
+    }
   },
   "pendingCapture": {
     "title": "Capture prête mais l'éditeur ne s'est pas ouvert",

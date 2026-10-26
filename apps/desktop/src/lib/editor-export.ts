@@ -66,6 +66,8 @@ export async function compositeCaptureExport(
     throw new Error("Could not prepare export");
   }
 
+  // 1:1 blit of the capture — disable smoothing to keep native sharpness.
+  ctx.imageSmoothingEnabled = false;
   ctx.drawImage(baseImage, 0, 0, nativeWidth, nativeHeight);
 
   const annotationsDataUrl = annotationLayer.toDataURL({
@@ -77,6 +79,8 @@ export async function compositeCaptureExport(
   });
 
   const overlay = await loadHtmlImage(annotationsDataUrl);
+  // Soft edges on vector strokes look better with smoothing on.
+  ctx.imageSmoothingEnabled = true;
   ctx.drawImage(overlay, 0, 0, nativeWidth, nativeHeight);
 
   return canvas

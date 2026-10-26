@@ -164,7 +164,7 @@
     "copyAndSave": "Copiar y guardar",
     "undo": "Deshacer",
     "redo": "Rehacer",
-    "shortcutHint": "V seleccionar · A flecha · R rectángulo · T texto · H resaltar · P lápiz · B desenfoque",
+    "shortcutHint": "V seleccionar · A flecha · R rectángulo · T texto · H resaltar · P lápiz · B pixelar",
     "tools": {
       "select": "Seleccionar",
       "arrow": "Flecha",
@@ -172,7 +172,7 @@
       "text": "Texto",
       "highlight": "Resaltar",
       "pen": "Lápiz",
-      "blur": "Desenfoque"
+      "blur": "Pixelar"
     },
     "style": {
       "color": "Color",
@@ -183,7 +183,14 @@
     "loadingImage": "Cargando imagen…",
     "empty": "Haz una captura para empezar a editar.",
     "textPlaceholder": "Escribe aquí…",
-    "editAnnotationText": "Editar texto de la anotación"
+    "editAnnotationText": "Editar texto de la anotación",
+    "compress": {
+      "label": "Comprimir",
+      "on": "Compresión activa — exportar como JPEG",
+      "off": "Compresión desactivada — exportar como PNG",
+      "sizes": "PNG {png} · JPEG {jpeg}",
+      "estimating": "Calculando tamaños…"
+    }
   },
   "pendingCapture": {
     "title": "Captura lista pero el editor no se abrió",
