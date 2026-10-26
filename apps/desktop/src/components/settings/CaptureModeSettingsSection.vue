@@ -203,125 +203,122 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <SettingsGroup :label="t('settings.sections.captureMode')">
-    <SettingsRow layout="block">
-      <div class="space-y-4">
-        <AlertBanner
-          v-if="capturePermissionPresentation?.showRepairAction"
-          tone="warning"
+  <div v-if="capturePermissionPresentation?.showRepairAction || driftDetected" class="mb-6 space-y-3">
+    <AlertBanner v-if="capturePermissionPresentation?.showRepairAction" tone="warning">
+      <p class="font-medium">{{ t("settings.repairScreenRecordingDescription") }}</p>
+      <p class="text-subhead text-fg-muted">
+        {{ t(capturePermissionPresentation.impactCode) }}
+      </p>
+      <template #actions>
+        <AppButton
+          size="sm"
+          :disabled="permissionRepairBusy"
+          @click="showRepairDialog = true"
         >
-          <p>{{ t("settings.repairScreenRecordingDescription") }}</p>
-          <p class="text-xs opacity-80">
-            {{ t(capturePermissionPresentation.impactCode) }}
-          </p>
-          <template #actions>
-            <AppButton
-              variant="secondary"
-              :disabled="permissionRepairBusy"
-              @click="showRepairDialog = true"
-            >
-              {{ t("settings.repairScreenRecordingPermission") }}
-            </AppButton>
-          </template>
-        </AlertBanner>
+          {{ t("settings.repairScreenRecordingPermission") }}
+        </AppButton>
+      </template>
+    </AlertBanner>
 
-        <AlertBanner v-if="driftDetected" tone="warning">
-          <p>{{ driftMessage }}</p>
-          <template #actions>
-            <AppButton variant="secondary" :disabled="systemBusy" @click="repairDrift">
-              {{ t("settings.repairState") }}
-            </AppButton>
-          </template>
-        </AlertBanner>
+    <AlertBanner v-if="driftDetected" tone="warning">
+      <p>{{ driftMessage }}</p>
+      <template #actions>
+        <AppButton size="sm" :disabled="systemBusy" @click="repairDrift">
+          {{ t("settings.repairState") }}
+        </AppButton>
+      </template>
+    </AlertBanner>
+  </div>
 
-        <fieldset
-          class="space-y-3"
-          :disabled="systemBusy || captureStatus?.platform_supported === false"
-        >
-          <legend class="sr-only">{{ t("settings.systemCaptureModeLegend") }}</legend>
-
-          <button
-            v-for="option in modeOptions"
-            :key="option.value"
-            type="button"
-            role="radio"
-            class="flex w-full cursor-pointer gap-3 rounded-lg border p-3 text-left transition"
-            :class="
-              currentMode === option.value
-                ? 'border-accent bg-accent/5'
-                : 'border-sep bg-win hover:bg-win/80'
-            "
-            :aria-checked="currentMode === option.value"
-            :disabled="systemBusy || captureStatus?.platform_supported === false"
-            @click="onModeChange(option.value)"
-          >
-            <span
-              class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border"
-              :class="
-                currentMode === option.value
-                  ? 'border-accent'
-                  : 'border-fg-muted/50'
-              "
-              aria-hidden="true"
-            >
-              <span
-                v-if="currentMode === option.value"
-                class="size-2 rounded-full bg-accent"
-              />
-            </span>
-            <span class="min-w-0 space-y-1">
-              <span class="block text-sm font-medium">{{ option.title }}</span>
-              <span class="block text-xs text-fg-muted">{{ option.preview }}</span>
-              <span class="block text-xs text-fg-muted">{{ option.hint }}</span>
-            </span>
-          </button>
-        </fieldset>
-
-        <ul
-          v-if="captureStatus?.platform_supported && captureStatus.system_shortcuts.length > 0"
-          class="space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm"
-        >
-          <li
-            v-for="shortcut in captureStatus.system_shortcuts"
-            :key="shortcut.id"
-            class="flex items-center justify-between gap-3"
-          >
-            <span class="text-fg-muted">
-              {{ shortcutLabel(shortcut.id, shortcut.label) }}
-            </span>
-            <AppBadge :tone="shortcut.enabled ? 'warning' : 'success'">
-              {{
-                shortcut.enabled
-                  ? t("settings.activeOnMacos")
-                  : t("common.disabled")
-              }}
-            </AppBadge>
-          </li>
-        </ul>
-
-        <div v-if="isReplaceMode">
-          <AppButton variant="secondary" :disabled="systemBusy" @click="restoreSystemCaptures">
-            {{ t("settings.restoreSystemCaptures") }}
-          </AppButton>
-          <p class="mt-2 text-xs text-fg-muted">
-            {{
-              t("settings.restoreSystemCapturesHint", {
-                cmd3: "⌘⇧3",
-                cmd4: "⌘⇧4",
-              })
-            }}
-          </p>
-        </div>
-
-        <p v-if="systemSuccess" class="text-xs text-success" role="status">
-          {{ systemSuccess }}
-        </p>
-        <p v-if="systemMessage" class="text-xs text-danger" role="alert">
-          {{ systemMessage }}
-        </p>
-      </div>
+  <SettingsGroup v-if="capturePermissionPresentation">
+    <SettingsRow
+      :label="t('onboarding.stepPermission.title')"
+      :description="t(capturePermissionPresentation.impactCode)"
+    >
+      <AppBadge :tone="capturePermissionPresentation.status === 'granted' ? 'success' : 'warning'">
+        {{
+          capturePermissionPresentation.status === "granted"
+            ? t("settings.permissionGranted")
+            : t("settings.permissionMissing")
+        }}
+      </AppBadge>
     </SettingsRow>
   </SettingsGroup>
+
+  <SettingsGroup :label="t('settings.systemCaptureModeLegend')">
+    <fieldset
+      class="contents"
+      :disabled="systemBusy || captureStatus?.platform_supported === false"
+    >
+      <legend class="sr-only">{{ t("settings.systemCaptureModeLegend") }}</legend>
+      <button
+        v-for="option in modeOptions"
+        :key="option.value"
+        type="button"
+        role="radio"
+        class="relative flex w-full gap-3 px-3 py-3 text-left transition-colors before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-sep first-of-type:before:hidden enabled:hover:bg-hover disabled:opacity-50"
+        :aria-checked="currentMode === option.value"
+        :disabled="systemBusy || captureStatus?.platform_supported === false"
+        @click="onModeChange(option.value)"
+      >
+        <span
+          class="mt-px flex size-4 shrink-0 items-center justify-center rounded-full transition-colors"
+          :class="
+            currentMode === option.value
+              ? 'bg-accent shadow-control'
+              : 'bg-field shadow-[inset_0_0_0_1px_var(--color-fg-tertiary)]'
+          "
+          aria-hidden="true"
+        >
+          <span v-if="currentMode === option.value" class="size-1.5 rounded-full bg-white" />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-body font-medium text-fg">{{ option.title }}</span>
+          <span class="mt-0.5 block text-subhead text-fg-muted">{{ option.hint }}</span>
+          <span class="mt-1.5 block text-subhead font-medium tracking-wide text-fg-muted">
+            {{ option.preview }}
+          </span>
+        </span>
+      </button>
+    </fieldset>
+  </SettingsGroup>
+
+  <SettingsGroup
+    v-if="captureStatus?.platform_supported && captureStatus.system_shortcuts.length > 0"
+    :label="t('settings.systemShortcutsTitle')"
+  >
+    <SettingsRow
+      v-for="shortcut in captureStatus.system_shortcuts"
+      :key="shortcut.id"
+      :label="shortcutLabel(shortcut.id, shortcut.label)"
+    >
+      <AppBadge :tone="shortcut.enabled ? 'warning' : 'success'">
+        {{
+          shortcut.enabled
+            ? t("settings.activeOnMacos")
+            : t("common.disabled")
+        }}
+      </AppBadge>
+    </SettingsRow>
+  </SettingsGroup>
+
+  <SettingsGroup v-if="isReplaceMode">
+    <SettingsRow
+      :label="t('settings.restoreSystemCaptures')"
+      :description="t('settings.restoreSystemCapturesHint', { cmd3: '⌘⇧3', cmd4: '⌘⇧4' })"
+    >
+      <AppButton :disabled="systemBusy" @click="restoreSystemCaptures">
+        {{ t("settings.restoreSystemCaptures") }}
+      </AppButton>
+    </SettingsRow>
+  </SettingsGroup>
+
+  <p v-if="systemSuccess" class="mt-3 px-2.5 text-subhead text-success" role="status">
+    {{ systemSuccess }}
+  </p>
+  <p v-if="systemMessage" class="mt-3 px-2.5 text-subhead text-danger" role="alert">
+    {{ systemMessage }}
+  </p>
 
   <SystemScreenshotPermissionDialog
     :open="showReplaceDialog"

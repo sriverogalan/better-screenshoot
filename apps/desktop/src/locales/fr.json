@@ -15,7 +15,8 @@
   "nav": {
     "mainNavigation": "Navigation principale",
     "history": "Historique",
-    "settings": "Réglages"
+    "settings": "Réglages",
+    "general": "Général"
   },
   "history": {
     "title": "Historique",
@@ -32,7 +33,9 @@
     "captureAlt": "Capture {id}",
     "deleteCapture": "Supprimer la capture",
     "openMacosPermissions": "Ouvrir les autorisations macOS",
-    "devBinary": "Binaire de développement : {path}"
+    "devBinary": "Binaire de développement : {path}",
+    "count": "Aucune capture | 1 capture | {count} captures",
+    "openInEditor": "Ouvrir dans l'éditeur"
   },
   "settings": {
     "title": "Réglages",
@@ -57,12 +60,14 @@
       "globalShortcuts": "Raccourcis globaux",
       "license": "Licence",
       "setup": "Configuration",
-      "appearance": "Apparence"
+      "appearance": "Apparence",
+      "afterCapture": "Après la capture"
     },
     "runSetupWizard": "Relancer l'assistant de configuration",
     "theme": "Thème",
     "saveFolder": "Dossier d'enregistrement",
     "chooseFolder": "Choisir…",
+    "saveFolderHint": "Les captures sont enregistrées dans des sous-dossiers datés (AAAA-MM-JJ) dans ce dossier.",
     "autoCopy": "Copier automatiquement dans le presse-papiers",
     "autoSave": "Enregistrer les captures sur le disque",
     "allowExternalControl": "Autoriser le contrôle externe (Raycast, CLI, schéma URL)",
@@ -95,7 +100,8 @@
       "pressShortcut": "Aucun raccourci",
       "recording": "Enregistrement…",
       "pressKeys": "Appuyez sur les touches",
-      "clickToRecord": "Cliquer pour enregistrer"
+      "clickToRecord": "Cliquer pour enregistrer",
+      "footer": "Cliquez sur un raccourci et appuyez sur la nouvelle combinaison de touches. Appuyez sur Échap pour annuler."
     },
     "license": {
       "currentPlan": "Forfait actuel :",
@@ -130,7 +136,21 @@
         "captureActive": "Terminez la capture en cours avant de mettre à jour.",
         "installFailed": "Impossible d'installer la mise à jour."
       }
-    }
+    },
+    "pageDescriptions": {
+      "general": "Choisissez l'apparence de Better Screenshoot et sa langue.",
+      "capture": "Décidez de ce qu'il advient de chaque capture et de son emplacement.",
+      "shortcuts": "Capturez depuis n'importe où grâce aux raccourcis clavier globaux.",
+      "captureMode": "Utilisez Better Screenshoot avec les captures de macOS ou remplacez-les entièrement.",
+      "integrations": "Autorisez Raycast, la CLI et d'autres apps à lancer des captures.",
+      "updates": "Gardez Better Screenshoot à jour avec les dernières améliorations."
+    },
+    "runSetupWizardHint": "Passez en revue les autorisations et préférences étape par étape.",
+    "openSetupWizard": "Ouvrir…",
+    "urlScheme": "Schéma d'URL",
+    "permissionGranted": "Autorisé",
+    "permissionMissing": "Non autorisé",
+    "systemShortcutsTitle": "Raccourcis de capture de macOS"
   },
   "overlay": {
     "regionSelector": "Sélecteur de région de capture",

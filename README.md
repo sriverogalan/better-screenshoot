@@ -1,6 +1,39 @@
-# Better Screenshoot
+<p align="center">
+  <img src="docs/assets/icon.png" width="128" height="128" alt="Better Screenshoot icon">
+</p>
 
-Screenshots with a built-in editor, global shortcuts, and history. **macOS only** for now.
+<h1 align="center">Better Screenshoot</h1>
+
+<p align="center">
+  <strong>Screenshots with a built-in editor, global shortcuts, and history.</strong><br>
+  macOS only · lives in the menu bar · annotate and share in seconds.
+</p>
+
+<p align="center">
+  <a href="#install"><img src="https://img.shields.io/badge/version-0.7.0-0A84FF?style=flat-square" alt="v0.7.0"></a>
+  <a href="#install"><img src="https://img.shields.io/badge/macOS-12%2B-black?style=flat-square" alt="macOS 12+"></a>
+  <a href="#install"><img src="https://img.shields.io/badge/Homebrew-cask-0A84FF?style=flat-square" alt="Homebrew"></a>
+  <a href="https://github.com/sriverogalan/better-screenshoot/issues/new/choose"><img src="https://img.shields.io/badge/Feedback-open%20an%20issue-success?style=flat-square" alt="Feedback"></a>
+</p>
+
+<p align="center">
+  <img src="docs/assets/hero.png" alt="Better Screenshoot product hero" width="920">
+</p>
+
+---
+
+## Demo (macOS)
+
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="Better Screenshoot demo on macOS: menu bar, history, settings, and editor" width="920">
+</p>
+
+<details>
+<summary>MP4 version (smaller download)</summary>
+
+[Download demo.mp4](docs/assets/demo.mp4)
+
+</details>
 
 ## Install
 
@@ -8,100 +41,113 @@ Screenshots with a built-in editor, global shortcuts, and history. **macOS only*
 brew install --cask sriverogalan/tap/better-screenshoot
 ```
 
-To uninstall:
+Uninstall:
 
 ```sh
 brew uninstall --cask better-screenshoot
 ```
 
-> **Requirements:** macOS 12.0 (Monterey) or later · Screen Recording permission (the app guides you through it on first launch)
+> **Requirements:** macOS 12.0 (Monterey) or later · **Screen Recording** permission (the app walks you through it on first launch).
 
-## Use the app
+## How to use
 
-Better Screenshoot opens on launch and lives in the **menu bar**. From there you can capture, open history, or go to settings.
+1. **Install** with Homebrew and open Better Screenshoot (it lives in the menu bar).
+2. **Capture** a region or the full screen from the menu bar panel or with a global shortcut.
+3. **Annotate** in the editor (arrows, shapes, text, highlight, blur), then **Copy and save**.
+4. Files land in your save folder under dated subfolders (`YYYY-MM-DD`). Browse them in **History**.
 
-After capturing, the **editor** opens so you can annotate: arrows, rectangles, text, highlight, freehand stroke, and blur. The capture is copied to the clipboard and optionally saved to disk.
+## Features
 
-### Default shortcuts
+| | |
+|---|---|
+| **Fast capture** | Region or full screen from the menu bar or global shortcuts. |
+| **Instant editor** | Arrows, rectangles, text, highlight, freehand, and blur. |
+| **Organized library** | Saves into your folder with `YYYY-MM-DD` subfolders. |
+| **History** | Reopen past captures anytime. |
+| **Your shortcuts** | Remap hotkeys — optionally replace macOS system captures. |
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/assets/screenshot-menubar.png" alt="Menu bar panel" width="280">
+  &nbsp;
+  <img src="docs/assets/screenshot-history.png" alt="History view" width="420">
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshot-editor.png" alt="Capture editor on macOS" width="720">
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshot-settings.png" alt="macOS-style settings" width="720">
+</p>
+
+## Default shortcuts
 
 | Action | Shortcut |
 |---|---|
-| Capture area | ⌘⇧X |
+| Capture region | ⌘⇧X |
 | Capture screen | ⌘⇧⌥S |
-| Capture window | ⌘⇧⌥W |
 | Open history | ⌘⇧H |
 
-Shortcuts can be changed in **Settings** inside the app.
+Change them anytime in **Settings → Global shortcuts**.
 
-## Troubleshooting
+## Found a bug? Open an issue
 
-### Capture doesn't work
+We care about real multi-monitor setups and day-to-day capture flows. If something breaks:
 
-Go to **System Settings → Privacy & Security → Screen Recording** and enable Better Screenshoot. Restart the app if it was already open.
+1. Install or update via Homebrew.
+2. Reproduce once.
+3. File a report → **[New issue](https://github.com/sriverogalan/better-screenshoot/issues/new/choose)**
 
-### Global shortcuts don't respond
+Please include when you can: macOS version, number of displays, and whether you use app shortcuts or system capture mode.
 
-Add Better Screenshoot under **System Settings → Privacy & Security → Accessibility**.
+### Troubleshooting
+
+**Capture does nothing**  
+System Settings → Privacy & Security → Screen Recording → enable Better Screenshoot. Restart the app if it was already open.
+
+**Global shortcuts do not respond**  
+System Settings → Privacy & Security → Accessibility → add Better Screenshoot.
 
 ---
 
 ## For developers
 
-### Stack
-
-- **Tauri 2** + **Vue 3** + **TypeScript** + **Tailwind CSS**
-- **Rust** (`capture-core`) for native capture
-- **Pinia** for state, **SQLite** for history
-
-### Local development
+**Stack:** Tauri 2 · Vue 3 · TypeScript · Tailwind · Rust (`capture-core`) · Pinia · SQLite
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-### Structure
-
 ```
 apps/desktop/          # Tauri + Vue app
-packages/capture-core/ # Rust capture engine
+packages/capture-core/ # Native capture engine
 packages/shared-types/ # Shared IPC types
-packages/licensing/    # Open core tiers + license validation
+packages/licensing/    # Open core + license validation
 packages/better-screenshoot/ # Raycast extension
 cli/                   # better-screenshoot CLI
 docs/api.md            # URL scheme and CLI
 ```
 
-### Integrations
+Integrations:
 
 ```bash
 open "betterscreenshoot://capture-area"
 better-screenshoot-cli open capture-area
 ```
 
-Raycast extension: `packages/better-screenshoot/` — local dev: `pnpm raycast:dev`.
+Raycast extension: `packages/better-screenshoot/` — `pnpm raycast:dev`.  
+API: [docs/api.md](docs/api.md) · branching: [docs/branching.md](docs/branching.md)
 
-See [docs/api.md](docs/api.md).
+### Publishing a release
 
-### Publishing a new release
-
-1. Bump version in root `package.json` and open a PR to `develop`.
-2. Merge `develop` → `main` via PR (CI must pass).
-3. On `main`, build the DMG locally:
-
-```bash
-cd apps/desktop && pnpm tauri build
-```
-
-4. Compute SHA256 and upload to `sriverogalan/better-screenshoot-releases`:
-
-```bash
-shasum -a 256 target/release/bundle/dmg/*.dmg
-gh release create vX.Y.Z target/release/bundle/dmg/*.dmg --repo sriverogalan/better-screenshoot-releases
-```
-
-5. Update `homebrew-tap/Casks/better-screenshoot.rb` with new version + SHA256 and push to `sriverogalan/homebrew-tap`.
+1. Bump the root `package.json` version and open a PR to `develop`.
+2. Merge `develop` → `main` (CI must pass).
+3. On `main`, build the DMG: `cd apps/desktop && pnpm tauri build`
+4. Upload to `sriverogalan/better-screenshoot-releases` and update the cask in `sriverogalan/homebrew-tap`.
 
 ## License
 
-Open core — Community (OSS) + paid Pro/Cloud/Team tiers.
+Open core — Community (OSS) + paid Pro / Cloud / Team tiers.

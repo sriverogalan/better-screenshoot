@@ -48,7 +48,7 @@ import {
   clearPendingCapture,
   copyImageToClipboard,
   discardCapture,
-  saveImageWithDialog,
+  saveImageToDisk,
   takePendingCapture,
 } from "../lib/tauri";
 
@@ -609,8 +609,7 @@ async function runEditorAction(action: "discard" | "save") {
     const pending = captureStore.current;
 
     if (action === "save") {
-      const saved = await saveImageWithDialog(png);
-      if (!saved) return;
+      await saveImageToDisk(png);
       if (pending?.id && pending.file_path && isEphemeralCapturePath(pending.file_path)) {
         await discardCapture(pending.id, pending.file_path);
       }

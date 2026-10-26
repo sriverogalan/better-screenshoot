@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { IconDownload, IconX } from "@tabler/icons-vue";
+import { IconX } from "@tabler/icons-vue";
+import appIcon from "../assets/app-icon.png";
 import { useAppUpdater } from "../composables/useAppUpdater";
 import AppButton from "./ui/AppButton.vue";
 
@@ -37,43 +38,43 @@ const progressLabel = computed(() => {
 
 <template>
   <div
-    class="fixed inset-x-4 top-4 z-50 rounded-xl border border-accent/40 bg-elev px-4 py-3 text-sm text-fg shadow-window"
+    class="fixed right-3 top-3 z-50 w-[340px] rounded-2xl bg-material p-3 text-body text-fg shadow-popover backdrop-blur-2xl backdrop-saturate-150"
     role="status"
     aria-live="polite"
   >
     <div class="flex items-start gap-3">
-      <IconDownload class="mt-0.5 size-5 shrink-0 text-accent" aria-hidden="true" />
-      <div class="min-w-0 flex-1 space-y-2">
-        <p class="font-medium">
+      <img :src="appIcon" alt="" class="size-9 shrink-0" draggable="false" />
+      <div class="min-w-0 flex-1">
+        <p class="font-semibold">
           {{ t("settings.updates.status.available", { version: updateSummary?.version }) }}
         </p>
-        <p v-if="updateSummary?.notes" class="text-xs text-fg-muted">
+        <p v-if="updateSummary?.notes" class="mt-0.5 line-clamp-3 text-subhead text-fg-muted">
           {{ updateSummary.notes }}
         </p>
-        <p v-if="progressLabel" class="text-xs text-accent">
+        <p v-if="progressLabel" class="mt-0.5 text-subhead text-accent">
           {{ progressLabel }}
         </p>
-        <div class="flex flex-wrap gap-2">
-          <AppButton variant="primary" :disabled="isDownloading" @click="installAvailableUpdate">
+        <div class="mt-2.5 flex flex-wrap gap-2">
+          <AppButton variant="primary" size="sm" :disabled="isDownloading" @click="installAvailableUpdate">
             {{
               isDownloading
                 ? t("settings.updates.downloadingAction")
                 : t("settings.updates.updateNow")
             }}
           </AppButton>
-          <AppButton variant="secondary" :disabled="isDownloading" @click="dismissPrompt">
+          <AppButton size="sm" :disabled="isDownloading" @click="dismissPrompt">
             {{ t("settings.updates.later") }}
           </AppButton>
         </div>
       </div>
       <button
         type="button"
-        class="rounded-md p-1 text-fg-muted hover:bg-sep/40 hover:text-fg disabled:opacity-50"
+        class="flex size-5 items-center justify-center rounded-full text-fg-muted hover:bg-hover hover:text-fg disabled:opacity-40"
         :disabled="isDownloading"
         :aria-label="t('settings.updates.dismissNotification')"
         @click="dismissPrompt"
       >
-        <IconX class="size-4" aria-hidden="true" />
+        <IconX class="size-3.5" stroke-width="2.25" aria-hidden="true" />
       </button>
     </div>
   </div>

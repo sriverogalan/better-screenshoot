@@ -1,9 +1,8 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use tauri::{
-    AppHandle, LogicalSize, Manager, Monitor, PhysicalPosition, PhysicalSize, Position, Size,
-    WebviewWindow,
-};
+use tauri::{AppHandle, LogicalSize, Manager, Monitor, Size, WebviewWindow};
+
+use crate::display_geometry;
 
 static MAIN_RESTORING: AtomicBool = AtomicBool::new(false);
 static MAIN_EDITOR_MODE: AtomicBool = AtomicBool::new(false);
@@ -31,7 +30,7 @@ pub fn reset_editor_presentation_state(window: &WebviewWindow) {
 }
 
 fn resolve_monitor(window: &WebviewWindow) -> Result<Monitor, String> {
-    if let Some(monitor) = monitor_under_cursor(window) {
+    if let Some(monitor) = display_geometry::monitor_under_cursor(window.app_handle()) {
         return Ok(monitor);
     }
 
@@ -45,72 +44,36 @@ fn resolve_monitor(window: &WebviewWindow) -> Result<Monitor, String> {
         .ok_or_else(|| crate::errors::app_error("noMonitorFound"))
 }
 
-/// Monitor containing the cursor (the one the user is using right now).
-fn monitor_under_cursor(window: &WebviewWindow) -> Option<Monitor> {
-    let app = window.app_handle();
-    let cursor = app.cursor_position().ok()?;
-    let monitors = window.available_monitors().ok()?;
-    monitors.into_iter().find(|monitor| {
-        let pos = monitor.position();
-        let size = monitor.size();
-        let x = cursor.x as i32;
-        let y = cursor.y as i32;
-        x >= pos.x && x < pos.x + size.width as i32 && y >= pos.y && y < pos.y + size.height as i32
-    })
-}
-
-/// Moves the editor to the monitor where the cursor is so it appears where the user is working.
-/// Essential on multi-monitor: otherwise the window opens fullscreen on the wrong monitor.
-pub fn move_editor_to_active_monitor(window: &WebviewWindow) -> Result<(), String> {
-    let Some(monitor) = monitor_under_cursor(window) else {
+/// Centers the window on the monitor under the cursor unless it is already there, so it
+/// appears on the screen the user is working on.
+pub fn move_to_active_monitor(window: &WebviewWindow) -> Result<(), String> {
+    let Some(monitor) = display_geometry::monitor_under_cursor(window.app_handle()) else {
         return Ok(());
     };
-
-    let pos = monitor.position();
-    crate::app_trace!(
-        "move_editor_to_active_monitor: monitor en ({}, {})",
-        pos.x,
-        pos.y
-    );
-    window
-        .set_position(Position::Physical(PhysicalPosition { x: pos.x, y: pos.y }))
-        .map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-/// Pantalla completa del editor tras captura.
-/// macOS: `simple_fullscreen` cubre el monitor sin crear un Space nuevo ni dejar el WKWebView en negro.
-pub fn enter_editor_capture_fullscreen(window: &WebviewWindow) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
-    {
-        window
-            .set_simple_fullscreen(true)
-            .map_err(|e| e.to_string())?;
+    if display_geometry::window_is_on_monitor(window, &monitor) {
         return Ok(());
     }
 
-    #[cfg(not(target_os = "macos"))]
-    {
-        window.set_fullscreen(true).map_err(|e| e.to_string())
-    }
+    let Some(bounds) = display_geometry::window_bounds(window) else {
+        return Ok(());
+    };
+    let area = display_geometry::monitor_work_area(&monitor);
+    let (x, y) = display_geometry::centered_origin((bounds.width, bounds.height), area);
+    crate::app_trace!("move_to_active_monitor: {} -> ({x}, {y})", window.label());
+    display_geometry::set_window_origin(window, x, y).map_err(|e| e.to_string())
+}
+
+/// Capture editor “fullscreen”: fill the monitor work area (below the menu bar / notch,
+/// above the Dock) so chrome stays visible on every display.
+pub fn enter_editor_capture_fullscreen(window: &WebviewWindow) -> Result<(), String> {
+    fill_work_area(window)
 }
 
 pub fn fill_work_area(window: &WebviewWindow) -> Result<(), String> {
     let monitor = resolve_monitor(window)?;
-    let work = monitor.work_area();
-    window
-        .set_position(Position::Physical(PhysicalPosition {
-            x: work.position.x,
-            y: work.position.y,
-        }))
-        .map_err(|e| e.to_string())?;
-    window
-        .set_size(Size::Physical(PhysicalSize {
-            width: work.size.width,
-            height: work.size.height,
-        }))
-        .map_err(|e| e.to_string())?;
-    Ok(())
+    let work = display_geometry::monitor_work_area(&monitor);
+    display_geometry::set_window_origin(window, work.x, work.y).map_err(|e| e.to_string())?;
+    display_geometry::set_window_size(window, work.width, work.height).map_err(|e| e.to_string())
 }
 
 pub fn restore_windowed_editor(window: &WebviewWindow) -> Result<(), String> {
@@ -157,6 +120,11 @@ fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
     // (see present_editor_window). Restore them whenever the hub is shown again,
     // otherwise the native traffic-light buttons stay missing for the rest of the session.
     let _ = window.set_decorations(true);
+    // A window the user can already see stays where they put it; a hidden one reappears
+    // on the screen they are working on.
+    if !window.is_visible().unwrap_or(false) {
+        move_to_active_monitor(window)?;
+    }
     Ok(())
 }
 

@@ -18,6 +18,7 @@
     "core:window:allow-close",
     "core:window:allow-set-size",
     "core:window:allow-set-position",
+    "core:window:allow-start-dragging",
     "core:webview:allow-create-webview-window",
     "opener:default",
     "clipboard-manager:default",

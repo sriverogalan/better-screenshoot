@@ -221,46 +221,47 @@ onUnmounted(() => {
       <div
         v-for="(panel, key) in dimPanels"
         :key="key"
-        class="pointer-events-none absolute bg-black/60 backdrop-blur-[1px]"
+        class="pointer-events-none absolute bg-black/45"
         :style="panelStyle(panel)"
       />
     </template>
 
     <div
       v-if="selection && selection.width > 0 && selection.height > 0"
-      class="pointer-events-none absolute border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
+      class="pointer-events-none absolute outline outline-1 outline-white/90 shadow-[0_0_0_1px_rgba(0,0,0,0.25)]"
       :style="selectionStyle"
     >
       <span
-        class="absolute -top-8 left-0 rounded-md bg-black/80 px-2.5 py-1 font-mono text-xs text-white shadow-lg"
+        class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/60 px-2.5 py-1 text-caption font-medium tabular-nums text-white shadow-[0_0_0_.5px_rgb(255_255_255_/_.15),0_4px_12px_rgb(0_0_0_/_.3)] backdrop-blur-xl"
       >
         {{ sizeLabel }}
       </span>
-      <span class="absolute -left-1 -top-1 size-2 rounded-full bg-white shadow" />
-      <span class="absolute -right-1 -top-1 size-2 rounded-full bg-white shadow" />
-      <span class="absolute -bottom-1 -left-1 size-2 rounded-full bg-white shadow" />
-      <span class="absolute -bottom-1 -right-1 size-2 rounded-full bg-white shadow" />
+      <span class="absolute -left-[5px] -top-[5px] size-[9px] rounded-full bg-white shadow-[0_0_0_.5px_rgb(0_0_0_/_.3),0_1px_3px_rgb(0_0_0_/_.4)]" />
+      <span class="absolute -right-[5px] -top-[5px] size-[9px] rounded-full bg-white shadow-[0_0_0_.5px_rgb(0_0_0_/_.3),0_1px_3px_rgb(0_0_0_/_.4)]" />
+      <span class="absolute -bottom-[5px] -left-[5px] size-[9px] rounded-full bg-white shadow-[0_0_0_.5px_rgb(0_0_0_/_.3),0_1px_3px_rgb(0_0_0_/_.4)]" />
+      <span class="absolute -bottom-[5px] -right-[5px] size-[9px] rounded-full bg-white shadow-[0_0_0_.5px_rgb(0_0_0_/_.3),0_1px_3px_rgb(0_0_0_/_.4)]" />
     </div>
 
     <div
       v-if="loading"
-      class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40"
+      class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30"
     >
-      <p class="rounded-full bg-black/70 px-5 py-2.5 text-sm text-white">
+      <p class="flex items-center gap-2 rounded-full bg-black/55 px-4 py-2 text-body text-white shadow-[0_0_0_.5px_rgb(255_255_255_/_.15),0_8px_24px_rgb(0_0_0_/_.35)] backdrop-blur-2xl">
+        <span class="size-3.5 animate-spin rounded-full border-2 border-white/25 border-t-white" aria-hidden="true" />
         {{ t("overlay.preparing") }}
       </p>
     </div>
 
     <p
       v-if="error"
-      class="pointer-events-none absolute inset-x-0 top-8 mx-auto max-w-md rounded-xl bg-red-950/90 px-4 py-3 text-center text-sm text-red-100"
+      class="pointer-events-none absolute inset-x-0 top-8 mx-auto max-w-md rounded-xl bg-black/60 px-4 py-3 text-center text-body text-white shadow-[0_0_0_.5px_rgb(255_59_48_/_.6),0_8px_24px_rgb(0_0_0_/_.35)] backdrop-blur-2xl"
     >
       {{ error }}
     </p>
 
     <p
       v-if="!loading && preview && !error"
-      class="pointer-events-none fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-5 py-2.5 text-sm text-white/90 shadow-lg"
+      class="pointer-events-none fixed bottom-8 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-4 py-2 text-body font-medium text-white/90 shadow-[0_0_0_.5px_rgb(255_255_255_/_.15),0_8px_24px_rgb(0_0_0_/_.35)] backdrop-blur-2xl"
     >
       {{ t("overlay.hint") }}
     </p>

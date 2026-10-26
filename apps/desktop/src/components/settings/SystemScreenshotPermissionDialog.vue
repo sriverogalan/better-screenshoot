@@ -48,27 +48,27 @@ function shortcutLabel(shortcut: SystemScreenshotShortcut) {
     :busy="busy"
     @close="emit('close')"
   >
-    <ul class="space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm">
+    <ul class="divide-y divide-sep overflow-hidden rounded-lg bg-group text-body shadow-[inset_0_0_0_.5px_var(--color-sep)]">
       <li
         v-for="item in replacements"
         :key="item.hotkey"
-        class="flex items-center justify-between gap-3"
+        class="flex min-h-9 items-center justify-between gap-3 px-3 py-1.5"
       >
-        <span class="text-fg-muted">{{ item.action }}</span>
+        <span class="text-fg">{{ item.action }}</span>
         <AppKbd>{{ item.hotkey }}</AppKbd>
       </li>
     </ul>
 
     <ul
       v-if="shortcuts.length > 0"
-      class="mt-3 space-y-2 rounded-lg border border-sep bg-win px-3 py-3 text-sm"
+      class="mt-3 divide-y divide-sep overflow-hidden rounded-lg bg-group text-body shadow-[inset_0_0_0_.5px_var(--color-sep)]"
     >
       <li
         v-for="shortcut in shortcuts"
         :key="shortcut.id"
-        class="flex items-center justify-between gap-3"
+        class="flex min-h-9 items-center justify-between gap-3 px-3 py-1.5"
       >
-        <span class="text-fg-muted">{{ shortcutLabel(shortcut) }}</span>
+        <span class="text-fg">{{ shortcutLabel(shortcut) }}</span>
         <AppBadge :tone="shortcut.enabled ? 'warning' : 'success'">
           {{
             shortcut.enabled
