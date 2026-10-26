@@ -7,15 +7,15 @@ defineProps<{
 </script>
 
 <template>
-  <div class="inline-flex rounded-[var(--radius-control)] bg-field p-0.5 gap-0.5">
+  <div class="inline-flex shrink-0 gap-px rounded-[7px] bg-hover p-[2px] shadow-[inset_0_0_0_.5px_var(--color-sep)]">
     <button
       v-for="option in options"
       :key="option.value"
       type="button"
-      class="rounded-[var(--radius-control)] px-3 py-1 text-sm transition-colors duration-150"
+      class="h-[20px] min-w-16 rounded-[5px] px-3 text-subhead transition-[background-color,color,box-shadow] duration-150"
       :class="
         model === option.value
-          ? 'bg-win text-fg font-medium shadow-sm'
+          ? 'bg-segment font-medium text-fg shadow-control'
           : 'text-fg-muted hover:text-fg'
       "
       :aria-pressed="model === option.value"

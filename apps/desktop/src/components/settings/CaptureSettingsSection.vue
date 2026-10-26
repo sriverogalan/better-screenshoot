@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { IconFolderFilled } from "@tabler/icons-vue";
 import { useSettingsStore } from "../../stores/settings";
 import { pickDirectory } from "../../lib/tauri";
 import SettingsGroup from "../ui/SettingsGroup.vue";
@@ -44,31 +45,42 @@ async function browseFolder() {
 </script>
 
 <template>
-  <SettingsGroup :label="t('settings.sections.capture')">
-    <SettingsRow>
-      <div class="min-w-0 flex-1">
-        <p class="text-sm">{{ t("settings.saveFolder") }}</p>
-        <p class="mt-0.5 truncate text-xs text-fg-muted" :title="settings.save_directory">
-          {{ folderLabel }}
-        </p>
-      </div>
-      <AppButton variant="secondary" :disabled="picking" @click="browseFolder">
-        {{ t("settings.chooseFolder") }}
-      </AppButton>
-    </SettingsRow>
-    <SettingsRow>
-      <span class="text-sm">{{ t("settings.autoCopy") }}</span>
+  <SettingsGroup :label="t('settings.sections.afterCapture')">
+    <SettingsRow :label="t('settings.autoCopy')">
       <AppToggle
         :model-value="settings.auto_copy"
+        :label="t('settings.autoCopy')"
         @update:model-value="updateField('auto_copy', $event)"
       />
     </SettingsRow>
-    <SettingsRow>
-      <span class="text-sm">{{ t("settings.autoSave") }}</span>
+    <SettingsRow :label="t('settings.autoSave')">
       <AppToggle
         :model-value="settings.auto_save"
+        :label="t('settings.autoSave')"
         @update:model-value="updateField('auto_save', $event)"
       />
+    </SettingsRow>
+  </SettingsGroup>
+
+  <SettingsGroup
+    :label="t('settings.saveFolder')"
+    :footer="t('settings.saveFolderHint')"
+  >
+    <SettingsRow>
+      <div class="flex min-w-0 flex-1 items-center gap-2.5">
+        <IconFolderFilled class="size-7 shrink-0 text-sys-blue" aria-hidden="true" />
+        <div class="min-w-0">
+          <p class="truncate text-body text-fg" :title="settings.save_directory">
+            {{ folderLabel }}
+          </p>
+          <p class="truncate text-caption text-fg-muted" :title="settings.save_directory">
+            {{ settings.save_directory }}
+          </p>
+        </div>
+      </div>
+      <AppButton :disabled="picking" @click="browseFolder">
+        {{ t("settings.chooseFolder") }}
+      </AppButton>
     </SettingsRow>
   </SettingsGroup>
 </template>

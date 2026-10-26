@@ -65,41 +65,29 @@ onUnmounted(() => {
 
 <template>
   <div class="flex h-full flex-col">
-    <div class="menubar-arrow" />
     <div
       ref="panelRef"
-      class="menubar-panel flex flex-1 flex-col overflow-hidden rounded-[var(--radius-window)] bg-win/75"
-      style="box-shadow: var(--shadow-window);"
+      class="menubar-panel flex flex-1 flex-col overflow-hidden rounded-[13px] bg-win/30"
     >
       <MenubarActions />
       <MenubarRecents />
+      <div class="flex-1" />
       <MenubarFooter />
     </div>
   </div>
 </template>
 
 <style scoped>
-.menubar-arrow {
-  width: 16px;
-  height: 7px;
-  margin: 0 auto;
-  margin-bottom: -2px;
-  background: var(--color-win);
-  opacity: 0.75;
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  flex-shrink: 0;
-}
-
 .menubar-panel {
   position: relative;
   transform-origin: top center;
-  animation: menubar-in 140ms ease-out;
+  animation: menubar-in 160ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
 }
 
 @keyframes menubar-in {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-4px);
+    transform: scale(0.97) translateY(-4px);
   }
 
   to {

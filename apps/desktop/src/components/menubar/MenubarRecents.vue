@@ -66,8 +66,8 @@ async function openInEditor(item: CaptureRecord) {
 }
 
 function openContextMenu(event: MouseEvent, item: CaptureRecord) {
-  const menuWidth = 168;
-  const menuHeight = 128;
+  const menuWidth = 200;
+  const menuHeight = 96;
   contextMenu.value = {
     x: Math.min(event.clientX, window.innerWidth - menuWidth - 8),
     y: Math.min(event.clientY, window.innerHeight - menuHeight - 8),
@@ -102,14 +102,17 @@ function onThumbnailDragStart(item: CaptureRecord) {
 </script>
 
 <template>
-  <div class="border-t border-sep px-2.5 py-2.5">
-    <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+  <div class="px-2.5 pb-2">
+    <p class="px-1 pb-1.5 text-caption font-semibold text-fg-muted">
       {{ t("menubar.recentCaptures") }}
     </p>
 
-    <div v-if="recents.length === 0" class="flex flex-col items-center gap-1.5 py-3">
-      <IconPhotoOff class="size-5 text-fg-muted opacity-60" />
-      <p class="text-xs text-fg-muted">{{ t("history.empty") }}</p>
+    <div
+      v-if="recents.length === 0"
+      class="flex flex-col items-center gap-1.5 rounded-xl bg-tile py-5 shadow-[inset_0_0_0_.5px_var(--color-sep)]"
+    >
+      <IconPhotoOff class="size-5 text-fg-tertiary" stroke-width="1.5" />
+      <p class="text-subhead text-fg-muted">{{ t("history.empty") }}</p>
     </div>
 
     <div v-else class="grid grid-cols-3 gap-1.5">
@@ -118,7 +121,8 @@ function onThumbnailDragStart(item: CaptureRecord) {
         :key="item.id"
         type="button"
         draggable="true"
-        class="aspect-video overflow-hidden rounded-lg bg-elev transition-opacity hover:opacity-80"
+        class="aspect-[16/10] overflow-hidden rounded-lg bg-tile shadow-[0_0_0_.5px_var(--color-sep)] outline-none transition-[transform,box-shadow] duration-100 hover:shadow-[0_0_0_2px_var(--color-accent)] focus-visible:shadow-[0_0_0_2px_var(--color-accent)] active:scale-[.96]"
+        :class="contextMenu?.item.id === item.id ? 'shadow-[0_0_0_2px_var(--color-accent)]' : undefined"
         :title="t('history.openCaptureInEditor', { width: item.width, height: item.height })"
         @click="openInEditor(item)"
         @contextmenu.prevent="openContextMenu($event, item)"
@@ -137,35 +141,39 @@ function onThumbnailDragStart(item: CaptureRecord) {
 
     <div
       v-if="contextMenu"
-      class="fixed z-50 min-w-[168px] rounded-lg border border-sep bg-elev p-1 shadow-window"
+      class="fixed z-50 w-[200px] rounded-[9px] bg-material p-[5px] text-body shadow-popover backdrop-blur-2xl"
       :style="{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }"
+      role="menu"
     >
       <button
         type="button"
-        class="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-fg hover:bg-win transition-colors"
+        role="menuitem"
+        class="flex h-6 w-full items-center gap-2 rounded-[5px] px-2 text-fg hover:bg-accent hover:text-white"
         @click="copyToClipboard(contextMenu.item)"
       >
-        <IconCopy class="size-4 shrink-0" />
+        <IconCopy class="size-4 shrink-0" stroke-width="1.75" />
         {{ t("menubar.copy") }}
       </button>
 
       <button
         type="button"
-        class="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-fg hover:bg-win transition-colors"
+        role="menuitem"
+        class="flex h-6 w-full items-center gap-2 rounded-[5px] px-2 text-fg hover:bg-accent hover:text-white"
         @click="revealInFinder(contextMenu.item)"
       >
-        <IconFolderOpen class="size-4 shrink-0" />
+        <IconFolderOpen class="size-4 shrink-0" stroke-width="1.75" />
         {{ t("menubar.revealInFinder") }}
       </button>
 
-      <div class="my-1 border-t border-sep"></div>
+      <div class="mx-2 my-[5px] h-px bg-sep" role="separator" />
 
       <button
         type="button"
-        class="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-sm text-danger hover:bg-win transition-colors"
+        role="menuitem"
+        class="flex h-6 w-full items-center gap-2 rounded-[5px] px-2 text-danger hover:bg-accent hover:text-white"
         @click="deleteCapture(contextMenu.item)"
       >
-        <IconTrash class="size-4 shrink-0" />
+        <IconTrash class="size-4 shrink-0" stroke-width="1.75" />
         {{ t("history.deleteCapture") }}
       </button>
     </div>

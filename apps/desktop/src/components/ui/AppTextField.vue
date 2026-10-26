@@ -32,7 +32,7 @@ defineEmits<{
     :placeholder="placeholder"
     :disabled="disabled"
     :readonly="readonly"
-    class="w-full rounded-[var(--radius-control)] border border-sep bg-field px-3 py-2 text-sm text-fg outline-none transition-colors placeholder:text-fg-muted focus-visible:border-accent disabled:cursor-not-allowed disabled:opacity-60"
+    class="h-7 w-full rounded-[var(--radius-control)] bg-field px-2.5 text-body text-fg shadow-control outline-none transition-shadow placeholder:text-fg-tertiary focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-accent)_45%,transparent)] disabled:opacity-40"
     :class="mono ? 'font-mono' : undefined"
     @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     @change="$emit('change', ($event.target as HTMLInputElement).value)"

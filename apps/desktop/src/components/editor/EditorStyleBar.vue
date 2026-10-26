@@ -54,10 +54,10 @@ function isLightColor(hex: string) {
 <template>
   <div
     v-if="isVisible"
-    class="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-sep bg-win/60 px-4 py-2 backdrop-blur-md"
+    class="relative z-[5] flex h-11 shrink-0 items-center justify-center gap-4 overflow-x-auto bg-win/95 px-4 shadow-[0_.5px_0_var(--color-sep)]"
   >
-    <template v-if="showColor">
-      <span class="text-[11px] font-medium uppercase tracking-wide text-fg-muted">
+    <div v-if="showColor" class="flex items-center gap-2.5">
+      <span class="text-caption font-medium text-fg-muted">
         {{ t("editor.style.color") }}
       </span>
       <div class="flex items-center gap-1.5">
@@ -65,11 +65,11 @@ function isLightColor(hex: string) {
           v-for="color in COLOR_PRESETS"
           :key="color"
           type="button"
-          class="relative flex size-5 items-center justify-center rounded-full transition-transform duration-150 hover:scale-110"
+          class="relative flex size-[22px] items-center justify-center rounded-full transition-transform duration-100 active:scale-90"
           :class="
             props.style.stroke === color
-              ? 'ring-2 ring-accent ring-offset-2 ring-offset-win'
-              : 'shadow-[inset_0_0_0_1px_rgb(0_0_0_/_.2)]'
+              ? 'shadow-[0_0_0_2px_var(--color-win),0_0_0_4px_var(--color-fg-muted)]'
+              : 'shadow-[inset_0_0_0_.5px_rgb(0_0_0_/_.25)] hover:scale-110'
           "
           :style="{ backgroundColor: color }"
           :aria-label="t('editor.style.colorAria', { color })"
@@ -78,32 +78,33 @@ function isLightColor(hex: string) {
         >
           <IconCheck
             v-if="props.style.stroke === color"
-            class="size-2.5"
-            :class="isLightColor(color) ? 'text-black/80' : 'text-white'"
+            class="size-3"
+            :class="isLightColor(color) ? 'text-black/75' : 'text-white'"
             stroke-width="3"
           />
         </button>
       </div>
-    </template>
+    </div>
 
-    <template v-if="showThickness">
-      <span
-        v-if="showColor"
-        class="hidden h-4 w-px bg-sep sm:block"
-        aria-hidden="true"
-      />
-      <span class="text-[11px] font-medium uppercase tracking-wide text-fg-muted">
+    <span
+      v-if="showColor && (showThickness || showFont)"
+      class="h-5 w-px shrink-0 bg-sep"
+      aria-hidden="true"
+    />
+
+    <div v-if="showThickness" class="flex items-center gap-2.5">
+      <span class="text-caption font-medium text-fg-muted">
         {{ t("editor.style.thickness") }}
       </span>
-      <div class="inline-flex items-center gap-0.5 rounded-[var(--radius-control)] bg-field p-0.5">
+      <div class="inline-flex items-center gap-px rounded-[7px] bg-hover p-[2px] shadow-[inset_0_0_0_.5px_var(--color-sep)]">
         <button
           v-for="width in STROKE_WIDTHS"
           :key="width"
           type="button"
-          class="flex h-7 min-w-8 items-center justify-center rounded-[calc(var(--radius-control)-2px)] px-2 transition-colors duration-150"
+          class="flex h-6 w-9 items-center justify-center rounded-[5px] transition-colors duration-100"
           :class="
             props.style.strokeWidth === width
-              ? 'bg-elev text-fg shadow-sm'
+              ? 'bg-segment text-fg shadow-control'
               : 'text-fg-muted hover:text-fg'
           "
           :aria-pressed="props.style.strokeWidth === width"
@@ -113,32 +114,27 @@ function isLightColor(hex: string) {
           <span
             class="block rounded-full bg-current"
             :style="{
-              width: `${6 + width * 2}px`,
-              height: `${Math.max(2, width)}px`,
+              width: '18px',
+              height: `${Math.max(1.5, width * 0.9)}px`,
             }"
           />
         </button>
       </div>
-    </template>
+    </div>
 
-    <template v-if="showFont">
-      <span
-        v-if="showColor"
-        class="hidden h-4 w-px bg-sep sm:block"
-        aria-hidden="true"
-      />
-      <span class="text-[11px] font-medium uppercase tracking-wide text-fg-muted">
+    <div v-if="showFont" class="flex items-center gap-2.5">
+      <span class="text-caption font-medium text-fg-muted">
         {{ t("editor.style.font") }}
       </span>
-      <div class="inline-flex items-center gap-0.5 rounded-[var(--radius-control)] bg-field p-0.5">
+      <div class="inline-flex items-center gap-px rounded-[7px] bg-hover p-[2px] shadow-[inset_0_0_0_.5px_var(--color-sep)]">
         <button
           v-for="size in FONT_SIZES"
           :key="size"
           type="button"
-          class="h-7 min-w-8 rounded-[calc(var(--radius-control)-2px)] px-2 text-xs tabular-nums transition-colors duration-150"
+          class="h-6 min-w-9 rounded-[5px] px-2 text-subhead tabular-nums transition-colors duration-100"
           :class="
             props.style.fontSize === size
-              ? 'bg-elev font-medium text-fg shadow-sm'
+              ? 'bg-segment font-medium text-fg shadow-control'
               : 'text-fg-muted hover:text-fg'
           "
           :aria-pressed="props.style.fontSize === size"
@@ -147,6 +143,6 @@ function isLightColor(hex: string) {
           {{ size }}
         </button>
       </div>
-    </template>
+    </div>
   </div>
 </template>

@@ -108,7 +108,7 @@ function onKeydown(event: KeyboardEvent) {
     ref="textareaRef"
     :value="editor.value"
     rows="1"
-    class="pointer-events-auto absolute z-20 resize-none overflow-hidden rounded-md border-2 border-accent bg-field/95 px-2 py-1 shadow-lg outline-none ring-2 ring-accent/30 placeholder:text-fg-muted"
+    class="pointer-events-auto absolute z-20 resize-none overflow-hidden rounded-[5px] bg-elev/95 px-2 py-1 shadow-[0_0_0_2px_var(--color-accent),0_6px_20px_rgb(0_0_0_/_.3)] outline-none backdrop-blur-md placeholder:text-fg-tertiary"
     :style="editorStyle"
     :placeholder="t('editor.textPlaceholder')"
     :aria-label="t('editor.editAnnotationText')"

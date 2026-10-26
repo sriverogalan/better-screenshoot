@@ -3,6 +3,7 @@ mod capture_prep;
 mod capture_session;
 mod commands;
 mod deep_link;
+mod display_geometry;
 mod errors;
 mod shortcuts;
 mod state;
