@@ -57,10 +57,12 @@ pub fn downscale_for_preview(image: image::RgbaImage) -> image::RgbaImage {
     )
 }
 
-pub fn encode_jpeg_preview(image: &image::RgbaImage) -> CaptureResult<Vec<u8>> {
+pub const EXPORT_JPEG_QUALITY: u8 = 82;
+
+pub fn encode_jpeg_quality(image: &image::RgbaImage, quality: u8) -> CaptureResult<Vec<u8>> {
     let rgb = image::DynamicImage::ImageRgba8(image.clone()).into_rgb8();
     let mut buffer = Vec::new();
-    let mut encoder = JpegEncoder::new_with_quality(&mut buffer, PREVIEW_JPEG_QUALITY);
+    let mut encoder = JpegEncoder::new_with_quality(&mut buffer, quality.clamp(1, 100));
     encoder
         .encode(
             rgb.as_raw(),
@@ -70,6 +72,16 @@ pub fn encode_jpeg_preview(image: &image::RgbaImage) -> CaptureResult<Vec<u8>> {
         )
         .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
     Ok(buffer)
+}
+
+pub fn encode_jpeg_preview(image: &image::RgbaImage) -> CaptureResult<Vec<u8>> {
+    encode_jpeg_quality(image, PREVIEW_JPEG_QUALITY)
+}
+
+pub fn jpeg_from_png_bytes(png_bytes: &[u8], quality: u8) -> CaptureResult<Vec<u8>> {
+    let img = image::load_from_memory(png_bytes)
+        .map_err(|e| CaptureError::CaptureFailed(e.to_string()))?;
+    encode_jpeg_quality(&img.to_rgba8(), quality)
 }
 
 pub fn encode_cropped_png(cropped: image::RgbaImage) -> CaptureResult<CaptureImage> {

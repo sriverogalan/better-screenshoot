@@ -65,6 +65,8 @@ type AnnotationLayerNode = {
 };
 
 const blurImages = ref<Map<string, HTMLImageElement>>(new Map());
+/** Bumps when a blur mosaic finishes loading so Konva re-renders the image node. */
+const blurImageVersion = ref(0);
 
 const stageCursor = computed(() => {
   switch (props.activeTool) {
@@ -117,14 +119,28 @@ function onImageHitMouseDown(event: { target: KonvaNode }) {
   emit("imagePointerDown", pos);
 }
 
-function getBlurImage(annotation: Annotation): HTMLImageElement | null {
-  if (!annotation.blurImageDataUrl) return null;
-  const cached = blurImages.value.get(annotation.id);
-  if (cached) return cached;
+function cacheBlurImage(id: string, dataUrl: string): HTMLImageElement {
+  const existing = blurImages.value.get(id);
+  if (existing?.dataset.dataUrl === dataUrl) return existing;
+
   const img = new Image();
-  img.src = annotation.blurImageDataUrl;
-  blurImages.value.set(annotation.id, img);
+  img.dataset.dataUrl = dataUrl;
+  img.onload = () => {
+    blurImageVersion.value += 1;
+  };
+  img.src = dataUrl;
+  blurImages.value.set(id, img);
+  if (img.complete) {
+    blurImageVersion.value += 1;
+  }
   return img;
+}
+
+function getBlurImage(annotation: Annotation): HTMLImageElement | null {
+  // Depend on version so template re-evaluates after async decode.
+  void blurImageVersion.value;
+  if (!annotation.blurImageDataUrl) return null;
+  return cacheBlurImage(annotation.id, annotation.blurImageDataUrl);
 }
 
 watch(
@@ -135,10 +151,8 @@ watch(
       if (!ids.has(id)) blurImages.value.delete(id);
     }
     for (const annotation of blurAnnotations) {
-      if (annotation.blurImageDataUrl && !blurImages.value.has(annotation.id)) {
-        const img = new Image();
-        img.src = annotation.blurImageDataUrl;
-        blurImages.value.set(annotation.id, img);
+      if (annotation.blurImageDataUrl) {
+        cacheBlurImage(annotation.id, annotation.blurImageDataUrl);
       }
     }
   },

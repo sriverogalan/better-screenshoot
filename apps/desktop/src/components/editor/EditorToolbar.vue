@@ -7,6 +7,7 @@ import {
   IconArrowRight,
   IconBlur,
   IconCopy,
+  IconFileZip,
   IconHighlight,
   IconPencil,
   IconPointer,
@@ -14,10 +15,12 @@ import {
   IconTypography,
 } from "@tabler/icons-vue";
 import type { Tool } from "../../lib/editor/types";
+import { formatBytes } from "../../lib/format-bytes";
 import AppButton from "../ui/AppButton.vue";
+import AppTooltip from "../ui/AppTooltip.vue";
 import AlertBanner from "../ui/AlertBanner.vue";
 
-defineProps<{
+const props = defineProps<{
   activeTool: Tool;
   actionBusy: boolean;
   actionError: string | null;
@@ -28,10 +31,15 @@ defineProps<{
   imageHeight: number;
   zoomPercent: number;
   hasCapture: boolean;
+  compress: boolean;
+  pngBytes: number | null;
+  jpegBytes: number | null;
+  sizesBusy: boolean;
 }>();
 
 const emit = defineEmits<{
   "update:activeTool": [tool: Tool];
+  "update:compress": [value: boolean];
   undo: [];
   redo: [];
   copyAndDiscard: [];
@@ -49,6 +57,16 @@ const tools = computed(() => [
   { id: "pen" as const, label: t("editor.tools.pen"), icon: IconPencil, shortcut: "P" },
   { id: "blur" as const, label: t("editor.tools.blur"), icon: IconBlur, shortcut: "B" },
 ]);
+
+const sizeLabel = computed(() => {
+  if (props.pngBytes == null || props.jpegBytes == null) {
+    return props.sizesBusy ? t("editor.compress.estimating") : null;
+  }
+  return t("editor.compress.sizes", {
+    png: formatBytes(props.pngBytes),
+    jpeg: formatBytes(props.jpegBytes),
+  });
+});
 </script>
 
 <template>
@@ -79,50 +97,84 @@ const tools = computed(() => [
           role="toolbar"
           :aria-label="t('editor.title')"
         >
-          <button
+          <AppTooltip
             v-for="tool in tools"
             :key="tool.id"
-            type="button"
-            class="flex h-[26px] w-[30px] items-center justify-center rounded-[5px] transition-[background-color,color] duration-100"
-            :class="
-              activeTool === tool.id
-                ? 'bg-segment text-accent shadow-control'
-                : 'text-fg-muted hover:bg-hover hover:text-fg'
-            "
-            :aria-label="`${tool.label} (${tool.shortcut})`"
-            :aria-pressed="activeTool === tool.id"
-            :title="`${tool.label} (${tool.shortcut})`"
-            @click="emit('update:activeTool', tool.id)"
+            :label="tool.label"
+            :shortcut="tool.shortcut"
           >
-            <component :is="tool.icon" class="size-[17px]" stroke-width="1.75" />
-          </button>
+            <button
+              type="button"
+              class="flex h-[26px] w-[30px] items-center justify-center rounded-[5px] transition-[background-color,color] duration-100"
+              :class="
+                activeTool === tool.id
+                  ? 'bg-segment text-accent shadow-control'
+                  : 'text-fg-muted hover:bg-hover hover:text-fg'
+              "
+              :aria-label="`${tool.label} (${tool.shortcut})`"
+              :aria-pressed="activeTool === tool.id"
+              @click="emit('update:activeTool', tool.id)"
+            >
+              <component :is="tool.icon" class="size-[17px]" stroke-width="1.75" />
+            </button>
+          </AppTooltip>
         </div>
 
         <div class="flex items-center">
-          <button
-            type="button"
-            class="flex h-[26px] w-[30px] items-center justify-center rounded-[5px] text-fg-muted transition-colors hover:bg-hover hover:text-fg disabled:opacity-30 disabled:hover:bg-transparent"
-            :disabled="!canUndo"
-            :aria-label="t('editor.undo')"
-            :title="`${t('editor.undo')} (⌘Z)`"
-            @click="emit('undo')"
-          >
-            <IconArrowBackUp class="size-[17px]" stroke-width="1.75" />
-          </button>
-          <button
-            type="button"
-            class="flex h-[26px] w-[30px] items-center justify-center rounded-[5px] text-fg-muted transition-colors hover:bg-hover hover:text-fg disabled:opacity-30 disabled:hover:bg-transparent"
-            :disabled="!canRedo"
-            :aria-label="t('editor.redo')"
-            :title="`${t('editor.redo')} (⇧⌘Z)`"
-            @click="emit('redo')"
-          >
-            <IconArrowForwardUp class="size-[17px]" stroke-width="1.75" />
-          </button>
+          <AppTooltip :label="t('editor.undo')" shortcut="⌘Z" :disabled="!canUndo">
+            <button
+              type="button"
+              class="flex h-[26px] w-[30px] items-center justify-center rounded-[5px] text-fg-muted transition-colors hover:bg-hover hover:text-fg disabled:opacity-30 disabled:hover:bg-transparent"
+              :disabled="!canUndo"
+              :aria-label="t('editor.undo')"
+              @click="emit('undo')"
+            >
+              <IconArrowBackUp class="size-[17px]" stroke-width="1.75" />
+            </button>
+          </AppTooltip>
+          <AppTooltip :label="t('editor.redo')" shortcut="⇧⌘Z" :disabled="!canRedo">
+            <button
+              type="button"
+              class="flex h-[26px] w-[30px] items-center justify-center rounded-[5px] text-fg-muted transition-colors hover:bg-hover hover:text-fg disabled:opacity-30 disabled:hover:bg-transparent"
+              :disabled="!canRedo"
+              :aria-label="t('editor.redo')"
+              @click="emit('redo')"
+            >
+              <IconArrowForwardUp class="size-[17px]" stroke-width="1.75" />
+            </button>
+          </AppTooltip>
         </div>
       </div>
 
       <div class="flex flex-1 shrink-0 items-center justify-end gap-2">
+        <AppTooltip
+          :label="compress ? t('editor.compress.on') : t('editor.compress.off')"
+          :disabled="!canExport"
+        >
+          <button
+            type="button"
+            class="inline-flex h-[26px] items-center gap-1.5 rounded-[5px] px-2 text-caption transition-colors disabled:opacity-30"
+            :class="
+              compress
+                ? 'bg-segment text-accent shadow-control'
+                : 'text-fg-muted hover:bg-hover hover:text-fg'
+            "
+            :disabled="actionBusy || !canExport"
+            :aria-pressed="compress"
+            :aria-label="t('editor.compress.label')"
+            @click="emit('update:compress', !compress)"
+          >
+            <IconFileZip class="size-[15px]" stroke-width="1.75" />
+            <span class="hidden whitespace-nowrap sm:inline">{{ t("editor.compress.label") }}</span>
+          </button>
+        </AppTooltip>
+        <span
+          v-if="sizeLabel && canExport"
+          class="hidden max-w-[160px] truncate text-caption tabular-nums text-fg-muted lg:inline"
+          :title="sizeLabel"
+        >
+          {{ sizeLabel }}
+        </span>
         <AppButton
           :disabled="actionBusy || !canExport"
           @click="emit('copyAndDiscard')"

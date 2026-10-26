@@ -13,7 +13,7 @@ import { useEditorLayout } from "../composables/useEditorLayout";
 import { useEditorEvents } from "../composables/useEditorEvents";
 import { useEditorLifecycle } from "../composables/useEditorLifecycle";
 import { useEditorShortcuts } from "../composables/useEditorShortcuts";
-import { createBlurredRegionDataUrl } from "../lib/editor/blur";
+import { createPixelatedRegionDataUrl } from "../lib/editor/blur";
 import { isCaptureSessionReady } from "../lib/editor/capture-session";
 import type { KonvaNode } from "../lib/editor/konva";
 import type {
@@ -48,6 +48,8 @@ import {
   clearPendingCapture,
   copyImageToClipboard,
   discardCapture,
+  encodePngToJpeg,
+  estimateImageSizes,
   saveImageToDisk,
   takePendingCapture,
 } from "../lib/tauri";
@@ -67,6 +69,12 @@ const draft = ref<DraftAnnotation | null>(null);
 const textEditor = ref<TextEditorState | null>(null);
 const actionBusy = ref(false);
 const actionError = ref<string | null>(null);
+const compressExport = ref(false);
+const exportPngBytes = ref<number | null>(null);
+const exportJpegBytes = ref<number | null>(null);
+const sizesBusy = ref(false);
+let sizesEstimateTimer: ReturnType<typeof setTimeout> | null = null;
+let sizesEstimateToken = 0;
 
 const FULLSCREEN_LAYOUT_DELAY_MS = 150;
 
@@ -355,7 +363,7 @@ async function finalizeActiveDraft(): Promise<boolean> {
   if (isAnnotationTooSmall(currentDraft)) return false;
 
   if (currentDraft.tool === "blur" && konvaImage.value) {
-    const dataUrl = await createBlurredRegionDataUrl(
+    const dataUrl = await createPixelatedRegionDataUrl(
       konvaImage.value,
       currentDraft.x,
       currentDraft.y,
@@ -534,6 +542,44 @@ async function exportPngBase64(): Promise<string> {
   );
 }
 
+async function refreshExportSizeEstimates() {
+  if (!konvaImage.value || !canvasRef.value?.getAnnotationLayer()) {
+    exportPngBytes.value = null;
+    exportJpegBytes.value = null;
+    return;
+  }
+
+  const token = ++sizesEstimateToken;
+  sizesBusy.value = true;
+  try {
+    await prepareForExport();
+    const png = await exportPngBase64();
+    if (token !== sizesEstimateToken) return;
+    const estimate = await estimateImageSizes(png);
+    if (token !== sizesEstimateToken) return;
+    exportPngBytes.value = estimate.pngBytes;
+    exportJpegBytes.value = estimate.jpegBytes;
+  } catch {
+    if (token !== sizesEstimateToken) return;
+    exportPngBytes.value = null;
+    exportJpegBytes.value = null;
+  } finally {
+    if (token === sizesEstimateToken) {
+      sizesBusy.value = false;
+    }
+  }
+}
+
+function scheduleExportSizeEstimates() {
+  if (sizesEstimateTimer !== null) {
+    clearTimeout(sizesEstimateTimer);
+  }
+  sizesEstimateTimer = setTimeout(() => {
+    sizesEstimateTimer = null;
+    void refreshExportSizeEstimates();
+  }, 450);
+}
+
 function resetInteractionState() {
   textEditor.value = null;
   selectedId.value = null;
@@ -604,12 +650,15 @@ async function runEditorAction(action: "discard" | "save") {
   try {
     await prepareForExport();
     const png = await exportPngBase64();
-    await copyImageToClipboard(png);
+    const payload = compressExport.value
+      ? await encodePngToJpeg(png)
+      : png;
+    await copyImageToClipboard(payload);
 
     const pending = captureStore.current;
 
     if (action === "save") {
-      await saveImageToDisk(png);
+      await saveImageToDisk(payload);
       if (pending?.id && pending.file_path && isEphemeralCapturePath(pending.file_path)) {
         await discardCapture(pending.id, pending.file_path);
       }
@@ -660,6 +709,15 @@ useEditorShortcuts({
   isTextEditing: () => textEditor.value !== null,
 });
 
+watch(
+  [() => annotations.value.length, imagePreviewSrc, () => history.value.length],
+  () => {
+    if (imagePreviewSrc.value) {
+      scheduleExportSizeEstimates();
+    }
+  },
+);
+
 onMounted(async () => {
   const win = getCurrentWindow();
   if (isCaptureSurfaceWindow(win.label)) {
@@ -683,9 +741,18 @@ onMounted(async () => {
   if (captureStore.current && history.value.length === 0) {
     initHistory();
   }
+
+  if (imagePreviewSrc.value) {
+    scheduleExportSizeEstimates();
+  }
 });
 
 onUnmounted(() => {
+  if (sizesEstimateTimer !== null) {
+    clearTimeout(sizesEstimateTimer);
+    sizesEstimateTimer = null;
+  }
+  sizesEstimateToken += 1;
   events.cleanup();
   lifecycle.cleanup();
 });
@@ -704,7 +771,12 @@ onUnmounted(() => {
       :image-height="displayLayout.imageHeight"
       :zoom-percent="displayLayout.zoomPercent"
       :has-capture="!!captureStore.current"
+      :compress="compressExport"
+      :png-bytes="exportPngBytes"
+      :jpeg-bytes="exportJpegBytes"
+      :sizes-busy="sizesBusy"
       @update:active-tool="setTool"
+      @update:compress="compressExport = $event"
       @undo="handleUndo"
       @redo="handleRedo"
       @copy-and-discard="handleCopyAndDiscard"

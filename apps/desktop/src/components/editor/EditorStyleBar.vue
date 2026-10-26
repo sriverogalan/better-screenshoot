@@ -8,6 +8,7 @@ import {
   FONT_SIZES,
   STROKE_WIDTHS,
 } from "../../lib/editor/types";
+import AppTooltip from "../ui/AppTooltip.vue";
 
 const props = defineProps<{
   style: EditorStyle;
@@ -61,28 +62,32 @@ function isLightColor(hex: string) {
         {{ t("editor.style.color") }}
       </span>
       <div class="flex items-center gap-1.5">
-        <button
+        <AppTooltip
           v-for="color in COLOR_PRESETS"
           :key="color"
-          type="button"
-          class="relative flex size-[22px] items-center justify-center rounded-full transition-transform duration-100 active:scale-90"
-          :class="
-            props.style.stroke === color
-              ? 'shadow-[0_0_0_2px_var(--color-win),0_0_0_4px_var(--color-fg-muted)]'
-              : 'shadow-[inset_0_0_0_.5px_rgb(0_0_0_/_.25)] hover:scale-110'
-          "
-          :style="{ backgroundColor: color }"
-          :aria-label="t('editor.style.colorAria', { color })"
-          :aria-pressed="props.style.stroke === color"
-          @click="emit('update:stroke', color)"
+          :label="t('editor.style.colorAria', { color })"
         >
-          <IconCheck
-            v-if="props.style.stroke === color"
-            class="size-3"
-            :class="isLightColor(color) ? 'text-black/75' : 'text-white'"
-            stroke-width="3"
-          />
-        </button>
+          <button
+            type="button"
+            class="relative flex size-[22px] items-center justify-center rounded-full transition-transform duration-100 active:scale-90"
+            :class="
+              props.style.stroke === color
+                ? 'shadow-[0_0_0_2px_var(--color-win),0_0_0_4px_var(--color-fg-muted)]'
+                : 'shadow-[inset_0_0_0_.5px_rgb(0_0_0_/_.25)] hover:scale-110'
+            "
+            :style="{ backgroundColor: color }"
+            :aria-label="t('editor.style.colorAria', { color })"
+            :aria-pressed="props.style.stroke === color"
+            @click="emit('update:stroke', color)"
+          >
+            <IconCheck
+              v-if="props.style.stroke === color"
+              class="size-3"
+              :class="isLightColor(color) ? 'text-black/75' : 'text-white'"
+              stroke-width="3"
+            />
+          </button>
+        </AppTooltip>
       </div>
     </div>
 
@@ -97,28 +102,32 @@ function isLightColor(hex: string) {
         {{ t("editor.style.thickness") }}
       </span>
       <div class="inline-flex items-center gap-px rounded-[7px] bg-hover p-[2px] shadow-[inset_0_0_0_.5px_var(--color-sep)]">
-        <button
+        <AppTooltip
           v-for="width in STROKE_WIDTHS"
           :key="width"
-          type="button"
-          class="flex h-6 w-9 items-center justify-center rounded-[5px] transition-colors duration-100"
-          :class="
-            props.style.strokeWidth === width
-              ? 'bg-segment text-fg shadow-control'
-              : 'text-fg-muted hover:text-fg'
-          "
-          :aria-pressed="props.style.strokeWidth === width"
-          :aria-label="`${t('editor.style.thickness')} ${width}`"
-          @click="emit('update:strokeWidth', width)"
+          :label="`${t('editor.style.thickness')} ${width}`"
         >
-          <span
-            class="block rounded-full bg-current"
-            :style="{
-              width: '18px',
-              height: `${Math.max(1.5, width * 0.9)}px`,
-            }"
-          />
-        </button>
+          <button
+            type="button"
+            class="flex h-6 w-9 items-center justify-center rounded-[5px] transition-colors duration-100"
+            :class="
+              props.style.strokeWidth === width
+                ? 'bg-segment text-fg shadow-control'
+                : 'text-fg-muted hover:text-fg'
+            "
+            :aria-pressed="props.style.strokeWidth === width"
+            :aria-label="`${t('editor.style.thickness')} ${width}`"
+            @click="emit('update:strokeWidth', width)"
+          >
+            <span
+              class="block rounded-full bg-current"
+              :style="{
+                width: '18px',
+                height: `${Math.max(1.5, width * 0.9)}px`,
+              }"
+            />
+          </button>
+        </AppTooltip>
       </div>
     </div>
 
@@ -127,21 +136,26 @@ function isLightColor(hex: string) {
         {{ t("editor.style.font") }}
       </span>
       <div class="inline-flex items-center gap-px rounded-[7px] bg-hover p-[2px] shadow-[inset_0_0_0_.5px_var(--color-sep)]">
-        <button
+        <AppTooltip
           v-for="size in FONT_SIZES"
           :key="size"
-          type="button"
-          class="h-6 min-w-9 rounded-[5px] px-2 text-subhead tabular-nums transition-colors duration-100"
-          :class="
-            props.style.fontSize === size
-              ? 'bg-segment font-medium text-fg shadow-control'
-              : 'text-fg-muted hover:text-fg'
-          "
-          :aria-pressed="props.style.fontSize === size"
-          @click="emit('update:fontSize', size)"
+          :label="`${t('editor.style.font')} ${size}`"
         >
-          {{ size }}
-        </button>
+          <button
+            type="button"
+            class="h-6 min-w-9 rounded-[5px] px-2 text-subhead tabular-nums transition-colors duration-100"
+            :class="
+              props.style.fontSize === size
+                ? 'bg-segment font-medium text-fg shadow-control'
+                : 'text-fg-muted hover:text-fg'
+            "
+            :aria-pressed="props.style.fontSize === size"
+            :aria-label="`${t('editor.style.font')} ${size}`"
+            @click="emit('update:fontSize', size)"
+          >
+            {{ size }}
+          </button>
+        </AppTooltip>
       </div>
     </div>
   </div>

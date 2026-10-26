@@ -164,7 +164,7 @@
     "copyAndSave": "Kopieren und speichern",
     "undo": "Rückgängig",
     "redo": "Wiederholen",
-    "shortcutHint": "V Auswahl · A Pfeil · R Rechteck · T Text · H Markierung · P Stift · B Unschärfe",
+    "shortcutHint": "V Auswahl · A Pfeil · R Rechteck · T Text · H Markierung · P Stift · B Pixeln",
     "tools": {
       "select": "Auswahl",
       "arrow": "Pfeil",
@@ -172,7 +172,7 @@
       "text": "Text",
       "highlight": "Markierung",
       "pen": "Stift",
-      "blur": "Unschärfe"
+      "blur": "Verpixeln"
     },
     "style": {
       "color": "Farbe",
@@ -183,7 +183,14 @@
     "loadingImage": "Bild wird geladen…",
     "empty": "Nehmen Sie eine Aufnahme auf, um mit der Bearbeitung zu beginnen.",
     "textPlaceholder": "Hier eingeben…",
-    "editAnnotationText": "Anmerkungstext bearbeiten"
+    "editAnnotationText": "Anmerkungstext bearbeiten",
+    "compress": {
+      "label": "Komprimieren",
+      "on": "Kompression an — als JPEG exportieren",
+      "off": "Kompression aus — als PNG exportieren",
+      "sizes": "PNG {png} · JPEG {jpeg}",
+      "estimating": "Größen werden berechnet…"
+    }
   },
   "pendingCapture": {
     "title": "Aufnahme bereit, aber Editor hat sich nicht geöffnet",
