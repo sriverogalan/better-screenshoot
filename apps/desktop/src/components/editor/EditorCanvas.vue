@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { IconPhoto } from "@tabler/icons-vue";
 import type {
   KonvaNode,
   KonvaStageRef,
@@ -240,7 +241,7 @@ defineExpose({
   <div class="editor-canvas relative h-full min-h-0 overflow-hidden">
     <div
       v-if="imagePreviewSrc"
-      class="pointer-events-none absolute rounded-[2px] shadow-[0_8px_40px_rgba(0,0,0,0.35),0_0_0_1px_var(--editor-frame)]"
+      class="pointer-events-none absolute overflow-hidden rounded-[3px] shadow-[0_0_0_.5px_var(--editor-frame),0_12px_40px_rgba(0,0,0,0.3),0_2px_6px_rgba(0,0,0,0.15)]"
       :style="{
         left: `${layout.offsetX}px`,
         top: `${layout.offsetY}px`,
@@ -476,7 +477,7 @@ defineExpose({
 
     <p
       v-if="imageLoadError"
-      class="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-danger"
+      class="absolute inset-0 flex items-center justify-center px-6 text-center text-body text-danger"
       role="alert"
     >
       {{ imageLoadError }}
@@ -486,43 +487,40 @@ defineExpose({
       class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-fg-muted"
     >
       <span
-        class="size-5 animate-spin rounded-full border-2 border-sep border-t-accent"
+        class="size-5 animate-spin rounded-full border-2 border-sep border-t-fg-muted"
         aria-hidden="true"
       />
-      <p class="text-sm">{{ t("editor.loadingImage") }}</p>
+      <p class="text-body">{{ t("editor.loadingImage") }}</p>
     </div>
     <div
       v-else-if="!hasCapture"
       class="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center"
     >
-      <p class="text-sm font-medium text-fg">{{ t("editor.empty") }}</p>
+      <IconPhoto class="size-10 text-fg-tertiary" stroke-width="1.25" aria-hidden="true" />
+      <p class="mt-2 text-title3 font-semibold text-fg">{{ t("editor.empty") }}</p>
     </div>
   </div>
 </template>
 
 <style scoped>
 .editor-canvas {
-  --editor-frame: rgb(255 255 255 / 0.08);
-  background-color: var(--color-field);
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% 40%, rgb(255 255 255 / 0.04), transparent 70%),
-    radial-gradient(circle, rgb(255 255 255 / 0.055) 1px, transparent 1px);
-  background-size: auto, 18px 18px;
+  --editor-frame: rgb(255 255 255 / 0.1);
+  background-color: #161616;
+  background-image: radial-gradient(circle, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 :global(html.theme-light) .editor-canvas {
-  --editor-frame: rgb(0 0 0 / 0.1);
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% 40%, rgb(0 0 0 / 0.03), transparent 70%),
-    radial-gradient(circle, rgb(0 0 0 / 0.07) 1px, transparent 1px);
+  --editor-frame: rgb(0 0 0 / 0.12);
+  background-color: #e4e4e6;
+  background-image: radial-gradient(circle, rgb(0 0 0 / 0.07) 1px, transparent 1px);
 }
 
 @media (prefers-color-scheme: light) {
   :global(html.theme-auto) .editor-canvas {
-    --editor-frame: rgb(0 0 0 / 0.1);
-    background-image:
-      radial-gradient(ellipse 80% 60% at 50% 40%, rgb(0 0 0 / 0.03), transparent 70%),
-      radial-gradient(circle, rgb(0 0 0 / 0.07) 1px, transparent 1px);
+    --editor-frame: rgb(0 0 0 / 0.12);
+    background-color: #e4e4e6;
+    background-image: radial-gradient(circle, rgb(0 0 0 / 0.07) 1px, transparent 1px);
   }
 }
 </style>

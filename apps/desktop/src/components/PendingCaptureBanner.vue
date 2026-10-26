@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { usePendingCaptureRecovery } from "../composables/usePendingCaptureRecovery";
+import AlertBanner from "./ui/AlertBanner.vue";
+import AppButton from "./ui/AppButton.vue";
 
 const { t } = useI18n();
 const {
@@ -12,15 +14,11 @@ const {
 </script>
 
 <template>
-  <div
-    v-if="pendingCapture"
-    class="mb-4 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm"
-    role="status"
-  >
-    <p class="font-medium text-fg">
+  <AlertBanner v-if="pendingCapture" tone="info" class="mb-4">
+    <p class="font-medium">
       {{ t("pendingCapture.title") }}
     </p>
-    <p class="mt-1 text-xs text-fg-muted">
+    <p class="text-subhead text-fg-muted">
       {{
         t("pendingCapture.description", {
           width: pendingCapture.width,
@@ -28,18 +26,20 @@ const {
         })
       }}
     </p>
-    <p v-if="recoveryError" class="mt-2 text-xs text-red-400">
+    <p v-if="recoveryError" class="text-subhead text-danger">
       {{ recoveryError }}
     </p>
-    <button
-      type="button"
-      class="mt-3 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/80 disabled:opacity-50"
-      :disabled="recoveryBusy"
-      @click="openPendingInEditor"
-    >
-      {{
-        recoveryBusy ? t("common.opening") : t("pendingCapture.openInEditor")
-      }}
-    </button>
-  </div>
+    <template #actions>
+      <AppButton
+        variant="primary"
+        size="sm"
+        :disabled="recoveryBusy"
+        @click="openPendingInEditor"
+      >
+        {{
+          recoveryBusy ? t("common.opening") : t("pendingCapture.openInEditor")
+        }}
+      </AppButton>
+    </template>
+  </AlertBanner>
 </template>

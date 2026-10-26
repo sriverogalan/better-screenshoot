@@ -38,6 +38,15 @@ function managedShortcut(key: keyof HotkeyConfig) {
   return "⌘⇧5";
 }
 
+function fieldDescription(field: { key: keyof HotkeyConfig; hint?: string }) {
+  if (isCaptureHotkeyLocked(field.key)) {
+    return t("settings.hotkeys.managedByReplace", {
+      shortcut: managedShortcut(field.key),
+    });
+  }
+  return field.hint;
+}
+
 async function updateHotkey(key: keyof HotkeyConfig, value: string) {
   await settingsStore.save({
     ...settings.value,
@@ -47,38 +56,27 @@ async function updateHotkey(key: keyof HotkeyConfig, value: string) {
 </script>
 
 <template>
-  <SettingsGroup :label="t('settings.sections.globalShortcuts')">
+  <SettingsGroup
+    :label="t('settings.sections.globalShortcuts')"
+    :footer="t('settings.hotkeys.footer')"
+  >
     <SettingsRow
       v-for="field in hotkeyFields"
       :key="field.key"
-      layout="block"
+      :label="field.label"
+      :description="fieldDescription(field)"
     >
-      <label class="block space-y-1.5">
-        <span class="block text-sm">
-          {{ field.label }}
-          <span v-if="field.hint" class="text-fg-muted"> — {{ field.hint }}</span>
-        </span>
-        <AppHotkeyRecorder
-          :model-value="settings.hotkeys[field.key]"
-          :disabled="isCaptureHotkeyLocked(field.key)"
-          :locked-label="
-            isCaptureHotkeyLocked(field.key)
-              ? managedShortcut(field.key)
-              : undefined
-          "
-          @update:model-value="updateHotkey(field.key, $event)"
-        />
-        <p
-          v-if="isCaptureHotkeyLocked(field.key)"
-          class="text-xs text-fg-muted"
-        >
-          {{
-            t("settings.hotkeys.managedByReplace", {
-              shortcut: managedShortcut(field.key),
-            })
-          }}
-        </p>
-      </label>
+      <AppHotkeyRecorder
+        :model-value="settings.hotkeys[field.key]"
+        :disabled="isCaptureHotkeyLocked(field.key)"
+        :aria-label="field.label"
+        :locked-label="
+          isCaptureHotkeyLocked(field.key)
+            ? managedShortcut(field.key)
+            : undefined
+        "
+        @update:model-value="updateHotkey(field.key, $event)"
+      />
     </SettingsRow>
   </SettingsGroup>
 </template>

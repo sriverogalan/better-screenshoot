@@ -16,14 +16,18 @@
       {
         "label": "main",
         "title": "Better Screenshoot",
-        "width": 960,
-        "height": 640,
+        "width": 980,
+        "height": 660,
+        "minWidth": 760,
+        "minHeight": 500,
         "visible": false,
         "decorations": true,
+        "transparent": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
         "resizable": true,
         "maximizable": true,
-        "center": true,
-        "backgroundColor": "#1E1E20"
+        "center": true
       },
       {
         "label": "overlay",

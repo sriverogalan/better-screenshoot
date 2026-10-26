@@ -15,7 +15,8 @@
   "nav": {
     "mainNavigation": "Main navigation",
     "history": "History",
-    "settings": "Settings"
+    "settings": "Settings",
+    "general": "General"
   },
   "history": {
     "title": "History",
@@ -32,7 +33,9 @@
     "captureAlt": "Capture {id}",
     "deleteCapture": "Delete capture",
     "openMacosPermissions": "Open macOS permissions",
-    "devBinary": "Dev binary: {path}"
+    "devBinary": "Dev binary: {path}",
+    "count": "No captures | 1 capture | {count} captures",
+    "openInEditor": "Open in Editor"
   },
   "settings": {
     "title": "Settings",
@@ -57,7 +60,8 @@
       "globalShortcuts": "Global shortcuts",
       "license": "License",
       "setup": "Setup",
-      "appearance": "Appearance"
+      "appearance": "Appearance",
+      "afterCapture": "After capture"
     },
     "runSetupWizard": "Run setup wizard again",
     "theme": "Theme",
@@ -95,7 +99,8 @@
       "pressShortcut": "No shortcut",
       "recording": "Recording…",
       "pressKeys": "Press keys",
-      "clickToRecord": "Click to record"
+      "clickToRecord": "Click to record",
+      "footer": "Click a shortcut and press the new key combination. Press Esc to cancel."
     },
     "license": {
       "currentPlan": "Current plan:",
@@ -130,7 +135,21 @@
         "captureActive": "Finish the current capture before updating.",
         "installFailed": "Could not install the update."
       }
-    }
+    },
+    "pageDescriptions": {
+      "general": "Choose how Better Screenshoot looks and which language it speaks.",
+      "capture": "Decide what happens with each capture and where it's stored.",
+      "shortcuts": "Capture from anywhere with global keyboard shortcuts.",
+      "captureMode": "Use Better Screenshoot alongside macOS screenshots or replace them entirely.",
+      "integrations": "Let Raycast, the CLI and other apps trigger captures.",
+      "updates": "Keep Better Screenshoot up to date with the latest improvements."
+    },
+    "runSetupWizardHint": "Review permissions and preferences step by step.",
+    "openSetupWizard": "Open…",
+    "urlScheme": "URL scheme",
+    "permissionGranted": "Allowed",
+    "permissionMissing": "Not allowed",
+    "systemShortcutsTitle": "macOS screenshot shortcuts"
   },
   "overlay": {
     "regionSelector": "Capture region selector",

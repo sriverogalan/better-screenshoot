@@ -4,6 +4,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useRouter } from "vue-router";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useI18n } from "vue-i18n";
+import { IconExclamationCircleFilled } from "@tabler/icons-vue";
 import { useSettingsStore } from "./stores/settings";
 import { useAppearance } from "./composables/useAppearance";
 import {
@@ -100,20 +101,22 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    :class="
-      isOverlay
-        ? 'min-h-full bg-transparent'
-        : 'h-full bg-win text-fg'
-    "
-  >
-    <div
-      v-if="notice && !isOverlay"
-      class="fixed inset-x-4 top-4 z-50 rounded-xl border border-red-500/40 bg-red-950/90 px-4 py-3 text-sm text-red-100 shadow-lg"
-      role="alert"
+  <div :class="isOverlay ? 'min-h-full bg-transparent' : 'h-full text-fg'">
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="-translate-y-2 opacity-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-to-class="opacity-0"
     >
-      {{ notice }}
-    </div>
+      <div
+        v-if="notice && !isOverlay"
+        class="fixed left-1/2 top-3 z-50 flex max-w-[min(480px,calc(100vw-32px))] -translate-x-1/2 items-start gap-2.5 rounded-xl bg-material px-3.5 py-2.5 text-body text-fg shadow-popover backdrop-blur-2xl backdrop-saturate-150"
+        role="alert"
+      >
+        <IconExclamationCircleFilled class="mt-px size-4 shrink-0 text-danger" aria-hidden="true" />
+        <span>{{ notice }}</span>
+      </div>
+    </Transition>
     <router-view class="h-full min-h-0" />
   </div>
 </template>

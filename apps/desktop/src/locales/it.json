@@ -15,7 +15,8 @@
   "nav": {
     "mainNavigation": "Navigazione principale",
     "history": "Cronologia",
-    "settings": "Impostazioni"
+    "settings": "Impostazioni",
+    "general": "Generali"
   },
   "history": {
     "title": "Cronologia",
@@ -32,7 +33,9 @@
     "captureAlt": "Cattura {id}",
     "deleteCapture": "Elimina cattura",
     "openMacosPermissions": "Apri autorizzazioni macOS",
-    "devBinary": "Binario di sviluppo: {path}"
+    "devBinary": "Binario di sviluppo: {path}",
+    "count": "Nessuna cattura | 1 cattura | {count} catture",
+    "openInEditor": "Apri nell'editor"
   },
   "settings": {
     "title": "Impostazioni",
@@ -57,7 +60,8 @@
       "globalShortcuts": "Scorciatoie globali",
       "license": "Licenza",
       "setup": "Configurazione",
-      "appearance": "Aspetto"
+      "appearance": "Aspetto",
+      "afterCapture": "Dopo la cattura"
     },
     "runSetupWizard": "Esegui nuovamente la procedura guidata di configurazione",
     "theme": "Tema",
@@ -95,7 +99,8 @@
       "pressShortcut": "Nessuna scorciatoia",
       "recording": "Registrazione…",
       "pressKeys": "Premi i tasti",
-      "clickToRecord": "Clicca per registrare"
+      "clickToRecord": "Clicca per registrare",
+      "footer": "Fai clic su una scorciatoia e premi la nuova combinazione di tasti. Premi Esc per annullare."
     },
     "license": {
       "currentPlan": "Piano attuale:",
@@ -130,7 +135,21 @@
         "captureActive": "Completa la cattura corrente prima di aggiornare.",
         "installFailed": "Impossibile installare l'aggiornamento."
       }
-    }
+    },
+    "pageDescriptions": {
+      "general": "Scegli l'aspetto di Better Screenshoot e la lingua in cui viene mostrato.",
+      "capture": "Decidi cosa succede a ogni cattura e dove viene salvata.",
+      "shortcuts": "Cattura da qualsiasi punto con le scorciatoie da tastiera globali.",
+      "captureMode": "Usa Better Screenshoot insieme alle istantanee di macOS o sostituiscile del tutto.",
+      "integrations": "Consenti a Raycast, alla CLI e ad altre app di avviare catture.",
+      "updates": "Mantieni Better Screenshoot aggiornato con gli ultimi miglioramenti."
+    },
+    "runSetupWizardHint": "Rivedi permessi e preferenze passo dopo passo.",
+    "openSetupWizard": "Apri…",
+    "urlScheme": "Schema URL",
+    "permissionGranted": "Consentito",
+    "permissionMissing": "Non consentito",
+    "systemShortcutsTitle": "Scorciatoie di cattura di macOS"
   },
   "overlay": {
     "regionSelector": "Selettore regione di cattura",

@@ -15,7 +15,8 @@
   "nav": {
     "mainNavigation": "Navegação principal",
     "history": "Histórico",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "general": "Geral"
   },
   "history": {
     "title": "Histórico",
@@ -32,7 +33,9 @@
     "captureAlt": "Captura {id}",
     "deleteCapture": "Excluir captura",
     "openMacosPermissions": "Abrir permissões do macOS",
-    "devBinary": "Binário de desenvolvimento: {path}"
+    "devBinary": "Binário de desenvolvimento: {path}",
+    "count": "Nenhuma captura | 1 captura | {count} capturas",
+    "openInEditor": "Abrir no editor"
   },
   "settings": {
     "title": "Configurações",
@@ -57,7 +60,8 @@
       "globalShortcuts": "Atalhos globais",
       "license": "Licença",
       "setup": "Configuração",
-      "appearance": "Aparência"
+      "appearance": "Aparência",
+      "afterCapture": "Depois de capturar"
     },
     "runSetupWizard": "Executar o assistente de configuração novamente",
     "theme": "Tema",
@@ -95,7 +99,8 @@
       "pressShortcut": "Sem atalho",
       "recording": "A gravar…",
       "pressKeys": "Prima as teclas",
-      "clickToRecord": "Clique para gravar"
+      "clickToRecord": "Clique para gravar",
+      "footer": "Clique num atalho e pressione a nova combinação de teclas. Pressione Esc para cancelar."
     },
     "license": {
       "currentPlan": "Plano atual:",
@@ -130,7 +135,21 @@
         "captureActive": "Conclua a captura atual antes de atualizar.",
         "installFailed": "Não foi possível instalar a atualização."
       }
-    }
+    },
+    "pageDescriptions": {
+      "general": "Escolha a aparência do Better Screenshoot e o idioma em que é exibido.",
+      "capture": "Decida o que acontece com cada captura e onde ela é guardada.",
+      "shortcuts": "Capture de qualquer lugar com atalhos de teclado globais.",
+      "captureMode": "Use o Better Screenshoot junto com as capturas do macOS ou substitua-as por completo.",
+      "integrations": "Permita que o Raycast, a CLI e outros apps iniciem capturas.",
+      "updates": "Mantenha o Better Screenshoot atualizado com as últimas melhorias."
+    },
+    "runSetupWizardHint": "Reveja permissões e preferências passo a passo.",
+    "openSetupWizard": "Abrir…",
+    "urlScheme": "Esquema de URL",
+    "permissionGranted": "Permitido",
+    "permissionMissing": "Sem permissão",
+    "systemShortcutsTitle": "Atalhos de captura do macOS"
   },
   "overlay": {
     "regionSelector": "Seletor de região de captura",

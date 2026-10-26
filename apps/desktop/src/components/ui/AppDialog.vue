@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, useId, watch } from "vue";
-import { IconX } from "@tabler/icons-vue";
-import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -22,8 +20,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { t } = useI18n();
-const closeButtonRef = ref<HTMLButtonElement | null>(null);
+const panelRef = ref<HTMLElement | null>(null);
 const titleId = useId();
 const descriptionId = useId();
 
@@ -48,7 +45,7 @@ watch(
     }
     document.addEventListener("keydown", onKeydown);
     await nextTick();
-    closeButtonRef.value?.focus();
+    panelRef.value?.focus();
   },
 );
 
@@ -59,54 +56,62 @@ onUnmounted(() => {
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      @click.self="onOverlayClick"
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-to-class="opacity-0"
     >
       <div
-        role="dialog"
-        aria-modal="true"
-        :aria-labelledby="titleId"
-        :aria-describedby="description ? descriptionId : undefined"
-        class="w-full max-w-lg rounded-xl border border-sep bg-elev p-5 shadow-window"
+        v-if="open"
+        class="fixed inset-0 z-50 flex items-start justify-center bg-black/25 px-4 pt-[12vh]"
+        @click.self="onOverlayClick"
       >
-        <div class="mb-4 flex items-start justify-between gap-4">
-          <div class="min-w-0">
-            <h2 :id="titleId" class="text-base font-semibold text-fg">
-              {{ title }}
-            </h2>
-            <p
-              v-if="description"
-              :id="descriptionId"
-              class="mt-1 text-sm text-fg-muted"
-            >
-              {{ description }}
-            </p>
-          </div>
-          <button
-            ref="closeButtonRef"
-            type="button"
-            class="shrink-0 rounded-lg p-1 text-fg-muted hover:bg-sep hover:text-fg disabled:opacity-50"
-            :aria-label="t('common.close')"
-            :disabled="busy"
-            @click="emit('close')"
-          >
-            <IconX class="size-5" />
-          </button>
-        </div>
-
-        <div v-if="$slots.default">
-          <slot />
-        </div>
-
         <div
-          v-if="$slots.footer"
-          class="mt-5 flex flex-wrap justify-end gap-2"
+          ref="panelRef"
+          role="dialog"
+          aria-modal="true"
+          tabindex="-1"
+          :aria-labelledby="titleId"
+          :aria-describedby="description ? descriptionId : undefined"
+          class="dialog-panel w-full max-w-[440px] rounded-xl bg-material p-5 text-fg shadow-popover outline-none backdrop-blur-2xl backdrop-saturate-150"
         >
-          <slot name="footer" />
+          <h2 :id="titleId" class="text-title3 font-semibold">
+            {{ title }}
+          </h2>
+          <p
+            v-if="description"
+            :id="descriptionId"
+            class="mt-1.5 text-body text-fg-muted"
+          >
+            {{ description }}
+          </p>
+
+          <div v-if="$slots.default" class="mt-4">
+            <slot />
+          </div>
+
+          <div
+            v-if="$slots.footer"
+            class="mt-5 flex flex-wrap justify-end gap-2"
+          >
+            <slot name="footer" />
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+.dialog-panel {
+  animation: dialog-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-6px);
+  }
+}
+</style>

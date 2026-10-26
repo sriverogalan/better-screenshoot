@@ -11,11 +11,20 @@ import {
   setLaunchAtLogin,
 } from "../lib/tauri";
 import { SUPPORTED_LOCALES, setLocale } from "../i18n";
+import {
+  IconCircleCheckFilled,
+  IconPower,
+  IconScreenShare,
+  IconSparkles,
+} from "@tabler/icons-vue";
+import appIcon from "../assets/app-icon.png";
 import AppButton from "../components/ui/AppButton.vue";
 import AppToggle from "../components/ui/AppToggle.vue";
+import AppSelect from "../components/ui/AppSelect.vue";
 import AlertBanner from "../components/ui/AlertBanner.vue";
 import SettingsGroup from "../components/ui/SettingsGroup.vue";
 import SettingsRow from "../components/ui/SettingsRow.vue";
+import TintedIcon from "../components/ui/TintedIcon.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -115,7 +124,8 @@ const languageOptions = computed(() =>
   })),
 );
 
-async function onLocaleChange(locale: AppLocale) {
+async function onLocaleChange(value: string) {
+  const locale = value as AppLocale;
   await settingsStore.save({ ...settings.value, locale });
   await setLocale(locale);
 }
@@ -181,135 +191,238 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-full flex-col bg-win text-fg">
-    <!-- Wizard header -->
-    <header class="flex items-center justify-between border-b border-sep px-6 py-4">
-      <span class="text-sm text-fg-muted">
-        {{ t("onboarding.step", { current: currentStep, total: TOTAL_STEPS }) }}
-      </span>
-      <select
-        :value="settings.locale"
-        class="rounded-lg border border-sep bg-field px-2 py-1 text-sm text-fg"
+  <div class="flex h-full flex-col bg-content text-fg">
+    <header data-tauri-drag-region class="flex h-[52px] shrink-0 items-center justify-end px-4">
+      <AppSelect
+        :model-value="settings.locale"
+        :options="languageOptions"
         :aria-label="t('onboarding.language')"
-        @change="onLocaleChange(($event.target as HTMLSelectElement).value as AppLocale)"
-      >
-        <option
-          v-for="option in languageOptions"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.label }}
-        </option>
-      </select>
+        @update:model-value="onLocaleChange"
+      />
     </header>
 
-    <!-- Steps -->
-    <main class="mx-auto w-full max-w-lg flex-1 space-y-8 p-8">
-
-      <!-- Step 1: Welcome -->
-      <section v-if="currentStep === 1">
-        <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepWelcome.title") }}</h1>
-        <p class="mb-8 text-fg-muted">{{ t("onboarding.stepWelcome.description") }}</p>
-        <AppButton variant="primary" @click="nextStep">
-          {{ t("onboarding.stepWelcome.next") }}
-        </AppButton>
-      </section>
-
-      <!-- Step 2: Screen Recording -->
-      <section v-else-if="currentStep === 2">
-        <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepPermission.title") }}</h1>
-        <p class="mb-6 text-fg-muted">{{ t("onboarding.stepPermission.description") }}</p>
-
-        <AlertBanner
-          v-if="captureMessageCode && captureMessageCode !== 'displaysDetected'"
-          tone="warning"
-          class="mb-6"
+    <main class="flex min-h-0 flex-1 flex-col items-center overflow-y-auto px-8">
+      <Transition
+        mode="out-in"
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-x-6 opacity-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-to-class="-translate-x-6 opacity-0"
+      >
+        <section
+          :key="currentStep"
+          class="my-auto flex w-full max-w-[460px] flex-col items-center py-6 text-center"
         >
-          {{ t(`errors.${captureMessageCode}`, { count: 0 }) }}
-        </AlertBanner>
+          <img
+            v-if="currentStep === 1"
+            :src="appIcon"
+            alt=""
+            class="size-28 drop-shadow-[0_10px_24px_rgb(0_0_0_/_.3)]"
+            draggable="false"
+          />
+          <TintedIcon
+            v-else-if="currentStep === 2"
+            :icon="IconScreenShare"
+            tint="var(--color-sys-purple)"
+            size="xl"
+          />
+          <TintedIcon
+            v-else-if="currentStep === 3"
+            :icon="IconPower"
+            tint="var(--color-sys-green)"
+            size="xl"
+          />
+          <TintedIcon
+            v-else-if="currentStep === 4"
+            :icon="IconSparkles"
+            tint="var(--color-sys-orange)"
+            size="xl"
+          />
+          <IconCircleCheckFilled
+            v-else
+            class="size-20 text-success"
+            aria-hidden="true"
+          />
 
-        <div class="space-y-3">
-          <AppButton variant="secondary" @click="handleOpenScreenRecordingSettings">
-            {{ t("onboarding.stepPermission.openSettings") }}
-          </AppButton>
+          <!-- Step 1: Welcome -->
+          <template v-if="currentStep === 1">
+            <h1 class="mt-6 text-largetitle font-bold tracking-tight">
+              {{ t("onboarding.stepWelcome.title") }}
+            </h1>
+            <p class="mt-2 text-title3 font-normal text-fg-muted">
+              {{ t("onboarding.stepWelcome.description") }}
+            </p>
+          </template>
 
-          <div class="flex items-center gap-4">
-            <AppButton
-              variant="primary"
-              :disabled="!permissionGranted"
-              @click="nextStep"
+          <!-- Step 2: Screen Recording -->
+          <template v-else-if="currentStep === 2">
+            <h1 class="mt-6 text-title1 font-bold tracking-tight">
+              {{ t("onboarding.stepPermission.title") }}
+            </h1>
+            <p class="mt-2 text-body text-fg-muted">
+              {{ t("onboarding.stepPermission.description") }}
+            </p>
+
+            <AlertBanner
+              v-if="captureMessageCode && captureMessageCode !== 'displaysDetected'"
+              tone="warning"
+              class="mt-6 w-full text-left"
             >
-              {{ permissionGranted ? t("onboarding.stepPermission.next") : t("onboarding.stepPermission.waiting") }}
-            </AppButton>
+              {{ t(`errors.${captureMessageCode}`, { count: 0 }) }}
+            </AlertBanner>
+
+            <SettingsGroup class="mt-6 w-full text-left">
+              <SettingsRow
+                :label="t('onboarding.stepPermission.title')"
+                :description="
+                  permissionGranted
+                    ? t('settings.capturePermissionImpact.granted')
+                    : t('onboarding.stepPermission.waiting')
+                "
+              >
+                <IconCircleCheckFilled
+                  v-if="permissionGranted"
+                  class="size-5 shrink-0 text-success"
+                  aria-hidden="true"
+                />
+                <AppButton v-else @click="handleOpenScreenRecordingSettings">
+                  {{ t("onboarding.stepPermission.openSettings") }}
+                </AppButton>
+              </SettingsRow>
+            </SettingsGroup>
 
             <button
               v-if="showSkipLink"
               type="button"
-              class="text-sm text-fg-muted underline hover:text-fg"
+              class="mt-4 text-subhead text-accent hover:underline"
               @click="skipPermissionStep"
             >
               {{ t("onboarding.stepPermission.skip") }}
             </button>
-          </div>
-        </div>
-      </section>
+          </template>
 
-      <!-- Step 3: Launch at Login -->
-      <section v-else-if="currentStep === 3">
-        <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepAutostart.title") }}</h1>
-        <p class="mb-6 text-fg-muted">{{ t("onboarding.stepAutostart.description") }}</p>
+          <!-- Step 3: Launch at Login -->
+          <template v-else-if="currentStep === 3">
+            <h1 class="mt-6 text-title1 font-bold tracking-tight">
+              {{ t("onboarding.stepAutostart.title") }}
+            </h1>
+            <p class="mt-2 text-body text-fg-muted">
+              {{ t("onboarding.stepAutostart.description") }}
+            </p>
 
-        <SettingsGroup class="mb-8">
-          <SettingsRow>
-            <span class="text-sm">{{ t("onboarding.stepAutostart.toggle") }}</span>
-            <AppToggle
-              :model-value="autostartEnabled"
-              @update:model-value="toggleAutostart"
-            />
-          </SettingsRow>
-        </SettingsGroup>
+            <SettingsGroup class="mt-6 w-full text-left">
+              <SettingsRow :label="t('onboarding.stepAutostart.toggle')">
+                <AppToggle
+                  :model-value="autostartEnabled"
+                  :label="t('onboarding.stepAutostart.toggle')"
+                  @update:model-value="toggleAutostart"
+                />
+              </SettingsRow>
+            </SettingsGroup>
+          </template>
 
-        <AppButton variant="primary" @click="nextStep">
-          {{ t("onboarding.stepAutostart.next") }}
-        </AppButton>
-      </section>
+          <!-- Step 4: Quick Settings -->
+          <template v-else-if="currentStep === 4">
+            <h1 class="mt-6 text-title1 font-bold tracking-tight">
+              {{ t("onboarding.stepQuickSettings.title") }}
+            </h1>
+            <p class="mt-2 text-body text-fg-muted">
+              {{ t("onboarding.stepQuickSettings.description") }}
+            </p>
 
-      <!-- Step 4: Quick Settings -->
-      <section v-else-if="currentStep === 4">
-        <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepQuickSettings.title") }}</h1>
-        <p class="mb-6 text-fg-muted">{{ t("onboarding.stepQuickSettings.description") }}</p>
+            <SettingsGroup class="mt-6 w-full text-left">
+              <SettingsRow :label="t('onboarding.stepQuickSettings.autoCopy')">
+                <AppToggle
+                  :model-value="settings.auto_copy"
+                  :label="t('onboarding.stepQuickSettings.autoCopy')"
+                  @update:model-value="updateAutoCopy"
+                />
+              </SettingsRow>
+              <SettingsRow :label="t('onboarding.stepQuickSettings.autoSave')">
+                <AppToggle
+                  :model-value="settings.auto_save"
+                  :label="t('onboarding.stepQuickSettings.autoSave')"
+                  @update:model-value="updateAutoSave"
+                />
+              </SettingsRow>
+            </SettingsGroup>
+          </template>
 
-        <SettingsGroup class="mb-8">
-          <SettingsRow>
-            <span class="text-sm">{{ t("onboarding.stepQuickSettings.autoCopy") }}</span>
-            <AppToggle
-              :model-value="settings.auto_copy"
-              @update:model-value="updateAutoCopy"
-            />
-          </SettingsRow>
-          <SettingsRow>
-            <span class="text-sm">{{ t("onboarding.stepQuickSettings.autoSave") }}</span>
-            <AppToggle
-              :model-value="settings.auto_save"
-              @update:model-value="updateAutoSave"
-            />
-          </SettingsRow>
-        </SettingsGroup>
-
-        <AppButton variant="primary" @click="nextStep">
-          {{ t("onboarding.stepQuickSettings.next") }}
-        </AppButton>
-      </section>
-
-      <!-- Step 5: Done -->
-      <section v-else-if="currentStep === 5">
-        <h1 class="mb-4 text-2xl font-bold">{{ t("onboarding.stepDone.title") }}</h1>
-        <p class="mb-8 text-fg-muted">{{ t("onboarding.stepDone.description") }}</p>
-        <AppButton variant="primary" @click="completeOnboarding">
-          {{ t("onboarding.stepDone.done") }}
-        </AppButton>
-      </section>
-
+          <!-- Step 5: Done -->
+          <template v-else-if="currentStep === 5">
+            <h1 class="mt-6 text-largetitle font-bold tracking-tight">
+              {{ t("onboarding.stepDone.title") }}
+            </h1>
+            <p class="mt-2 text-title3 font-normal text-fg-muted">
+              {{ t("onboarding.stepDone.description") }}
+            </p>
+          </template>
+        </section>
+      </Transition>
     </main>
+
+    <footer class="flex shrink-0 flex-col items-center gap-5 px-8 pb-8 pt-4">
+      <AppButton
+        v-if="currentStep === 1"
+        variant="primary"
+        size="lg"
+        @click="nextStep"
+      >
+        {{ t("onboarding.stepWelcome.next") }}
+      </AppButton>
+      <AppButton
+        v-else-if="currentStep === 2"
+        variant="primary"
+        size="lg"
+        :disabled="!permissionGranted"
+        @click="nextStep"
+      >
+        {{
+          permissionGranted
+            ? t("onboarding.stepPermission.next")
+            : t("onboarding.stepPermission.waiting")
+        }}
+      </AppButton>
+      <AppButton
+        v-else-if="currentStep === 3"
+        variant="primary"
+        size="lg"
+        @click="nextStep"
+      >
+        {{ t("onboarding.stepAutostart.next") }}
+      </AppButton>
+      <AppButton
+        v-else-if="currentStep === 4"
+        variant="primary"
+        size="lg"
+        @click="nextStep"
+      >
+        {{ t("onboarding.stepQuickSettings.next") }}
+      </AppButton>
+      <AppButton
+        v-else
+        variant="primary"
+        size="lg"
+        @click="completeOnboarding"
+      >
+        {{ t("onboarding.stepDone.done") }}
+      </AppButton>
+
+      <div
+        class="flex items-center gap-2"
+        role="progressbar"
+        :aria-valuemin="1"
+        :aria-valuemax="TOTAL_STEPS"
+        :aria-valuenow="currentStep"
+        :aria-label="t('onboarding.step', { current: currentStep, total: TOTAL_STEPS })"
+      >
+        <span
+          v-for="step in TOTAL_STEPS"
+          :key="step"
+          class="h-[7px] rounded-full transition-all duration-300"
+          :class="step === currentStep ? 'w-[18px] bg-fg' : 'w-[7px] bg-fg-tertiary'"
+        />
+      </div>
+    </footer>
   </div>
 </template>

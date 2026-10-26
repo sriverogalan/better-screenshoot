@@ -157,7 +157,32 @@ fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
     // (see present_editor_window). Restore them whenever the hub is shown again,
     // otherwise the native traffic-light buttons stay missing for the rest of the session.
     let _ = window.set_decorations(true);
+    // Toggling decorations rebuilds the macOS style mask and drops the full-size content
+    // view, so the transparent overlay title bar has to be re-applied afterwards.
+    #[cfg(target_os = "macos")]
+    let _ = window.set_title_bar_style(tauri::TitleBarStyle::Overlay);
+    #[cfg(target_os = "macos")]
+    extend_webview_under_titlebar(window);
     Ok(())
+}
+
+/// With the overlay title bar the web view already spans the whole window, but WebKit
+/// insets the page by the title bar height on its own unless automatic insets are off.
+#[cfg(target_os = "macos")]
+fn extend_webview_under_titlebar(window: &WebviewWindow) {
+    let _ = window.with_webview(|webview| unsafe {
+        use objc2::runtime::AnyObject;
+        use objc2::{msg_send, sel};
+
+        let wk_webview = webview.inner() as *mut AnyObject;
+        let supported: bool = msg_send![
+            wk_webview,
+            respondsToSelector: sel!(_setAutomaticallyAdjustsContentInsets:)
+        ];
+        if supported {
+            let _: () = msg_send![wk_webview, _setAutomaticallyAdjustsContentInsets: false];
+        }
+    });
 }
 
 #[tauri::command]

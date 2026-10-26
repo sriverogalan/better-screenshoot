@@ -9,10 +9,12 @@ const props = withDefaults(
     modelValue: string;
     disabled?: boolean;
     lockedLabel?: string;
+    ariaLabel?: string;
   }>(),
   {
     disabled: false,
     lockedLabel: undefined,
+    ariaLabel: undefined,
   },
 );
 
@@ -64,34 +66,33 @@ function onBlur() {
 <template>
   <button
     type="button"
-    class="flex w-full items-center justify-between gap-3 rounded-[var(--radius-control)] border border-sep bg-field px-3 py-2 text-left text-sm outline-none transition-colors focus-visible:border-accent disabled:cursor-not-allowed disabled:opacity-60"
+    class="inline-flex h-[24px] min-w-[132px] shrink-0 items-center justify-center rounded-[var(--radius-control)] px-3 text-body outline-none transition-[background-color,box-shadow] duration-150 disabled:opacity-50"
     :class="
       recording
-        ? 'border-accent ring-2 ring-accent/30'
-        : 'hover:border-fg-muted/40'
+        ? 'bg-accent/15 text-accent shadow-[0_0_0_2px_var(--color-accent)]'
+        : 'bg-field shadow-control enabled:hover:bg-control-hover'
     "
     :disabled="disabled"
     :aria-pressed="recording"
+    :aria-label="ariaLabel"
+    :title="disabled ? undefined : t('settings.hotkeys.clickToRecord')"
     @click="startRecording"
     @keydown="onKeydown"
     @blur="onBlur"
   >
     <span
-      class="font-mono"
-      :class="modelValue || lockedLabel ? 'text-fg' : 'text-fg-muted'"
+      v-if="recording"
+      class="flex items-center gap-1.5 text-subhead font-medium"
     >
-      {{
-        recording ? t("settings.hotkeys.recording") : displayValue
-      }}
+      <span class="size-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />
+      {{ t("settings.hotkeys.pressKeys") }}
     </span>
-    <span class="text-xs text-fg-muted">
-      {{
-        recording
-          ? t("settings.hotkeys.pressKeys")
-          : disabled
-            ? ""
-            : t("settings.hotkeys.clickToRecord")
-      }}
+    <span
+      v-else
+      class="font-medium tracking-[0.12em]"
+      :class="modelValue || lockedLabel ? 'text-fg' : 'tracking-normal text-fg-muted'"
+    >
+      {{ displayValue }}
     </span>
   </button>
 </template>

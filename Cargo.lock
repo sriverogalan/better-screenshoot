@@ -520,7 +520,7 @@ checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
 
 [[package]]
 name = "better-screenshoot"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "ashpd 0.10.3",
  "base64 0.22.1",
@@ -528,6 +528,7 @@ dependencies = [
  "chrono",
  "dirs 6.0.0",
  "image",
+ "objc2",
  "rfd",
  "rusqlite",
  "serde",
@@ -554,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "better-screenshoot-cli"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "base64 0.22.1",
  "capture-core",
@@ -836,7 +837,7 @@ dependencies = [
 
 [[package]]
 name = "capture-core"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "dispatch2",
  "image",
