@@ -67,6 +67,7 @@
     "theme": "Theme",
     "saveFolder": "Save folder",
     "chooseFolder": "Choose…",
+    "saveFolderHint": "Captures are saved into dated subfolders (YYYY-MM-DD) inside this folder.",
     "autoCopy": "Copy to clipboard automatically",
     "autoSave": "Save captures to disk",
     "allowExternalControl": "Allow external control (Raycast, CLI, URL scheme)",

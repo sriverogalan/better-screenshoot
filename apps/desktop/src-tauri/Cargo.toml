@@ -45,4 +45,3 @@ ashpd = { version = "0.10", features = ["tokio"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 window-vibrancy = "0.7.1"
-objc2 = "0.6"

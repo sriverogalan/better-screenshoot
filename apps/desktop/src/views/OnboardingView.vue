@@ -192,7 +192,8 @@ onUnmounted(() => {
 
 <template>
   <div class="flex h-full flex-col bg-content text-fg">
-    <header data-tauri-drag-region class="flex h-[52px] shrink-0 items-center justify-end px-4">
+    <header class="flex h-11 shrink-0 items-center justify-end px-4">
+      <div data-tauri-drag-region class="min-h-11 min-w-0 flex-1" />
       <AppSelect
         :model-value="settings.locale"
         :options="languageOptions"

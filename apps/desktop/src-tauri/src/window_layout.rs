@@ -63,21 +63,10 @@ pub fn move_to_active_monitor(window: &WebviewWindow) -> Result<(), String> {
     display_geometry::set_window_origin(window, x, y).map_err(|e| e.to_string())
 }
 
-/// Pantalla completa del editor tras captura.
-/// macOS: `simple_fullscreen` cubre el monitor sin crear un Space nuevo ni dejar el WKWebView en negro.
+/// Capture editor “fullscreen”: fill the monitor work area (below the menu bar / notch,
+/// above the Dock) so chrome stays visible on every display.
 pub fn enter_editor_capture_fullscreen(window: &WebviewWindow) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
-    {
-        window
-            .set_simple_fullscreen(true)
-            .map_err(|e| e.to_string())?;
-        return Ok(());
-    }
-
-    #[cfg(not(target_os = "macos"))]
-    {
-        window.set_fullscreen(true).map_err(|e| e.to_string())
-    }
+    fill_work_area(window)
 }
 
 pub fn fill_work_area(window: &WebviewWindow) -> Result<(), String> {
@@ -131,37 +120,12 @@ fn prepare_main_hub_window_inner(window: &WebviewWindow) -> Result<(), String> {
     // (see present_editor_window). Restore them whenever the hub is shown again,
     // otherwise the native traffic-light buttons stay missing for the rest of the session.
     let _ = window.set_decorations(true);
-    // Toggling decorations rebuilds the macOS style mask and drops the full-size content
-    // view, so the transparent overlay title bar has to be re-applied afterwards.
-    #[cfg(target_os = "macos")]
-    let _ = window.set_title_bar_style(tauri::TitleBarStyle::Overlay);
-    #[cfg(target_os = "macos")]
-    extend_webview_under_titlebar(window);
     // A window the user can already see stays where they put it; a hidden one reappears
     // on the screen they are working on.
     if !window.is_visible().unwrap_or(false) {
         move_to_active_monitor(window)?;
     }
     Ok(())
-}
-
-/// With the overlay title bar the web view already spans the whole window, but WebKit
-/// insets the page by the title bar height on its own unless automatic insets are off.
-#[cfg(target_os = "macos")]
-fn extend_webview_under_titlebar(window: &WebviewWindow) {
-    let _ = window.with_webview(|webview| unsafe {
-        use objc2::runtime::AnyObject;
-        use objc2::{msg_send, sel};
-
-        let wk_webview = webview.inner() as *mut AnyObject;
-        let supported: bool = msg_send![
-            wk_webview,
-            respondsToSelector: sel!(_setAutomaticallyAdjustsContentInsets:)
-        ];
-        if supported {
-            let _: () = msg_send![wk_webview, _setAutomaticallyAdjustsContentInsets: false];
-        }
-    });
 }
 
 #[tauri::command]

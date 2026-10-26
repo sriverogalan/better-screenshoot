@@ -67,6 +67,7 @@
     "theme": "Tema",
     "saveFolder": "Pasta de salvamento",
     "chooseFolder": "Escolher…",
+    "saveFolderHint": "As capturas são salvas em subpastas por data (AAAA-MM-DD) dentro desta pasta.",
     "autoCopy": "Copiar para a área de transferência automaticamente",
     "autoSave": "Salvar capturas no disco",
     "allowExternalControl": "Permitir controle externo (Raycast, CLI, esquema de URL)",

@@ -43,7 +43,7 @@
 
   --color-win: #1E1E1E;
   --color-content: #1E1E1E;
-  --color-sidebar: rgb(40 40 40 / .55);
+  --color-sidebar: #282828;
   --color-group: rgb(255 255 255 / .045);
   --color-elev: #2C2C2E;
   --color-field: rgb(255 255 255 / .06);
@@ -89,7 +89,7 @@ html.theme-light {
   --color-success-fg: #1B7A36;
   --color-win: #ECECEC;
   --color-content: #F5F5F5;
-  --color-sidebar: rgb(232 232 232 / .55);
+  --color-sidebar: #E8E8E8;
   --color-group: rgb(0 0 0 / .035);
   --color-elev: #FFFFFF;
   --color-field: #FFFFFF;
@@ -132,7 +132,7 @@ html.theme-light {
     --color-success-fg: #1B7A36;
     --color-win: #ECECEC;
     --color-content: #F5F5F5;
-    --color-sidebar: rgb(232 232 232 / .55);
+    --color-sidebar: #E8E8E8;
     --color-group: rgb(0 0 0 / .035);
     --color-elev: #FFFFFF;
     --color-field: #FFFFFF;

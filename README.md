@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="#install"><img src="https://img.shields.io/badge/version-0.7.0-0A84FF?style=flat-square" alt="v0.7.0"></a>
   <a href="#install"><img src="https://img.shields.io/badge/macOS-12%2B-black?style=flat-square" alt="macOS 12+"></a>
   <a href="#install"><img src="https://img.shields.io/badge/Homebrew-cask-0A84FF?style=flat-square" alt="Homebrew"></a>
   <a href="https://github.com/sriverogalan/better-screenshoot/issues/new/choose"><img src="https://img.shields.io/badge/Feedback-open%20an%20issue-success?style=flat-square" alt="Feedback"></a>
@@ -21,10 +22,10 @@
 
 ---
 
-## Demo
+## Demo (macOS)
 
 <p align="center">
-  <img src="docs/assets/demo.gif" alt="Better Screenshoot demo: onboarding, menu bar, history, settings, and editor" width="920">
+  <img src="docs/assets/demo.gif" alt="Better Screenshoot demo on macOS: menu bar, history, settings, and editor" width="920">
 </p>
 
 <details>
@@ -48,14 +49,22 @@ brew uninstall --cask better-screenshoot
 
 > **Requirements:** macOS 12.0 (Monterey) or later · **Screen Recording** permission (the app walks you through it on first launch).
 
+## How to use
+
+1. **Install** with Homebrew and open Better Screenshoot (it lives in the menu bar).
+2. **Capture** a region or the full screen from the menu bar panel or with a global shortcut.
+3. **Annotate** in the editor (arrows, shapes, text, highlight, blur), then **Copy and save**.
+4. Files land in your save folder under dated subfolders (`YYYY-MM-DD`). Browse them in **History**.
+
 ## Features
 
 | | |
 |---|---|
 | **Fast capture** | Region or full screen from the menu bar or global shortcuts. |
 | **Instant editor** | Arrows, rectangles, text, highlight, freehand, and blur. |
-| **History** | Keep what matters and reopen it later. |
-| **Your shortcuts** | Remap hotkeys in Settings — optionally replace macOS system captures. |
+| **Organized library** | Saves into your folder with `YYYY-MM-DD` subfolders. |
+| **History** | Reopen past captures anytime. |
+| **Your shortcuts** | Remap hotkeys — optionally replace macOS system captures. |
 
 ## Screenshots
 
@@ -63,6 +72,10 @@ brew uninstall --cask better-screenshoot
   <img src="docs/assets/screenshot-menubar.png" alt="Menu bar panel" width="280">
   &nbsp;
   <img src="docs/assets/screenshot-history.png" alt="History view" width="420">
+</p>
+
+<p align="center">
+  <img src="docs/assets/screenshot-editor.png" alt="Capture editor on macOS" width="720">
 </p>
 
 <p align="center">

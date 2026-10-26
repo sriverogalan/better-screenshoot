@@ -67,6 +67,7 @@
     "theme": "Tema",
     "saveFolder": "Cartella di salvataggio",
     "chooseFolder": "Scegli…",
+    "saveFolderHint": "Le catture vengono salvate in sottocartelle per data (AAAA-MM-GG) in questa cartella.",
     "autoCopy": "Copia automaticamente negli appunti",
     "autoSave": "Salva le catture su disco",
     "allowExternalControl": "Consenti controllo esterno (Raycast, CLI, schema URL)",

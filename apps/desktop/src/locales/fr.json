@@ -67,6 +67,7 @@
     "theme": "Thème",
     "saveFolder": "Dossier d'enregistrement",
     "chooseFolder": "Choisir…",
+    "saveFolderHint": "Les captures sont enregistrées dans des sous-dossiers datés (AAAA-MM-JJ) dans ce dossier.",
     "autoCopy": "Copier automatiquement dans le presse-papiers",
     "autoSave": "Enregistrer les captures sur le disque",
     "allowExternalControl": "Autoriser le contrôle externe (Raycast, CLI, schéma URL)",

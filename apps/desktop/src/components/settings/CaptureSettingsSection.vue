@@ -62,7 +62,10 @@ async function browseFolder() {
     </SettingsRow>
   </SettingsGroup>
 
-  <SettingsGroup :label="t('settings.saveFolder')">
+  <SettingsGroup
+    :label="t('settings.saveFolder')"
+    :footer="t('settings.saveFolderHint')"
+  >
     <SettingsRow>
       <div class="flex min-w-0 flex-1 items-center gap-2.5">
         <IconFolderFilled class="size-7 shrink-0 text-sys-blue" aria-hidden="true" />

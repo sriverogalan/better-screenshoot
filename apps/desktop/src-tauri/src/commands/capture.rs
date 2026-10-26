@@ -8,7 +8,7 @@ use tokio::sync::Mutex;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use capture_core::encode::{downscale_for_preview, encode_jpeg_preview};
 use capture_core::types::{CaptureImage, DisplayInfo, Region};
-use chrono::Utc;
+use chrono::{Local, Utc};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State, WebviewWindow};
 use tauri_plugin_clipboard_manager::ClipboardExt;
@@ -109,6 +109,42 @@ fn save_temp_png(app: &AppHandle, image: &CaptureImage) -> Result<(String, Strin
     let dir = cache_dir(app)?.join("captures");
     fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     save_png_to_dir(&dir, image)
+}
+
+/// `{save_directory}/YYYY-MM-DD/` using the local calendar day.
+fn library_day_dir(save_directory: &str, now: chrono::DateTime<Local>) -> Result<PathBuf, String> {
+    let day = now.format("%Y-%m-%d").to_string();
+    let dir = PathBuf::from(save_directory).join(day);
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir)
+}
+
+/// Prefer `BetterScreenshoot-HHMMSS.png`; on collision append a short id.
+fn unique_library_png_path(dir: &std::path::Path, now: chrono::DateTime<Local>) -> PathBuf {
+    let stamp = now.format("%H%M%S").to_string();
+    let primary = dir.join(format!("BetterScreenshoot-{stamp}.png"));
+    if !primary.exists() {
+        return primary;
+    }
+    let suffix = &Uuid::new_v4().to_string()[..6];
+    dir.join(format!("BetterScreenshoot-{stamp}-{suffix}.png"))
+}
+
+/// Writes a PNG into the configured library folder (date subfolder) and returns id + path + created_at.
+fn save_png_to_library(
+    save_directory: &str,
+    png_bytes: &[u8],
+) -> Result<(String, String, String), String> {
+    let now = Local::now();
+    let dir = library_day_dir(save_directory, now)?;
+    let path = unique_library_png_path(&dir, now);
+    fs::write(&path, png_bytes).map_err(|e| e.to_string())?;
+    let id = Uuid::new_v4().to_string();
+    Ok((
+        id,
+        path.to_string_lossy().to_string(),
+        now.to_rfc3339(),
+    ))
 }
 
 fn png_dimensions(bytes: &[u8]) -> Result<(u32, u32), String> {
@@ -455,14 +491,23 @@ async fn finalize_capture(
     state: &State<'_, AppState>,
     image: CaptureImage,
 ) -> Result<SavedCapture, String> {
-    let (auto_copy, auto_save) = {
+    let (auto_copy, auto_save, save_directory) = {
         let settings = state.settings.lock().map_err(|e| e.to_string())?;
-        (settings.auto_copy, settings.auto_save)
+        (
+            settings.auto_copy,
+            settings.auto_save,
+            settings.save_directory.clone(),
+        )
     };
 
     let image_width = image.width;
     let image_height = image.height;
     let png_bytes_for_clipboard = if auto_copy {
+        Some(image.png_bytes.clone())
+    } else {
+        None
+    };
+    let png_for_library = if auto_save {
         Some(image.png_bytes.clone())
     } else {
         None
@@ -488,20 +533,33 @@ async fn finalize_capture(
         *state.pending_capture.lock().map_err(|e| e.to_string())? = Some(json);
     }
 
-    if auto_save {
-        if let Err(_error) = crate::commands::history::insert_record(
-            app,
-            &record.id,
-            &record.file_path,
-            image_width,
-            image_height,
-            &record.created_at,
-        )
+    if let Some(png_bytes) = png_for_library {
+        let library = tauri::async_runtime::spawn_blocking(move || {
+            save_png_to_library(&save_directory, &png_bytes)
+        })
         .await
-        {
-            crate::app_trace!("finalize_capture: insert_record failed: {_error}");
-        } else {
-            let _ = app.emit("history-changed", ());
+        .map_err(|e| e.to_string())?;
+
+        match library {
+            Ok((lib_id, lib_path, created_at)) => {
+                if let Err(_error) = crate::commands::history::insert_record(
+                    app,
+                    &lib_id,
+                    &lib_path,
+                    image_width,
+                    image_height,
+                    &created_at,
+                )
+                .await
+                {
+                    crate::app_trace!("finalize_capture: insert_record failed: {_error}");
+                } else {
+                    let _ = app.emit("history-changed", ());
+                }
+            }
+            Err(_error) => {
+                crate::app_trace!("finalize_capture: save_png_to_library failed: {_error}");
+            }
         }
     }
 
@@ -909,13 +967,30 @@ pub async fn save_image_to_disk(
 ) -> Result<SavedCapture, String> {
     let bytes = STANDARD.decode(png_base64).map_err(|e| e.to_string())?;
     let (width, height) = png_dimensions(&bytes)?;
-    let capture = CaptureImage {
+    let save_directory = {
+        let settings = state.settings.lock().map_err(|e| e.to_string())?;
+        settings.save_directory.clone()
+    };
+
+    let bytes_for_disk = bytes.clone();
+    let (id, file_path, created_at) = tauri::async_runtime::spawn_blocking(move || {
+        save_png_to_library(&save_directory, &bytes_for_disk)
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+
+    crate::commands::history::insert_record(&app, &id, &file_path, width, height, &created_at)
+        .await?;
+    let _ = app.emit("history-changed", ());
+
+    Ok(SavedCapture {
+        id,
+        file_path,
         width,
         height,
-        png_bytes: bytes,
-        rgba_bytes: Vec::new(),
-    };
-    finalize_capture(&app, &state, capture).await
+        created_at,
+        data_url: String::new(),
+    })
 }
 
 #[tauri::command]
@@ -974,7 +1049,10 @@ pub async fn save_image_with_dialog(
 
 #[cfg(test)]
 mod tests {
-    use super::capture_surface_presentation_ok;
+    use super::{
+        capture_surface_presentation_ok, library_day_dir, unique_library_png_path,
+    };
+    use chrono::{Local, TimeZone};
 
     #[test]
     fn capture_surface_presentation_ok_requires_visible_main_and_hidden_detached_editor() {
@@ -982,5 +1060,42 @@ mod tests {
         assert!(!capture_surface_presentation_ok(false, false));
         assert!(!capture_surface_presentation_ok(true, true));
         assert!(!capture_surface_presentation_ok(false, true));
+    }
+
+    #[test]
+    fn library_day_dir_nests_under_date_folder() {
+        let root = std::env::temp_dir().join(format!("bs-lib-{}", uuid::Uuid::new_v4()));
+        let now = Local
+            .with_ymd_and_hms(2026, 10, 26, 14, 30, 52)
+            .single()
+            .expect("valid local datetime");
+        let day = library_day_dir(root.to_str().unwrap(), now).unwrap();
+        assert!(day.ends_with("2026-10-26"));
+        assert!(day.is_dir());
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn unique_library_png_path_avoids_collision() {
+        let root = std::env::temp_dir().join(format!("bs-lib-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let now = Local
+            .with_ymd_and_hms(2026, 10, 26, 14, 30, 52)
+            .single()
+            .expect("valid local datetime");
+        let first = unique_library_png_path(&root, now);
+        assert_eq!(
+            first.file_name().and_then(|n| n.to_str()),
+            Some("BetterScreenshoot-143052.png")
+        );
+        std::fs::write(&first, b"x").unwrap();
+        let second = unique_library_png_path(&root, now);
+        assert_ne!(first, second);
+        assert!(second
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap()
+            .starts_with("BetterScreenshoot-143052-"));
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

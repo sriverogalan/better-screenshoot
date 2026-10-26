@@ -67,6 +67,7 @@
     "theme": "Tema",
     "saveFolder": "Carpeta de guardado",
     "chooseFolder": "Elegir…",
+    "saveFolderHint": "Las capturas se guardan en subcarpetas por fecha (AAAA-MM-DD) dentro de esta carpeta.",
     "autoCopy": "Copiar al portapapeles automáticamente",
     "autoSave": "Guardar capturas en disco",
     "allowExternalControl": "Permitir control externo (Raycast, CLI, esquema URL)",

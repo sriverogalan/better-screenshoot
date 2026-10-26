@@ -67,6 +67,7 @@
     "theme": "Erscheinungsbild",
     "saveFolder": "Speicherordner",
     "chooseFolder": "Auswählen…",
+    "saveFolderHint": "Aufnahmen werden in datierte Unterordner (JJJJ-MM-TT) in diesem Ordner gespeichert.",
     "autoCopy": "Automatisch in die Zwischenablage kopieren",
     "autoSave": "Aufnahmen auf der Festplatte speichern",
     "allowExternalControl": "Externe Steuerung erlauben (Raycast, CLI, URL-Schema)",

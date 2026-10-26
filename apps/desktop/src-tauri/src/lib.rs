@@ -79,16 +79,6 @@ pub fn run() {
                 );
             }
 
-            #[cfg(target_os = "macos")]
-            if let Some(main) = handle.get_webview_window("main") {
-                let _ = window_vibrancy::apply_vibrancy(
-                    &main,
-                    window_vibrancy::NSVisualEffectMaterial::Sidebar,
-                    Some(window_vibrancy::NSVisualEffectState::FollowsWindowActiveState),
-                    None,
-                );
-            }
-
             if let Some(message) = commands::reconcile_system_capture(&handle, state.inner())? {
                 let _ = handle.emit("system-capture-drift", message);
             }

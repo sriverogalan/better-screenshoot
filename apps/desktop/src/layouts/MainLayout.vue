@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import appIcon from "../assets/app-icon.png";
@@ -21,12 +21,7 @@ function isActive(item: NavItem) {
 }
 
 onMounted(() => {
-  document.documentElement.classList.add("vibrancy-mode");
   void loadCurrentVersion();
-});
-
-onUnmounted(() => {
-  document.documentElement.classList.remove("vibrancy-mode");
 });
 </script>
 
@@ -35,11 +30,9 @@ onUnmounted(() => {
     <aside
       class="flex w-[220px] shrink-0 flex-col bg-sidebar shadow-[inset_-.5px_0_0_var(--color-sep)]"
     >
-      <div data-tauri-drag-region class="h-[52px] shrink-0" />
-
-      <div data-tauri-drag-region class="flex items-center gap-2.5 px-4 pb-3">
+      <div class="flex items-center gap-2.5 px-4 pb-3 pt-3">
         <img :src="appIcon" alt="" class="size-8 shrink-0" draggable="false" />
-        <div data-tauri-drag-region class="min-w-0">
+        <div class="min-w-0">
           <p class="truncate text-body font-semibold text-fg">{{ t("common.appName") }}</p>
           <p class="text-caption tabular-nums text-fg-muted">
             {{ currentVersion ? `v${currentVersion}` : "" }}
