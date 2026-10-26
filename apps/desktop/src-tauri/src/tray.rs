@@ -1,9 +1,10 @@
 use serde::Deserialize;
 use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, LogicalPosition, Manager, WebviewWindow,
+    AppHandle, Manager, Rect, WebviewWindow,
 };
 
+use crate::display_geometry::{self, DesktopRect};
 use crate::state::{AppSettings, AppState};
 
 #[derive(Debug, Deserialize)]
@@ -60,13 +61,13 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
             if let TrayIconEvent::Click {
                 button: MouseButton::Left | MouseButton::Right,
                 button_state: MouseButtonState::Up,
-                position,
+                rect,
                 ..
             } = event
             {
                 let app = tray.app_handle();
                 if let Some(menubar) = app.get_webview_window("menubar") {
-                    toggle_menubar_panel(&menubar, position.x, position.y);
+                    toggle_menubar_panel(&menubar, rect);
                 }
             }
         })
@@ -75,30 +76,42 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn toggle_menubar_panel(menubar: &WebviewWindow, tray_x: f64, tray_y: f64) {
+fn toggle_menubar_panel(menubar: &WebviewWindow, icon_rect: Rect) {
     if menubar.is_visible().unwrap_or(false) {
         let _ = menubar.hide();
         return;
     }
 
-    let scale = menubar
-        .current_monitor()
-        .ok()
-        .flatten()
-        .map(|m| m.scale_factor())
-        .unwrap_or(1.0);
-
-    let (window_width, window_height) = menubar
-        .outer_size()
-        .map(|size| (size.width as f64 / scale, size.height as f64 / scale))
-        .unwrap_or((300.0, 400.0));
-
-    let (logical_x, logical_y) =
-        calculate_tray_popup_position(tray_x, tray_y, scale, window_width, window_height);
-
-    let _ = menubar.set_position(LogicalPosition::new(logical_x, logical_y));
+    if let Some(origin) = menubar_panel_origin(menubar, icon_rect) {
+        let _ = display_geometry::set_window_origin(menubar, origin.0, origin.1);
+    }
     let _ = menubar.show();
     let _ = menubar.set_focus();
+}
+
+/// Places the panel under the icon on the screen whose menu bar was clicked, not on the
+/// screen the panel was last shown on.
+fn menubar_panel_origin(menubar: &WebviewWindow, icon_rect: Rect) -> Option<(f64, f64)> {
+    let app = menubar.app_handle();
+    let (monitor, x, y) = display_geometry::locate_scaled_position(app, icon_rect.position)?;
+    let icon_scale = if cfg!(target_os = "macos") {
+        monitor.scale_factor()
+    } else {
+        1.0
+    };
+    let icon_size = icon_rect.size.to_logical::<f64>(icon_scale);
+    let anchor = DesktopRect {
+        x,
+        y,
+        width: icon_size.width,
+        height: icon_size.height,
+    };
+    let panel = display_geometry::window_bounds(menubar)?;
+    Some(display_geometry::popover_origin(
+        anchor,
+        (panel.width, panel.height),
+        display_geometry::monitor_work_area(&monitor),
+    ))
 }
 
 #[tauri::command]
@@ -118,45 +131,9 @@ pub fn update_tray_tooltip(app: AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())
 }
 
-fn calculate_tray_popup_position(
-    physical_x: f64,
-    physical_y: f64,
-    scale: f64,
-    window_width: f64,
-    window_height: f64,
-) -> (f64, f64) {
-    let logical_x = physical_x / scale - window_width / 2.0;
-    let logical_y = (physical_y / scale - window_height).max(0.0);
-    (logical_x, logical_y)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn position_centers_window_on_tray_icon() {
-        let (x, y) = calculate_tray_popup_position(800.0, 50.0, 2.0, 300.0, 408.0);
-        // 800.0 / 2.0 - 300.0 / 2.0 = 400.0 - 150.0 = 250.0
-        assert_eq!(x, 250.0);
-        // (50.0 / 2.0 - 408.0).max(0.0) = (25.0 - 408.0).max(0.0) = 0.0
-        assert_eq!(y, 0.0);
-    }
-
-    #[test]
-    fn y_coordinate_clamps_to_zero() {
-        let (_, y) = calculate_tray_popup_position(400.0, 10.0, 1.0, 300.0, 408.0);
-        assert_eq!(y, 0.0);
-    }
-
-    #[test]
-    fn normal_position_below_tray_icon() {
-        let (x, y) = calculate_tray_popup_position(1000.0, 1080.0, 1.0, 300.0, 408.0);
-        // 1000.0 / 1.0 - 300.0 / 2.0 = 850.0
-        assert_eq!(x, 850.0);
-        // (1080.0 / 1.0 - 408.0).max(0.0) = 672.0
-        assert_eq!(y, 672.0);
-    }
 
     #[test]
     fn tray_labels_provide_tooltip_for_each_locale() {

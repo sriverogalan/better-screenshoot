@@ -317,8 +317,8 @@ async fn present_editor_window(surface: &WebviewWindow, fullscreen: bool) {
     crate::window_layout::reset_editor_presentation_state(surface);
     let _ = surface.set_decorations(false);
 
-    if let Err(_error) = crate::window_layout::move_editor_to_active_monitor(surface) {
-        crate::app_trace!("move_editor_to_active_monitor failed: {error}");
+    if let Err(_error) = crate::window_layout::move_to_active_monitor(surface) {
+        crate::app_trace!("move_to_active_monitor failed: {error}");
     }
 
     if fullscreen {
@@ -529,7 +529,7 @@ pub async fn capture_overlay_preview_internal(
 ) -> Result<OverlayPreview, String> {
     let state = app.state::<AppState>();
     let displays = state.provider.list_displays().map_err(|e| e.to_string())?;
-    let display = match display_id {
+    let display = match display_id.or_else(|| display_under_cursor(app)) {
         Some(id) => displays.iter().find(|d| d.id == id).ok_or_else(|| {
             AppErrorPayload::new("displayNotFound")
                 .with_detail("id", id)
@@ -610,10 +610,26 @@ pub async fn capture_area_interactive(app: AppHandle) -> Result<SavedCapture, St
     capture_area_interactive_internal(app).await
 }
 
+/// Display bounds come in points on macOS and physical pixels elsewhere, the same units
+/// `display_geometry` uses for the cursor.
+fn display_under_cursor(app: &AppHandle) -> Option<u32> {
+    let (x, y) = crate::display_geometry::cursor_point(app)?;
+    let state = app.state::<AppState>();
+    let displays = state.provider.list_displays().ok()?;
+    displays
+        .iter()
+        .find(|d| {
+            let (left, top) = (d.x as f64, d.y as f64);
+            x >= left && x < left + d.width as f64 && y >= top && y < top + d.height as f64
+        })
+        .map(|d| d.id)
+}
+
 pub async fn capture_screen_internal(
     app: AppHandle,
     display_id: Option<u32>,
 ) -> Result<SavedCapture, String> {
+    let display_id = display_id.or_else(|| display_under_cursor(&app));
     let app_capture = app.clone();
     let image = tauri::async_runtime::spawn_blocking(move || {
         let state = app_capture.state::<AppState>();
